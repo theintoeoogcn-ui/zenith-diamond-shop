@@ -5,7 +5,10 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json());Z
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'diamond-plan.html'));
+});
 
 // Serve the storefront (public/diamond-plan.html and friends)
 app.use(express.static(path.join(__dirname, '..', 'public')));
