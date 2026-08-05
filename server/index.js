@@ -22,6 +22,10 @@ app.use('/api/ign', ignRoutes);
 const tournamentRoutes = require('./routes/tournaments');
 app.use('/api/tournaments', tournamentRoutes);
 
+// Diamond package pricing — public to read, admin-passcode-protected to edit
+const diamondPricingRoutes = require('./routes/diamond-pricing');
+app.use('/api/diamond-pricing', diamondPricingRoutes);
+
 if (!process.env.ADMIN_PASSCODE) {
   console.warn('⚠️  ADMIN_PASSCODE is not set — the "Create Tournament" admin panel is disabled until you set one in server/.env.');
 }

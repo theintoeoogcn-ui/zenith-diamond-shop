@@ -61,6 +61,73 @@
   nav a:hover{color:var(--hi);}
   @media (max-width:900px){ nav{display:none;} header{padding:16px 20px;} }
 
+  /* ---------- admin toggle pill in header ---------- */
+  .admin-toggle{
+    display:flex;align-items:center;gap:6px;
+    background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
+    font-family:var(--font-main);
+  }
+  .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .admin-toggle.on{background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+
+  /* ---------- admin controls on package cards ---------- */
+  .card{position:relative;}
+  .card-admin-actions{display:none;gap:4px;position:absolute;top:8px;right:8px;z-index:2;}
+  .card-admin-actions.show{display:flex;}
+  .card-admin-actions button{
+    width:20px;height:20px;border-radius:6px;border:1px solid var(--line);background:var(--panel-raised);
+    color:var(--mid);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;
+  }
+  .card-admin-actions button:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .card-admin-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
+  .add-card{
+    display:none;align-items:center;justify-content:center;flex-direction:column;gap:6px;
+    background:var(--panel);border:1.5px dashed var(--line);border-radius:var(--radius);
+    padding:18px 14px;text-align:center;cursor:pointer;color:var(--dim);font-weight:700;font-size:13px;
+  }
+  .add-card.show{display:flex;}
+  .add-card:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .pass-edit{
+    display:none;width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:var(--panel-raised);
+    color:var(--mid);cursor:pointer;font-size:11px;align-items:center;justify-content:center;margin-left:auto;
+  }
+  .pass-edit.show{display:flex;}
+  .pass-edit:hover{border-color:var(--violet-dim);color:var(--hi);}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(5,3,12,0.72);backdrop-filter:blur(4px);
+    z-index:100;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    width:100%;max-width:380px;max-height:90vh;overflow-y:auto;padding:26px 24px;
+    animation:modalPop .2s ease;
+  }
+  @keyframes modalPop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .modal h3{font-family:'Orbitron',sans-serif;font-size:17px;margin:0 0 18px;}
+  .modal .field{margin-bottom:14px;}
+  .modal .field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:600;}
+  .modal .field input{
+    width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
+    padding:10px 12px;color:var(--hi);font-family:var(--font-main);font-size:14px;font-weight:600;outline:none;
+  }
+  .modal .field input:focus{border-color:var(--violet);}
+  .modal-err{color:var(--signal);font-size:12.5px;margin:-6px 0 12px;display:none;}
+  .modal-err.show{display:block;}
+  .modal-actions{display:flex;gap:10px;margin-top:6px;}
+  .modal-actions button{
+    flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;
+    font-family:var(--font-main);
+  }
+  .modal-actions .save{background:var(--violet);color:#fff;}
+  .modal-actions .save:hover{background:#7C4CED;}
+  .modal-actions .save:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
+  .modal-actions .cancel{background:var(--panel-raised);color:var(--mid);border:1px solid var(--line);}
+  .modal-actions .cancel:hover{color:var(--hi);}
+
   /* ---------- hero ---------- */
   .hero{padding:56px 48px 20px;}
   .eyebrow{
@@ -70,7 +137,7 @@
   h1{
     font-family:'Orbitron',sans-serif;font-weight:800;font-size:44px;
     margin:0 0 12px;letter-spacing:0.5px;
-    background:linear-gradient(180deg,#fff, var(--mid));
+    background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
   .hero p{color:var(--mid);font-size:17px;max-width:540px;line-height:1.6;margin:0;}
@@ -113,7 +180,7 @@
     animation:cardPop .25s ease;
   }
   @keyframes cardPop{0%{transform:scale(.94);}100%{transform:scale(1);}}
-  .card .amt{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;margin-bottom:10px;}
+  .card .amt{font-family:var(--font-main);font-weight:700;font-size:18px;margin-bottom:10px;}
   .card img.card-icon{width:30px;height:30px;margin-bottom:8px;}
   .card .price{font-size:15px;color:var(--cyan);font-weight:700;}
   .card .badge{
@@ -305,6 +372,9 @@
     <a href="customer-service.html" data-i18n="nav.service">Customer Service</a>
   </nav>
   <div class="hdr-controls">
+    <button type="button" class="admin-toggle" id="admin-toggle">
+      <span id="admin-toggle-label" data-i18n="tournament.admin.locked">Admin</span>
+    </button>
     <div class="lang-switch" role="group" aria-label="Language">
       <div class="pill"></div>
       <button type="button" data-lang="mm">MM</button>
@@ -346,8 +416,9 @@
         </div>
         <div class="info">
           <div class="name"><span data-i18n="diamond.passcard.name">Weekly pass</span> <span style="color:var(--signal);font-size:11px;font-family:'JetBrains Mono',monospace;">+445%</span></div>
-          <div class="price">35,000 Ks</div>
+          <div class="price" id="pass-price">35,000 Ks</div>
         </div>
+        <button type="button" class="pass-edit" id="pass-edit-btn" title="Edit price">✏️</button>
       </div>
     </div>
   </div>
@@ -451,33 +522,130 @@
   <span>Beyond the peak — Zenith Esports</span>
 </footer>
 
+<!-- ---------- admin passcode modal ---------- -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <h3 data-i18n="tournament.admin.prompt.title">Enter admin passcode</h3>
+    <div class="field">
+      <input type="password" id="admin-passcode-input" data-i18n-placeholder="tournament.admin.prompt.placeholder" placeholder="Passcode">
+    </div>
+    <div class="modal-err" id="admin-modal-err" data-i18n="tournament.admin.prompt.wrong">Incorrect passcode</div>
+    <div class="modal-actions">
+      <button class="cancel" id="admin-modal-cancel" data-i18n="tournament.admin.prompt.cancel">Cancel</button>
+      <button class="save" id="admin-modal-submit" data-i18n="tournament.admin.prompt.submit">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- add / edit package modal ---------- -->
+<div class="modal-overlay" id="pkg-modal">
+  <div class="modal">
+    <h3 id="pkg-modal-title" data-i18n="diamond.admin.add.title">Add package</h3>
+    <div class="field">
+      <label data-i18n="diamond.admin.field.amount">Diamonds</label>
+      <input type="text" id="pkg-amt" placeholder="e.g. 86 or 50 + 50">
+    </div>
+    <div class="field">
+      <label data-i18n="diamond.admin.field.price">Price (Ks)</label>
+      <input type="number" id="pkg-price" min="1" placeholder="e.g. 5500">
+    </div>
+    <div class="modal-err" id="pkg-modal-err">Error</div>
+    <div class="modal-actions">
+      <button class="cancel" id="pkg-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
+      <button class="save" id="pkg-modal-save" data-i18n="tournament.form.save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- edit weekly pass price modal ---------- -->
+<div class="modal-overlay" id="pass-modal">
+  <div class="modal">
+    <h3 data-i18n="diamond.admin.editpass.title">Edit weekly pass price</h3>
+    <div class="field">
+      <label data-i18n="diamond.admin.field.price">Price (Ks)</label>
+      <input type="number" id="pass-price-input" min="1" placeholder="e.g. 35000">
+    </div>
+    <div class="modal-err" id="pass-modal-err">Error</div>
+    <div class="modal-actions">
+      <button class="cancel" id="pass-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
+      <button class="save" id="pass-modal-save" data-i18n="tournament.form.save">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="js/app-shared.js"></script>
 <script>
 function t(key, fallback){
   const v = window.ZenithI18n && window.ZenithI18n.t(key);
   return v || fallback || key;
 }
 
-const diamondPacks = [
-  {amt:86,price:5500},{amt:172,price:11000},{amt:257,price:15500},
-  {amt:343,price:20700},{amt:429,price:25800},{amt:514,price:31000},
-  {amt:600,price:36000},{amt:706,price:41200},{amt:792,price:46350},
-  {amt:878,price:51500},{amt:963,price:56650},{amt:1049,price:62000}
+let diamondPacks = [
+  {amt:'86',price:5500},{amt:'172',price:11000},{amt:'257',price:15500},
+  {amt:'343',price:20700},{amt:'429',price:25800},{amt:'514',price:31000},
+  {amt:'600',price:36000},{amt:'706',price:41200},{amt:'792',price:46350},
+  {amt:'878',price:51500},{amt:'963',price:56650},{amt:'1049',price:62000}
 ];
-const doublePacks = [
+let doublePacks = [
   {amt:'50 + 50',price:3500},{amt:'150 + 150',price:10500},
   {amt:'250 + 250',price:17500},{amt:'500 + 500',price:35000}
 ];
+let weeklyPassPrice = 35000;
+
+const ADMIN_KEY = 'zenith-admin-passcode';
+let isAdmin = false;
+function getPasscode(){ return sessionStorage.getItem(ADMIN_KEY) || ''; }
 
 function renderGrid(el, packs, group){
-  el.innerHTML = packs.map((p,i)=>`
+  const cards = packs.map((p,i)=>`
     <div class="card" data-group="${group}" data-idx="${i}">
+      <div class="card-admin-actions${isAdmin ? ' show' : ''}">
+        <button class="edit" title="${t('tournament.card.edit','Edit')}" onclick="event.stopPropagation();openPkgEdit('${group}',${i})">✏️</button>
+        <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="event.stopPropagation();deletePkg('${group}',${i})">🗑</button>
+      </div>
       <img class="card-icon" src="assets/diamond-icon.png" alt="diamond">
       <div class="amt">${p.amt}</div>
       <div class="price">${p.price.toLocaleString()} Ks</div>
     </div>`).join('');
+  const addCard = `<div class="add-card${isAdmin ? ' show' : ''}" onclick="openPkgAdd('${group}')">+ <span data-i18n="diamond.admin.add.btn">${t('diamond.admin.add.btn','Add package')}</span></div>`;
+  el.innerHTML = cards + addCard;
 }
-renderGrid(document.getElementById('grid-diamond'), diamondPacks, 'diamond');
-renderGrid(document.getElementById('grid-double'), doublePacks, 'double');
+
+function renderAllGrids(){
+  renderGrid(document.getElementById('grid-diamond'), diamondPacks, 'diamond');
+  renderGrid(document.getElementById('grid-double'), doublePacks, 'double');
+  document.getElementById('pass-price').textContent = weeklyPassPrice.toLocaleString() + ' Ks';
+  document.getElementById('pass-edit-btn').classList.toggle('show', isAdmin);
+}
+
+async function loadPricing(){
+  try {
+    const res = await fetch('/api/diamond-pricing');
+    const data = await res.json();
+    if (Array.isArray(data.diamondPacks) && data.diamondPacks.length) diamondPacks = data.diamondPacks;
+    if (Array.isArray(data.doublePacks) && data.doublePacks.length) doublePacks = data.doublePacks;
+    if (typeof data.weeklyPassPrice === 'number') weeklyPassPrice = data.weeklyPassPrice;
+  } catch (e) {
+    // keep the hardcoded fallback defaults above (e.g. backend unreachable)
+  }
+  renderAllGrids();
+}
+loadPricing();
+
+async function savePricing(){
+  const res = await fetch('/api/diamond-pricing', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
+    body: JSON.stringify({ diamondPacks, doublePacks, weeklyPassPrice }),
+  });
+  if (!res.ok) throw new Error('save failed');
+  const saved = await res.json();
+  diamondPacks = saved.diamondPacks;
+  doublePacks = saved.doublePacks;
+  weeklyPassPrice = saved.weeklyPassPrice;
+  renderAllGrids();
+}
 
 let selected = null;
 let selectedPayment = null;
@@ -508,16 +676,22 @@ function selectPack(node, data){
   updateTotal();
 }
 
-document.querySelectorAll('#grid-diamond .card, #grid-double .card').forEach(card=>{
-  card.addEventListener('click', ()=>{
-    const group = card.dataset.group;
-    const packs = group === 'diamond' ? diamondPacks : doublePacks;
-    const p = packs[card.dataset.idx];
-    selectPack(card, {label: p.amt + ' diamonds', price: p.price});
-  });
-});
+// Event delegation (not per-card listeners) since the grids re-render
+// whenever an admin adds/edits/deletes a package.
+document.getElementById('grid-diamond').addEventListener('click', handleGridClick);
+document.getElementById('grid-double').addEventListener('click', handleGridClick);
+function handleGridClick(e){
+  const card = e.target.closest('.card');
+  if (!card) return;
+  const group = card.dataset.group;
+  const packs = group === 'diamond' ? diamondPacks : doublePacks;
+  const p = packs[card.dataset.idx];
+  if (!p) return;
+  selectPack(card, {label: p.amt + ' diamonds', price: p.price});
+}
+
 document.getElementById('pass-card').addEventListener('click', function(){
-  selectPack(this, {label:'Weekly pass', price:35000});
+  selectPack(this, {label:'Weekly pass', price: weeklyPassPrice});
 });
 
 document.querySelectorAll('.pay-chip').forEach(chip=>{
@@ -729,8 +903,200 @@ document.getElementById('submit-btn').addEventListener('click', submitOrder);
 document.getElementById('new-order').addEventListener('click', ()=>{
   location.reload();
 });
+
+/* ================= admin: unlock, edit/add/delete packages, edit pass price ================= */
+
+const adminToggle = document.getElementById('admin-toggle');
+const adminToggleLabel = document.getElementById('admin-toggle-label');
+const adminModal = document.getElementById('admin-modal');
+const adminInput = document.getElementById('admin-passcode-input');
+const adminErr = document.getElementById('admin-modal-err');
+
+async function verifyPasscode(pass){
+  try {
+    const res = await fetch('/api/tournaments/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': pass },
+      body: '{}',
+    });
+    const data = await res.json();
+    return !!data.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+function setAdminUI(){
+  adminToggle.classList.toggle('on', isAdmin);
+  adminToggleLabel.textContent = isAdmin ? t('tournament.admin.unlocked','Admin mode') : t('tournament.admin.locked','Admin');
+  adminToggleLabel.setAttribute('data-i18n', isAdmin ? 'tournament.admin.unlocked' : 'tournament.admin.locked');
+}
+
+adminToggle.addEventListener('click', async () => {
+  if (isAdmin) {
+    isAdmin = false;
+    sessionStorage.removeItem(ADMIN_KEY);
+    setAdminUI();
+    renderAllGrids();
+    return;
+  }
+  adminErr.classList.remove('show');
+  adminInput.value = '';
+  adminModal.classList.add('show');
+  adminInput.focus();
+});
+
+document.getElementById('admin-modal-cancel').addEventListener('click', () => {
+  adminModal.classList.remove('show');
+});
+
+document.getElementById('admin-modal-submit').addEventListener('click', async () => {
+  const pass = adminInput.value;
+  const ok = await verifyPasscode(pass);
+  if (!ok) {
+    adminErr.classList.add('show');
+    return;
+  }
+  sessionStorage.setItem(ADMIN_KEY, pass);
+  isAdmin = true;
+  adminModal.classList.remove('show');
+  setAdminUI();
+  renderAllGrids();
+});
+adminInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('admin-modal-submit').click();
+});
+
+/* silently re-verify a stored passcode on load (e.g. unlocked on the Tournament page already) */
+(async () => {
+  const stored = getPasscode();
+  if (stored) {
+    const ok = await verifyPasscode(stored);
+    if (ok) { isAdmin = true; } else { sessionStorage.removeItem(ADMIN_KEY); }
+    setAdminUI();
+    renderAllGrids();
+  }
+})();
+
+/* ---- add / edit package modal ---- */
+const pkgModal = document.getElementById('pkg-modal');
+const pkgModalTitle = document.getElementById('pkg-modal-title');
+const pkgModalErr = document.getElementById('pkg-modal-err');
+const pkgAmt = document.getElementById('pkg-amt');
+const pkgPrice = document.getElementById('pkg-price');
+let pkgEditing = null; // { group, idx } or null when adding
+
+window.openPkgAdd = function(group){
+  pkgEditing = { group, idx: null };
+  pkgModalTitle.textContent = t('diamond.admin.add.title','Add package');
+  pkgAmt.value = ''; pkgPrice.value = '';
+  pkgModalErr.classList.remove('show');
+  pkgModal.classList.add('show');
+  pkgAmt.focus();
+};
+
+window.openPkgEdit = function(group, idx){
+  const packs = group === 'diamond' ? diamondPacks : doublePacks;
+  const p = packs[idx];
+  if (!p) return;
+  pkgEditing = { group, idx };
+  pkgModalTitle.textContent = t('diamond.admin.edit.title','Edit package');
+  pkgAmt.value = p.amt; pkgPrice.value = p.price;
+  pkgModalErr.classList.remove('show');
+  pkgModal.classList.add('show');
+  pkgAmt.focus();
+};
+
+window.deletePkg = async function(group, idx){
+  if (!confirm(t('diamond.admin.delete.confirm','Remove this package?'))) return;
+  const packs = group === 'diamond' ? diamondPacks : doublePacks;
+  packs.splice(idx, 1);
+  try {
+    await savePricing();
+  } catch (e) {
+    alert(t('diamond.admin.error.save','Could not save prices. Please try again.'));
+  }
+};
+
+document.getElementById('pkg-modal-cancel').addEventListener('click', () => pkgModal.classList.remove('show'));
+
+document.getElementById('pkg-modal-save').addEventListener('click', async () => {
+  const amt = pkgAmt.value.trim();
+  const price = Number(pkgPrice.value);
+  if (!amt || !Number.isFinite(price) || price <= 0) {
+    pkgModalErr.textContent = t('diamond.admin.error.save','Could not save prices. Please try again.');
+    pkgModalErr.classList.add('show');
+    return;
+  }
+  const saveBtn = document.getElementById('pkg-modal-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = t('tournament.form.saving','Saving…');
+
+  const packs = pkgEditing.group === 'diamond' ? diamondPacks : doublePacks;
+  if (pkgEditing.idx === null) {
+    packs.push({ amt, price });
+  } else {
+    packs[pkgEditing.idx] = { amt, price };
+  }
+
+  try {
+    await savePricing();
+    pkgModal.classList.remove('show');
+  } catch (e) {
+    pkgModalErr.textContent = t('diamond.admin.error.save','Could not save prices. Please try again.');
+    pkgModalErr.classList.add('show');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = t('tournament.form.save','Save');
+  }
+});
+
+/* ---- edit weekly pass price modal ---- */
+const passModal = document.getElementById('pass-modal');
+const passPriceInput = document.getElementById('pass-price-input');
+const passModalErr = document.getElementById('pass-modal-err');
+
+document.getElementById('pass-edit-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  passPriceInput.value = weeklyPassPrice;
+  passModalErr.classList.remove('show');
+  passModal.classList.add('show');
+  passPriceInput.focus();
+});
+document.getElementById('pass-modal-cancel').addEventListener('click', () => passModal.classList.remove('show'));
+
+document.getElementById('pass-modal-save').addEventListener('click', async () => {
+  const price = Number(passPriceInput.value);
+  if (!Number.isFinite(price) || price <= 0) {
+    passModalErr.textContent = t('diamond.admin.error.save','Could not save prices. Please try again.');
+    passModalErr.classList.add('show');
+    return;
+  }
+  const saveBtn = document.getElementById('pass-modal-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = t('tournament.form.saving','Saving…');
+  weeklyPassPrice = price;
+  try {
+    await savePricing();
+    passModal.classList.remove('show');
+  } catch (e) {
+    passModalErr.textContent = t('diamond.admin.error.save','Could not save prices. Please try again.');
+    passModalErr.classList.add('show');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = t('tournament.form.save','Save');
+  }
+});
+
+// re-render admin-dependent bits when the language changes
+window.ZenithI18n = window.ZenithI18n || {};
+const prevOnLangChange = window.ZenithI18n.onLangChange;
+window.ZenithI18n.onLangChange = function(lang, dict){
+  if (prevOnLangChange) prevOnLangChange(lang, dict);
+  setAdminUI();
+  renderAllGrids();
+};
 </script>
-<script src="js/app-shared.js"></script>
 
 </body>
 </html>

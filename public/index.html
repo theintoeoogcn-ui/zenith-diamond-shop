@@ -94,7 +94,7 @@
   h1{
     font-family:'Orbitron',sans-serif;font-weight:800;font-size:46px;line-height:1.15;
     margin:0 0 18px;letter-spacing:0.5px;
-    background:linear-gradient(180deg,#fff, var(--mid));
+    background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
   .hero-text p{color:var(--mid);font-size:17px;max-width:480px;line-height:1.65;margin:0 0 30px;}
@@ -145,68 +145,32 @@
     50%{opacity:0.9;transform:translateX(-50%) scaleX(1.15);}
   }
   .char-stage{
-    position:relative;z-index:2;max-width:520px;width:100%;
-    /* --- tune these to line up the overlays with your artwork --- */
-    --hair-top:2%;   --hair-left:24%;  --hair-width:38%;
-    --bow-top:30%;   --bow-left:8%;    --bow-width:20%;
+    position:relative;z-index:2;max-width:480px;width:100%;
     animation:floatLoop 4.5s ease-in-out infinite;
   }
-  .char-img{
-    position:relative;z-index:2;display:block;width:100%;height:auto;
-    filter:drop-shadow(0 20px 40px rgba(0,0,0,0.55)) drop-shadow(0 0 40px rgba(139,92,246,0.25));
+  .char-frame{
+    position:relative;width:100%;aspect-ratio:1920/1280;border-radius:28px;overflow:hidden;
+    border:1px solid var(--line);
+    box-shadow:0 25px 60px rgba(0,0,0,0.45), 0 0 50px rgba(139,92,246,0.22);
+    -webkit-mask-image:radial-gradient(120% 120% at 50% 38%, #000 62%, transparent 100%);
+            mask-image:radial-gradient(120% 120% at 50% 38%, #000 62%, transparent 100%);
   }
+  [data-theme="light"] .char-frame{
+    box-shadow:0 20px 50px rgba(124,76,237,0.16), 0 0 36px rgba(124,76,237,0.12);
+  }
+  .char-frame::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg, transparent 55%, var(--void) 100%);
+  }
+  .char-video{display:block;width:100%;height:100%;object-fit:cover;}
   @keyframes floatLoop{
     0%,100%{transform:translateY(0px);}
     50%{transform:translateY(-18px);}
   }
   @media (max-width:980px){
-    .char-stage{max-width:340px;}
+    .char-stage{max-width:320px;}
     .hero-art{margin-top:20px;}
   }
-
-  /* ---- hair strands: gentle sway, like it's caught in a breeze ---- */
-  .hair-fx{
-    position:absolute;z-index:3;top:var(--hair-top);left:var(--hair-left);width:var(--hair-width);
-    height:auto;aspect-ratio:200/220;pointer-events:none;opacity:0.9;mix-blend-mode:screen;
-  }
-  .strand{transform-origin:50% 0%;}
-  .strand-a{animation:swayA 3.2s ease-in-out infinite;}
-  .strand-b{animation:swayB 2.6s ease-in-out infinite .15s;}
-  .strand-c{animation:swayC 3.6s ease-in-out infinite .3s;}
-  @keyframes swayA{0%,100%{transform:rotate(-4deg) translateX(0);}50%{transform:rotate(5deg) translateX(2px);}}
-  @keyframes swayB{0%,100%{transform:rotate(3deg);}50%{transform:rotate(-5deg);}}
-  @keyframes swayC{0%,100%{transform:rotate(-3deg) translateX(-1px);}50%{transform:rotate(4deg) translateX(1px);}}
-  @media (prefers-reduced-motion:reduce){ .strand-a,.strand-b,.strand-c{animation:none;} }
-
-  /* ---- bow + arrow: draw back, release, loop ---- */
-  .bow-fx{
-    position:absolute;z-index:1;top:var(--bow-top);left:var(--bow-left);width:var(--bow-width);
-    aspect-ratio:90/150;pointer-events:none;
-  }
-  .bow-svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 8px rgba(79,224,232,0.35));}
-  .bowstring{animation:bowDraw 2.8s cubic-bezier(.45,0,.2,1) infinite;transform-origin:20px 75px;}
-  @keyframes bowDraw{
-    0%,18%{d:path("M20 8 L20 75 L20 142");}
-    38%,46%{d:path("M20 8 L-6 75 L20 142");}
-    62%,100%{d:path("M20 8 L20 75 L20 142");}
-  }
-  .arrow{
-    position:absolute;left:6%;top:48%;width:60%;height:6px;
-    transform:translate(-40%,-50%) scaleX(0);transform-origin:right center;opacity:0;
-    animation:arrowFly 2.8s cubic-bezier(.45,0,.2,1) infinite;
-  }
-  .arrow-shaft{position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--hi));border-radius:2px;}
-  .arrow-head{
-    position:absolute;right:-4px;top:50%;width:0;height:0;transform:translateY(-50%);
-    border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid var(--signal);
-  }
-  @keyframes arrowFly{
-    0%,38%{opacity:0;transform:translate(-40%,-50%) scaleX(0);}
-    46%{opacity:1;transform:translate(-40%,-50%) scaleX(.3);}
-    70%{opacity:1;transform:translate(140%,-50%) scaleX(1);}
-    82%,100%{opacity:0;transform:translate(160%,-50%) scaleX(1);}
-  }
-  @media (prefers-reduced-motion:reduce){ .bowstring,.arrow{animation:none;opacity:0;} }
 
   /* floating particles */
   .particle{
@@ -279,41 +243,10 @@
   <div class="hero-art" id="hero-art">
     <div class="ring"></div>
     <div class="char-stage">
-      <img src="assets/hero-character.png" alt="Zenith Esports hero" class="char-img">
-
-      <!-- Flowing hair strands, layered above the artwork. Positions are set in
-           percentages of .char-stage — nudge --hair-top/--hair-left in the CSS
-           below to line them up with the head in your actual artwork. -->
-      <svg class="hair-fx" viewBox="0 0 200 220" preserveAspectRatio="none" aria-hidden="true">
-        <g class="strand strand-a">
-          <path d="M60 6 C 30 40, 20 90, 40 160 C 48 185, 42 200, 30 214" fill="none" stroke="url(#hairGrad)" stroke-width="7" stroke-linecap="round"/>
-        </g>
-        <g class="strand strand-b">
-          <path d="M100 2 C 90 46, 96 100, 78 168 C 72 190, 78 204, 70 218" fill="none" stroke="url(#hairGrad)" stroke-width="6" stroke-linecap="round"/>
-        </g>
-        <g class="strand strand-c">
-          <path d="M138 8 C 158 44, 164 96, 146 158 C 138 184, 146 200, 136 216" fill="none" stroke="url(#hairGrad)" stroke-width="6" stroke-linecap="round"/>
-        </g>
-        <defs>
-          <linearGradient id="hairGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="var(--violet)"/>
-            <stop offset="100%" stop-color="var(--cyan)"/>
-          </linearGradient>
-        </defs>
-      </svg>
-
-      <!-- Bow + arrow draw/release loop. Position with --bow-top/--bow-left below
-           to sit it in the character's hand. -->
-      <div class="bow-fx" aria-hidden="true">
-        <svg viewBox="0 0 90 150" class="bow-svg">
-          <path d="M20 8 C 60 40, 60 110, 20 142" fill="none" stroke="var(--hi)" stroke-width="5" stroke-linecap="round"/>
-          <path class="bowstring" d="M20 8 L20 75 L20 142" fill="none" stroke="var(--cyan)" stroke-width="2"/>
-        </svg>
-        <div class="arrow">
-          <div class="arrow-shaft"></div>
-          <div class="arrow-head"></div>
-        </div>
-        <div class="arrow-trail"></div>
+      <div class="char-frame">
+        <video class="char-video" autoplay muted loop playsinline poster="assets/miya-hero-poster.jpg">
+          <source src="assets/miya-hero-loop.mp4" type="video/mp4">
+        </video>
       </div>
     </div>
   </div>

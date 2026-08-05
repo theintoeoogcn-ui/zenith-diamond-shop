@@ -57,7 +57,7 @@
   h1{
     font-family:'Orbitron',sans-serif;font-weight:800;font-size:40px;
     margin:0 0 12px;letter-spacing:0.5px;
-    background:linear-gradient(180deg,#fff, var(--mid));
+    background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
   .hero p{color:var(--mid);font-size:16px;max-width:560px;line-height:1.6;margin:0;}
@@ -84,10 +84,9 @@
   .t-section h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--violet);}
   .t-section.past h2 .dot{background:var(--dim);}
 
-  .t-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
-  @media (max-width:1200px){ .t-grid{grid-template-columns:repeat(3,1fr);} }
-  @media (max-width:700px){ .t-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:460px){ .t-grid{grid-template-columns:1fr;} }
+  .t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media (max-width:900px){ .t-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:520px){ .t-grid{grid-template-columns:1fr;} }
 
   .t-card{
     position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
@@ -108,7 +107,12 @@
   .t-meta .k{color:var(--dim);}
   .t-meta .v{color:var(--mid);font-weight:600;text-align:right;}
   .t-desc{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:4px;}
-  .t-admin-actions{display:flex;gap:6px;position:absolute;top:12px;right:12px;}
+  .t-cover{
+    width:calc(100% + 28px);aspect-ratio:16/9;object-fit:cover;display:block;
+    margin:-18px -14px 6px;border-top-left-radius:var(--radius);border-top-right-radius:var(--radius);
+    background:var(--panel-raised);
+  }
+  .t-admin-actions{display:flex;gap:6px;position:absolute;top:12px;right:12px;z-index:2;}
   .t-admin-actions button{
     width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:var(--panel-raised);
     color:var(--mid);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
@@ -154,6 +158,21 @@
     font-size:15px;cursor:pointer;
   }
   .icon-picks button:hover{border-color:var(--violet-dim);}
+  .cover-box{
+    display:flex;align-items:center;gap:12px;border:1.5px dashed var(--line);border-radius:10px;
+    padding:10px;cursor:pointer;background:var(--void);transition:border-color .15s;
+  }
+  .cover-box:hover{border-color:var(--violet-dim);}
+  .cover-box.has-file{border-style:solid;border-color:var(--violet);}
+  .cover-box .thumb{
+    width:56px;height:34px;border-radius:6px;background:var(--panel-raised);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:16px;
+  }
+  .cover-box .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .cover-box .txt{font-size:12.5px;color:var(--mid);font-weight:600;}
+  .cover-box .txt small{display:block;color:var(--dim);font-weight:500;margin-top:2px;}
+  .cover-clear{margin-top:6px;font-size:11.5px;color:var(--signal);cursor:pointer;text-decoration:underline;display:none;}
+  .cover-clear.show{display:inline-block;}
   .modal-err{color:var(--signal);font-size:12.5px;margin:-6px 0 12px;display:none;}
   .modal-err.show{display:block;}
   .modal-actions{display:flex;gap:10px;margin-top:6px;}
@@ -283,6 +302,16 @@
     </div>
 
     <div class="field">
+      <label data-i18n="tournament.form.field.cover">Cover image</label>
+      <div class="cover-box" id="cover-box">
+        <div class="thumb" id="cover-thumb">🖼️</div>
+        <div class="txt" id="cover-text"><span data-i18n="tournament.form.field.cover.tap">Tap to add a cover image</span></div>
+      </div>
+      <input type="file" id="f-cover" accept="image/*" style="display:none;">
+      <span class="cover-clear" id="cover-clear" data-i18n="tournament.form.field.cover.remove">Remove cover image</span>
+    </div>
+
+    <div class="field">
       <label data-i18n="tournament.form.field.icon">Icon</label>
       <input type="text" id="f-icon" maxlength="4" placeholder="🏆">
       <div class="icon-picks">
@@ -349,6 +378,8 @@ function renderCard(item){
 
   const metaHtml = rows.map(([k,v]) => `<div><span class="k">${escapeHtml(k)}</span><span class="v">${escapeHtml(v)}</span></div>`).join('');
   const descHtml = item.description ? `<div class="t-desc">${escapeHtml(item.description)}</div>` : '';
+  const coverHtml = item.coverImage ? `<img class="t-cover" src="${item.coverImage}" alt="">` : '';
+  const iconHtml = item.coverImage ? '' : `<div class="t-icon">${item.icon || '🏆'}</div>`;
   const adminHtml = isAdmin ? `
     <div class="t-admin-actions">
       <button class="edit" title="${t('tournament.card.edit','Edit')}" onclick="openEdit('${item.id}')">✏️</button>
@@ -358,8 +389,9 @@ function renderCard(item){
   return `
     <div class="t-card" data-id="${item.id}">
       ${adminHtml}
+      ${coverHtml}
       <div class="t-badge ${item.status === 'past' ? 'past' : ''}">${badgeText}</div>
-      <div class="t-icon">${item.icon || '🏆'}</div>
+      ${iconHtml}
       <div class="t-title">${escapeHtml(item.title)}</div>
       <div class="t-meta">${metaHtml}</div>
       ${descHtml}
@@ -469,6 +501,41 @@ const fSlots = document.getElementById('f-slots');
 const fFormat = document.getElementById('f-format');
 const fIcon = document.getElementById('f-icon');
 const fDesc = document.getElementById('f-desc');
+const fCover = document.getElementById('f-cover');
+const coverBox = document.getElementById('cover-box');
+const coverThumb = document.getElementById('cover-thumb');
+const coverText = document.getElementById('cover-text');
+const coverClear = document.getElementById('cover-clear');
+let coverImageData = null;
+
+function setCoverPreview(dataUrl){
+  coverImageData = dataUrl || null;
+  if (coverImageData) {
+    coverBox.classList.add('has-file');
+    coverThumb.innerHTML = `<img src="${coverImageData}" alt="">`;
+    coverText.innerHTML = `<span>${t('tournament.form.field.cover.attached','Cover image attached')}</span>`;
+    coverClear.classList.add('show');
+  } else {
+    coverBox.classList.remove('has-file');
+    coverThumb.innerHTML = '🖼️';
+    coverText.innerHTML = `<span data-i18n="tournament.form.field.cover.tap">${t('tournament.form.field.cover.tap','Tap to add a cover image')}</span>`;
+    coverClear.classList.remove('show');
+  }
+}
+
+coverBox.addEventListener('click', () => fCover.click());
+fCover.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => setCoverPreview(reader.result);
+  reader.readAsDataURL(file);
+});
+coverClear.addEventListener('click', (e) => {
+  e.stopPropagation();
+  fCover.value = '';
+  setCoverPreview(null);
+});
 
 document.querySelectorAll('.icon-picks button').forEach(btn => {
   btn.addEventListener('click', () => { fIcon.value = btn.dataset.icon; });
@@ -479,6 +546,7 @@ function openCreate(){
   tModalTitle.textContent = t('tournament.form.title.create','Create tournament');
   fTitle.value = ''; fStatus.value = 'upcoming'; fDate.value = ''; fPrize.value = '';
   fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = '';
+  setCoverPreview(null); fCover.value = '';
   tModalErr.classList.remove('show');
   tModal.classList.add('show');
   fTitle.focus();
@@ -492,6 +560,7 @@ window.openEdit = function(id){
   fTitle.value = item.title || ''; fStatus.value = item.status === 'past' ? 'past' : 'upcoming';
   fDate.value = item.date || ''; fPrize.value = item.prize || ''; fSlots.value = item.slots || '';
   fFormat.value = item.format || ''; fIcon.value = item.icon || '🏆'; fDesc.value = item.description || '';
+  setCoverPreview(item.coverImage || null); fCover.value = '';
   tModalErr.classList.remove('show');
   tModal.classList.add('show');
   fTitle.focus();
@@ -525,6 +594,7 @@ document.getElementById('t-modal-save').addEventListener('click', async () => {
     format: fFormat.value.trim(),
     icon: fIcon.value.trim() || '🏆',
     description: fDesc.value.trim(),
+    coverImage: coverImageData || '',
   };
   if (!payload.title) {
     tModalErr.textContent = t('tournament.error.save','Could not save. Please try again.');

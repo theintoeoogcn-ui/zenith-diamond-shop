@@ -51,6 +51,7 @@ function createTournament(data) {
     slots: data.slots ? String(data.slots).trim() : '',
     description: data.description ? String(data.description).trim() : '',
     icon: data.icon ? String(data.icon).trim() : '🏆',
+    coverImage: data.coverImage ? String(data.coverImage) : '',
     createdAt: new Date().toISOString(),
   };
   list.push(item);
@@ -72,6 +73,9 @@ function updateTournament(id, patch) {
         : String(patch[f]).trim();
     }
   });
+  if (patch.coverImage !== undefined) {
+    clean.coverImage = String(patch.coverImage);
+  }
   list[idx] = clean;
   writeAll(list);
   return list[idx];
