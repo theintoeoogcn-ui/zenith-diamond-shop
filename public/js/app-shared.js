@@ -114,7 +114,7 @@
       "news.form.field.media.image": "Image",
       "news.form.field.media.video": "Video link",
       "news.form.field.link": "Link (optional)",
-      "news.form.field.islive": "Mark as Live Now",
+      "news.form.field.live.hint": "If this is a YouTube link that's currently live, a \"Live now\" badge appears automatically — no need to set anything.",
       "news.live.now": "Live now",
 
       "tournament.upcoming.title": "Upcoming Tournaments",
@@ -288,7 +288,7 @@
       "news.form.field.media.image": "ပုံ",
       "news.form.field.media.video": "ဗီဒီယို Link",
       "news.form.field.link": "Link (ရွေးချယ်ခွင့်)",
-      "news.form.field.islive": "Live Now အဖြစ်သတ်မှတ်ရန်",
+      "news.form.field.live.hint": "ဒါက YouTube link ဖြစ်ပြီး လက်ရှိ Live ထုတ်လွှင့်နေရင် \"Live now\" badge ကို အလိုအလျောက် ပြသပါမည် — ဘာမှ ရွေးချယ်ဖို့ မလိုပါ။",
       "news.live.now": "တိုက်ရိုက်ထုတ်လွှင့်နေသည်",
 
       "tournament.upcoming.title": "လာမည့်ပြိုင်ပွဲများ",
@@ -462,7 +462,7 @@
       "news.form.field.media.image": "รูปภาพ",
       "news.form.field.media.video": "ลิงก์วิดีโอ",
       "news.form.field.link": "ลิงก์ (ไม่บังคับ)",
-      "news.form.field.islive": "ทำเครื่องหมายว่ากำลังถ่ายทอดสด",
+      "news.form.field.live.hint": "หากเป็นลิงก์ YouTube ที่กำลังถ่ายทอดสดอยู่ ป้าย \"กำลังถ่ายทอดสด\" จะปรากฏขึ้นอัตโนมัติ — ไม่ต้องตั้งค่าใด ๆ",
       "news.live.now": "กำลังถ่ายทอดสด",
 
       "tournament.upcoming.title": "ทัวร์นาเมนต์ที่กำลังจะมาถึง",

@@ -89,8 +89,7 @@
   .n-admin-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
 
   .n-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;margin:0 0 6px;padding-right:60px;}
-  .live-check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--mid);cursor:pointer;user-select:none;}
-  .live-check input{width:15px;height:15px;accent-color:var(--signal);cursor:pointer;}
+  .live-hint{margin:8px 0 0;font-size:11.5px;color:var(--dim);line-height:1.5;}
   .n-live-badge{
     display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:5px 12px;border-radius:999px;
     background:rgba(255,62,154,0.15);border:1px solid var(--signal);color:var(--signal);
@@ -302,10 +301,7 @@
       </div>
       <div class="modal-media-field" id="media-video-field">
         <input type="url" id="f-media-video" placeholder="https://youtube.com/... or https://facebook.com/...">
-        <label class="live-check">
-          <input type="checkbox" id="f-is-live">
-          <span>🔴 <span data-i18n="news.form.field.islive">Mark as Live Now</span></span>
-        </label>
+        <p class="live-hint" data-i18n="news.form.field.live.hint">If this is a YouTube link that's currently live, a "Live now" badge appears automatically — no need to set anything.</p>
       </div>
     </div>
 
@@ -345,9 +341,13 @@ function markLiked(id){
   if (!liked.includes(id)) { liked.push(id); localStorage.setItem(LIKED_KEY, JSON.stringify(liked)); }
 }
 
-function youtubeEmbedUrl(url){
+function youtubeVideoId(url){
   const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{6,15})/i);
-  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+  return m ? m[1] : null;
+}
+function youtubeEmbedUrl(url){
+  const id = youtubeVideoId(url);
+  return id ? `https://www.youtube.com/embed/${id}` : null;
 }
 function facebookEmbedUrl(url){
   return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`;
@@ -404,7 +404,10 @@ function renderCard(item){
       <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="deletePost('${item.id}')">🗑</button>
     </div>` : '';
   const linkHtml = item.link ? `<a class="n-link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">🔗 ${escapeHtml(t('news.readmore','Open link'))}</a><br>` : '';
-  const liveHtml = item.isLive ? `<div class="n-live-badge"><span class="dot"></span>${escapeHtml(t('news.live.now','Live now'))}</div>` : '';
+  const ytId = item.mediaType === 'video' ? youtubeVideoId(item.media) : null;
+  const liveHtml = ytId
+    ? `<div class="n-live-badge" id="live-badge-${item.id}" style="display:none;"><span class="dot"></span>${escapeHtml(t('news.live.now','Live now'))}</div>`
+    : '';
   const liked = getLikedIds().includes(item.id);
   const commentCount = (item.comments || []).length;
 
@@ -433,7 +436,29 @@ function renderFeed(){
     ? posts.map(renderCard).join('')
     : `<div class="n-empty"><div class="icon">📰</div><p>${t('news.empty','No news posts yet — check back soon.')}</p></div>`;
   document.getElementById('create-btn').classList.toggle('show', isAdmin);
+  refreshLiveBadges();
 }
+
+// Checks every YouTube video post's real live status and shows/hides its
+// "Live now" badge accordingly — fully automatic, nothing for the admin to
+// toggle. Runs once after every render and again on a timer so a badge
+// disappears on its own once the stream ends.
+async function refreshLiveBadges(){
+  const videoPosts = posts.filter(p => p.mediaType === 'video' && youtubeVideoId(p.media));
+  await Promise.all(videoPosts.map(async (p) => {
+    const id = youtubeVideoId(p.media);
+    const badge = document.getElementById('live-badge-' + p.id);
+    if (!badge) return;
+    try {
+      const res = await fetch('/api/youtube-live/' + id);
+      const data = await res.json();
+      badge.style.display = data.isLive ? 'inline-flex' : 'none';
+    } catch (e) {
+      // leave badge state as-is on a transient network error
+    }
+  }));
+}
+setInterval(refreshLiveBadges, 45000);
 
 async function loadNews(){
   try {
@@ -590,7 +615,6 @@ const fBody = document.getElementById('f-body');
 const fLink = document.getElementById('f-link');
 const fMediaFile = document.getElementById('f-media-file');
 const fMediaVideo = document.getElementById('f-media-video');
-const fIsLive = document.getElementById('f-is-live');
 
 document.querySelectorAll('[data-media-tab]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -630,7 +654,7 @@ function openCreate(){
   editingId = null;
   postModalTitle.textContent = t('news.form.title.create','Create post');
   fTitle.value = ''; fBody.value = ''; fLink.value = ''; fMediaVideo.value = '';
-  fMediaFile.value = ''; mediaFileData = null; fIsLive.checked = false;
+  fMediaFile.value = ''; mediaFileData = null;
   mediaTab = 'image';
   document.querySelector('[data-media-tab="image"]').click();
   postModalErr.classList.remove('show');
@@ -644,7 +668,7 @@ window.openEdit = function(id){
   editingId = id;
   postModalTitle.textContent = t('news.form.title.edit','Edit post');
   fTitle.value = item.title || ''; fBody.value = item.body || ''; fLink.value = item.link || '';
-  fMediaFile.value = ''; mediaFileData = null; fMediaVideo.value = ''; fIsLive.checked = !!item.isLive;
+  fMediaFile.value = ''; mediaFileData = null; fMediaVideo.value = '';
   if (item.mediaType === 'video') {
     mediaTab = 'video';
     fMediaVideo.value = item.media || '';
@@ -671,11 +695,9 @@ document.getElementById('post-modal-save').addEventListener('click', async () =>
   if (mediaTab === 'video') {
     payload.media = fMediaVideo.value.trim();
     payload.mediaType = payload.media ? 'video' : '';
-    payload.isLive = fIsLive.checked;
   } else {
     payload.media = mediaFileData || '';
     payload.mediaType = payload.media ? 'image' : '';
-    payload.isLive = false;
   }
   if (!payload.title) {
     postModalErr.textContent = t('news.error.save','Could not save. Please try again.');

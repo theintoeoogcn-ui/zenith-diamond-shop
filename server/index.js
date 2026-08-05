@@ -34,6 +34,11 @@ app.use('/api/home-stats', homeStatsRoutes);
 const newsRoutes = require('./routes/news');
 app.use('/api/news', newsRoutes);
 
+// YouTube live-status check — used by the News page to auto-show/hide the
+// "Live Now" badge on video posts, no admin action needed.
+const youtubeLiveRoutes = require('./routes/youtube-live');
+app.use('/api/youtube-live', youtubeLiveRoutes);
+
 if (!process.env.ADMIN_PASSCODE) {
   console.warn('⚠️  ADMIN_PASSCODE is not set — the "Create Tournament" admin panel is disabled until you set one in server/.env.');
 }
