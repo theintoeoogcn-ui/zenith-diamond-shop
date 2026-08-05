@@ -10,8 +10,13 @@
 
 /* ---------- dark (default) already comes from each page's :root ---------- */
 
-/* ---------- light mode ---------- */
-[data-theme="light"]{
+/* ---------- light mode ----------
+   NOTE: uses :root[data-theme="light"] (not just [data-theme="light"])
+   so this beats the plain `:root{...}` dark-color block that each page
+   defines in its own <style>. Both selectors have the same specificity,
+   so without the extra :root here, whichever one happens to load later
+   in the HTML wins — which was silently canceling the whole toggle. */
+:root[data-theme="light"]{
   --void:#F3EFFC;
   --panel:#FFFFFF;
   --panel-raised:#F4EFFF;

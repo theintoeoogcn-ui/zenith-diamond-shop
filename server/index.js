@@ -18,6 +18,14 @@ app.use('/api/orders', orderRoutes);
 const ignRoutes = require('./routes/ign');
 app.use('/api/ign', ignRoutes);
 
+// Tournament list — public to read, admin-passcode-protected to create/edit/delete
+const tournamentRoutes = require('./routes/tournaments');
+app.use('/api/tournaments', tournamentRoutes);
+
+if (!process.env.ADMIN_PASSCODE) {
+  console.warn('⚠️  ADMIN_PASSCODE is not set — the "Create Tournament" admin panel is disabled until you set one in server/.env.');
+}
+
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;

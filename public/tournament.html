@@ -12,7 +12,7 @@
   :root{
     --void:#0A0713; --panel:#150C29; --panel-raised:#1D1237; --line:#2C1F4D;
     --violet:#8B5CF6; --violet-dim:#4C3592; --cyan:#4FE0E8; --signal:#FF3E9A;
-    --hi:#F4EEFF; --mid:#B4A4DC; --dim:#6C6089;
+    --hi:#F4EEFF; --mid:#B4A4DC; --dim:#6C6089; --radius:14px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -24,6 +24,7 @@
     color:var(--hi); font-family:var(--font-main); font-weight:500; min-height:100vh;
   }
   a{color:inherit;text-decoration:none;}
+  button{font-family:var(--font-main);}
   header{
     display:flex;align-items:center;justify-content:space-between;
     padding:20px 48px;border-bottom:1px solid var(--line);
@@ -38,21 +39,138 @@
   nav a:hover{color:var(--hi);}
   @media (max-width:900px){ nav{display:none;} header{padding:16px 20px;} }
 
-  .empty{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;min-height:calc(100vh - 73px);padding:40px 20px;
+  /* ---------- admin toggle pill in header ---------- */
+  .admin-toggle{
+    display:flex;align-items:center;gap:6px;
+    background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
   }
-  .empty .icon{font-size:52px;margin-bottom:18px;animation:trophyFloat 3s ease-in-out infinite;}
-  @keyframes trophyFloat{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-10px) rotate(3deg);}}
-  @media (prefers-reduced-motion:reduce){ .empty .icon{animation:none;} }
-  .empty a.back{transition:transform .15s ease, box-shadow .15s ease;}
-  .empty a.back:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(139,92,246,0.35);}
-  .empty h1{font-family:'Orbitron',sans-serif;font-size:28px;margin:0 0 12px;}
-  .empty p{color:var(--mid);max-width:420px;line-height:1.6;margin:0 0 26px;}
-  .empty a.back{
-    background:var(--violet);color:#fff;font-weight:700;padding:12px 26px;
-    border-radius:10px;letter-spacing:0.3px;
+  .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .admin-toggle.on{background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+
+  /* ---------- hero ---------- */
+  .hero{padding:56px 48px 10px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;
+    color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
   }
+  h1{
+    font-family:'Orbitron',sans-serif;font-weight:800;font-size:40px;
+    margin:0 0 12px;letter-spacing:0.5px;
+    background:linear-gradient(180deg,#fff, var(--mid));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p{color:var(--mid);font-size:16px;max-width:560px;line-height:1.6;margin:0;}
+  @media (max-width:900px){ .hero{padding:40px 20px 6px;} h1{font-size:30px;} }
+
+  .create-bar{padding:18px 48px 0;display:flex;justify-content:flex-end;}
+  @media (max-width:900px){ .create-bar{padding:14px 20px 0;} }
+  .create-btn{
+    display:none;align-items:center;gap:8px;
+    background:var(--violet);color:#fff;border:none;border-radius:10px;
+    padding:11px 20px;font-weight:700;font-size:13px;letter-spacing:0.3px;cursor:pointer;
+    box-shadow:0 8px 22px rgba(139,92,246,0.35);
+  }
+  .create-btn.show{display:inline-flex;}
+  .create-btn:hover{transform:translateY(-1px);}
+
+  /* ---------- tournament sections ---------- */
+  .t-section{padding:26px 48px 10px;}
+  @media (max-width:900px){ .t-section{padding:20px 20px 6px;} }
+  .t-section h2{
+    font-family:'Orbitron',sans-serif;font-size:18px;margin:0 0 16px;
+    display:flex;align-items:center;gap:10px;color:var(--hi);
+  }
+  .t-section h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--violet);}
+  .t-section.past h2 .dot{background:var(--dim);}
+
+  .t-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+  @media (max-width:1200px){ .t-grid{grid-template-columns:repeat(3,1fr);} }
+  @media (max-width:700px){ .t-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:460px){ .t-grid{grid-template-columns:1fr;} }
+
+  .t-card{
+    position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 14px 16px;display:flex;flex-direction:column;gap:8px;
+    transition:border-color .15s, transform .12s, box-shadow .15s;
+  }
+  .t-card:hover{border-color:var(--violet-dim);transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,0.3);}
+  .t-badge{
+    align-self:flex-start;font-size:10px;font-weight:700;letter-spacing:0.5px;
+    padding:3px 9px;border-radius:6px;font-family:'JetBrains Mono',monospace;
+    background:rgba(139,92,246,0.18);color:var(--violet);
+  }
+  .t-badge.past{background:rgba(108,96,137,0.2);color:var(--dim);}
+  .t-icon{font-size:28px;line-height:1;margin-top:2px;}
+  .t-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:14px;line-height:1.35;color:var(--hi);}
+  .t-meta{display:flex;flex-direction:column;gap:3px;margin-top:2px;}
+  .t-meta div{display:flex;justify-content:space-between;gap:6px;font-size:11px;}
+  .t-meta .k{color:var(--dim);}
+  .t-meta .v{color:var(--mid);font-weight:600;text-align:right;}
+  .t-desc{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:4px;}
+  .t-admin-actions{display:flex;gap:6px;position:absolute;top:12px;right:12px;}
+  .t-admin-actions button{
+    width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:var(--panel-raised);
+    color:var(--mid);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
+  }
+  .t-admin-actions button:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .t-admin-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
+
+  .t-empty{
+    grid-column:1 / -1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:34px 20px;color:var(--mid);
+    border:1px dashed var(--line);border-radius:var(--radius);
+  }
+  .t-empty .icon{font-size:34px;margin-bottom:10px;animation:trophyFloat 3s ease-in-out infinite;}
+  @keyframes trophyFloat{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-8px) rotate(3deg);}}
+  @media (prefers-reduced-motion:reduce){ .t-empty .icon{animation:none;} }
+  .t-empty p{margin:0;font-size:13px;max-width:340px;}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(5,3,12,0.72);backdrop-filter:blur(4px);
+    z-index:100;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    width:100%;max-width:420px;max-height:90vh;overflow-y:auto;padding:26px 24px;
+    animation:modalPop .2s ease;
+  }
+  @keyframes modalPop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .modal h3{font-family:'Orbitron',sans-serif;font-size:17px;margin:0 0 18px;}
+  .modal .field{margin-bottom:14px;}
+  .modal .field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:600;}
+  .modal .field input,.modal .field select,.modal .field textarea{
+    width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
+    padding:10px 12px;color:var(--hi);font-family:var(--font-main);font-size:14px;font-weight:600;outline:none;resize:vertical;
+  }
+  .modal .field input:focus,.modal .field select:focus,.modal .field textarea:focus{border-color:var(--violet);}
+  .modal .field-row{display:flex;gap:10px;}
+  .modal .field-row .field{flex:1;}
+  .icon-picks{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .icon-picks button{
+    width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--void);
+    font-size:15px;cursor:pointer;
+  }
+  .icon-picks button:hover{border-color:var(--violet-dim);}
+  .modal-err{color:var(--signal);font-size:12.5px;margin:-6px 0 12px;display:none;}
+  .modal-err.show{display:block;}
+  .modal-actions{display:flex;gap:10px;margin-top:6px;}
+  .modal-actions button{
+    flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;
+  }
+  .modal-actions .save{background:var(--violet);color:#fff;}
+  .modal-actions .save:hover{background:#7C4CED;}
+  .modal-actions .save:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
+  .modal-actions .cancel{background:var(--panel-raised);color:var(--mid);border:1px solid var(--line);}
+  .modal-actions .cancel:hover{color:var(--hi);}
+
+  footer{
+    display:flex;justify-content:space-between;padding:26px 48px;margin-top:20px;
+    border-top:1px solid var(--line);color:var(--dim);font-size:13px;
+  }
+  @media (max-width:640px){ footer{flex-direction:column;gap:8px;padding:22px 20px;} }
 </style>
 </head>
 <body>
@@ -63,9 +181,12 @@
     <a href="index.html" data-i18n="nav.home">Home</a>
     <a href="tournament.html" class="active" data-i18n="nav.tournament">Tournament</a>
     <a href="diamond-plan.html" data-i18n="nav.diamond">Diamond</a>
-    <a href="#" data-i18n="nav.service">Customer Service</a>
+    <a href="customer-service.html" data-i18n="nav.service">Customer Service</a>
   </nav>
   <div class="hdr-controls">
+    <button type="button" class="admin-toggle" id="admin-toggle">
+      <span id="admin-toggle-label" data-i18n="tournament.admin.locked">Admin</span>
+    </button>
     <div class="lang-switch" role="group" aria-label="Language">
       <div class="pill"></div>
       <button type="button" data-lang="mm">MM</button>
@@ -81,13 +202,375 @@
   </div>
 </header>
 
-<div class="empty reveal">
-  <div class="icon">🏆</div>
+<div class="hero reveal">
+  <p class="eyebrow" data-i18n="tournament.eyebrow">Compete & win</p>
   <h1 data-i18n="tournament.title">Tournaments coming soon</h1>
   <p data-i18n="tournament.desc">We're setting up the next Zenith Esports tournament. Check back soon, or head over to the Diamond store in the meantime.</p>
-  <a class="back" href="diamond-plan.html" data-i18n="tournament.cta">Go to Diamond store</a>
+</div>
+
+<div class="create-bar">
+  <button class="create-btn" id="create-btn" data-i18n="tournament.create.btn">+ Create Tournament</button>
+</div>
+
+<div class="t-section">
+  <h2><span class="dot"></span><span data-i18n="tournament.upcoming.title">Upcoming Tournaments</span></h2>
+  <div class="t-grid reveal-stagger" id="grid-upcoming"></div>
+</div>
+
+<div class="t-section past">
+  <h2><span class="dot"></span><span data-i18n="tournament.past.title">Past Tournaments</span></h2>
+  <div class="t-grid reveal-stagger" id="grid-past"></div>
+</div>
+
+<footer>
+  <span data-i18n="footer.est">EST 2026</span>
+  <span data-i18n="footer.tagline">Beyond the peak — Zenith Esports</span>
+</footer>
+
+<!-- ---------- admin passcode modal ---------- -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <h3 data-i18n="tournament.admin.prompt.title">Enter admin passcode</h3>
+    <div class="field">
+      <input type="password" id="admin-passcode-input" data-i18n-placeholder="tournament.admin.prompt.placeholder" placeholder="Passcode">
+    </div>
+    <div class="modal-err" id="admin-modal-err" data-i18n="tournament.admin.prompt.wrong">Incorrect passcode</div>
+    <div class="modal-actions">
+      <button class="cancel" id="admin-modal-cancel" data-i18n="tournament.admin.prompt.cancel">Cancel</button>
+      <button class="save" id="admin-modal-submit" data-i18n="tournament.admin.prompt.submit">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- create / edit tournament modal ---------- -->
+<div class="modal-overlay" id="t-modal">
+  <div class="modal">
+    <h3 id="t-modal-title" data-i18n="tournament.form.title.create">Create tournament</h3>
+
+    <div class="field">
+      <label data-i18n="tournament.form.field.title">Tournament title</label>
+      <input type="text" id="f-title">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="tournament.form.field.status">Status</label>
+        <select id="f-status">
+          <option value="upcoming" data-i18n="tournament.form.field.status.upcoming">Upcoming</option>
+          <option value="past" data-i18n="tournament.form.field.status.past">Completed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="tournament.form.field.date">Date</label>
+        <input type="text" id="f-date" placeholder="e.g. Aug 20, 2026">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="tournament.form.field.prize">Prize pool</label>
+        <input type="text" id="f-prize" placeholder="e.g. 500,000 Ks">
+      </div>
+      <div class="field">
+        <label data-i18n="tournament.form.field.slots">Slots / Teams</label>
+        <input type="text" id="f-slots" placeholder="e.g. 32 Teams">
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="tournament.form.field.format">Format</label>
+      <input type="text" id="f-format" placeholder="e.g. Squad · Single elimination">
+    </div>
+
+    <div class="field">
+      <label data-i18n="tournament.form.field.icon">Icon</label>
+      <input type="text" id="f-icon" maxlength="4" placeholder="🏆">
+      <div class="icon-picks">
+        <button type="button" data-icon="🏆">🏆</button>
+        <button type="button" data-icon="🎮">🎮</button>
+        <button type="button" data-icon="⚔️">⚔️</button>
+        <button type="button" data-icon="🔥">🔥</button>
+        <button type="button" data-icon="🎯">🎯</button>
+        <button type="button" data-icon="🥇">🥇</button>
+        <button type="button" data-icon="⭐">⭐</button>
+        <button type="button" data-icon="💥">💥</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="tournament.form.field.description">Description</label>
+      <textarea id="f-desc" rows="3"></textarea>
+    </div>
+
+    <div class="modal-err" id="t-modal-err">Error</div>
+    <div class="modal-actions">
+      <button class="cancel" id="t-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
+      <button class="save" id="t-modal-save" data-i18n="tournament.form.save">Save</button>
+    </div>
+  </div>
 </div>
 
 <script src="js/app-shared.js"></script>
+<script>
+function t(key, fallback){
+  const v = window.ZenithI18n && window.ZenithI18n.t(key);
+  return v || fallback || key;
+}
+
+const ADMIN_KEY = 'zenith-admin-passcode';
+let isAdmin = false;
+let tournaments = [];
+let editingId = null;
+
+function getPasscode(){ return sessionStorage.getItem(ADMIN_KEY) || ''; }
+
+async function verifyPasscode(pass){
+  try {
+    const res = await fetch('/api/tournaments/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': pass },
+      body: '{}',
+    });
+    const data = await res.json();
+    return !!data.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+function renderCard(item){
+  const badgeText = item.status === 'past' ? t('tournament.badge.past','Completed') : t('tournament.badge.upcoming','Upcoming');
+  const rows = [
+    item.date ? [t('tournament.field.date','Date'), item.date] : null,
+    item.prize ? [t('tournament.field.prize','Prize pool'), item.prize] : null,
+    item.format ? [t('tournament.field.format','Format'), item.format] : null,
+    item.slots ? [t('tournament.field.slots','Slots'), item.slots] : null,
+  ].filter(Boolean);
+
+  const metaHtml = rows.map(([k,v]) => `<div><span class="k">${escapeHtml(k)}</span><span class="v">${escapeHtml(v)}</span></div>`).join('');
+  const descHtml = item.description ? `<div class="t-desc">${escapeHtml(item.description)}</div>` : '';
+  const adminHtml = isAdmin ? `
+    <div class="t-admin-actions">
+      <button class="edit" title="${t('tournament.card.edit','Edit')}" onclick="openEdit('${item.id}')">✏️</button>
+      <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="deleteItem('${item.id}')">🗑</button>
+    </div>` : '';
+
+  return `
+    <div class="t-card" data-id="${item.id}">
+      ${adminHtml}
+      <div class="t-badge ${item.status === 'past' ? 'past' : ''}">${badgeText}</div>
+      <div class="t-icon">${item.icon || '🏆'}</div>
+      <div class="t-title">${escapeHtml(item.title)}</div>
+      <div class="t-meta">${metaHtml}</div>
+      ${descHtml}
+    </div>`;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderGrids(){
+  const upcoming = tournaments.filter(x => x.status !== 'past');
+  const past = tournaments.filter(x => x.status === 'past');
+
+  const gridUp = document.getElementById('grid-upcoming');
+  const gridPast = document.getElementById('grid-past');
+
+  gridUp.innerHTML = upcoming.length
+    ? upcoming.map(renderCard).join('')
+    : `<div class="t-empty"><div class="icon">🏆</div><p>${t('tournament.upcoming.empty','No upcoming tournaments yet — check back soon.')}</p></div>`;
+
+  gridPast.innerHTML = past.length
+    ? past.map(renderCard).join('')
+    : `<div class="t-empty"><div class="icon">🏆</div><p>${t('tournament.past.empty','No past tournaments listed yet.')}</p></div>`;
+
+  document.getElementById('create-btn').classList.toggle('show', isAdmin);
+}
+
+async function loadTournaments(){
+  try {
+    const res = await fetch('/api/tournaments');
+    tournaments = await res.json();
+  } catch (e) {
+    tournaments = [];
+  }
+  renderGrids();
+}
+
+/* ---------------- admin unlock ---------------- */
+const adminToggle = document.getElementById('admin-toggle');
+const adminToggleLabel = document.getElementById('admin-toggle-label');
+const adminModal = document.getElementById('admin-modal');
+const adminInput = document.getElementById('admin-passcode-input');
+const adminErr = document.getElementById('admin-modal-err');
+
+function setAdminUI(){
+  adminToggle.classList.toggle('on', isAdmin);
+  adminToggleLabel.textContent = isAdmin ? t('tournament.admin.unlocked','Admin mode') : t('tournament.admin.locked','Admin');
+  adminToggleLabel.setAttribute('data-i18n', isAdmin ? 'tournament.admin.unlocked' : 'tournament.admin.locked');
+}
+
+adminToggle.addEventListener('click', async () => {
+  if (isAdmin) {
+    isAdmin = false;
+    sessionStorage.removeItem(ADMIN_KEY);
+    setAdminUI();
+    renderGrids();
+    return;
+  }
+  adminErr.classList.remove('show');
+  adminInput.value = '';
+  adminModal.classList.add('show');
+  adminInput.focus();
+});
+
+document.getElementById('admin-modal-cancel').addEventListener('click', () => {
+  adminModal.classList.remove('show');
+});
+
+document.getElementById('admin-modal-submit').addEventListener('click', async () => {
+  const pass = adminInput.value;
+  const ok = await verifyPasscode(pass);
+  if (!ok) {
+    adminErr.classList.add('show');
+    return;
+  }
+  sessionStorage.setItem(ADMIN_KEY, pass);
+  isAdmin = true;
+  adminModal.classList.remove('show');
+  setAdminUI();
+  renderGrids();
+});
+adminInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('admin-modal-submit').click();
+});
+
+/* silently re-verify a stored passcode on load, in case it's still valid */
+(async () => {
+  const stored = getPasscode();
+  if (stored) {
+    const ok = await verifyPasscode(stored);
+    if (ok) { isAdmin = true; } else { sessionStorage.removeItem(ADMIN_KEY); }
+    setAdminUI();
+    renderGrids();
+  }
+})();
+
+/* ---------------- create / edit tournament ---------------- */
+const tModal = document.getElementById('t-modal');
+const tModalTitle = document.getElementById('t-modal-title');
+const tModalErr = document.getElementById('t-modal-err');
+const fTitle = document.getElementById('f-title');
+const fStatus = document.getElementById('f-status');
+const fDate = document.getElementById('f-date');
+const fPrize = document.getElementById('f-prize');
+const fSlots = document.getElementById('f-slots');
+const fFormat = document.getElementById('f-format');
+const fIcon = document.getElementById('f-icon');
+const fDesc = document.getElementById('f-desc');
+
+document.querySelectorAll('.icon-picks button').forEach(btn => {
+  btn.addEventListener('click', () => { fIcon.value = btn.dataset.icon; });
+});
+
+function openCreate(){
+  editingId = null;
+  tModalTitle.textContent = t('tournament.form.title.create','Create tournament');
+  fTitle.value = ''; fStatus.value = 'upcoming'; fDate.value = ''; fPrize.value = '';
+  fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = '';
+  tModalErr.classList.remove('show');
+  tModal.classList.add('show');
+  fTitle.focus();
+}
+
+window.openEdit = function(id){
+  const item = tournaments.find(x => x.id === id);
+  if (!item) return;
+  editingId = id;
+  tModalTitle.textContent = t('tournament.form.title.edit','Edit tournament');
+  fTitle.value = item.title || ''; fStatus.value = item.status === 'past' ? 'past' : 'upcoming';
+  fDate.value = item.date || ''; fPrize.value = item.prize || ''; fSlots.value = item.slots || '';
+  fFormat.value = item.format || ''; fIcon.value = item.icon || '🏆'; fDesc.value = item.description || '';
+  tModalErr.classList.remove('show');
+  tModal.classList.add('show');
+  fTitle.focus();
+};
+
+window.deleteItem = async function(id){
+  if (!confirm(t('tournament.card.delete.confirm','Delete this tournament?'))) return;
+  try {
+    const res = await fetch('/api/tournaments/' + id, {
+      method: 'DELETE',
+      headers: { 'x-admin-passcode': getPasscode() },
+    });
+    if (!res.ok) throw new Error('delete failed');
+    tournaments = tournaments.filter(x => x.id !== id);
+    renderGrids();
+  } catch (e) {
+    alert(t('tournament.error.delete','Could not delete. Please try again.'));
+  }
+};
+
+document.getElementById('create-btn').addEventListener('click', openCreate);
+document.getElementById('t-modal-cancel').addEventListener('click', () => tModal.classList.remove('show'));
+
+document.getElementById('t-modal-save').addEventListener('click', async () => {
+  const payload = {
+    title: fTitle.value.trim(),
+    status: fStatus.value,
+    date: fDate.value.trim(),
+    prize: fPrize.value.trim(),
+    slots: fSlots.value.trim(),
+    format: fFormat.value.trim(),
+    icon: fIcon.value.trim() || '🏆',
+    description: fDesc.value.trim(),
+  };
+  if (!payload.title) {
+    tModalErr.textContent = t('tournament.error.save','Could not save. Please try again.');
+    tModalErr.classList.add('show');
+    return;
+  }
+  const saveBtn = document.getElementById('t-modal-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = t('tournament.form.saving','Saving…');
+
+  try {
+    const url = editingId ? '/api/tournaments/' + editingId : '/api/tournaments';
+    const method = editingId ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('save failed');
+    const saved = await res.json();
+    if (editingId) {
+      tournaments = tournaments.map(x => x.id === editingId ? saved : x);
+    } else {
+      tournaments.unshift(saved);
+    }
+    tModal.classList.remove('show');
+    renderGrids();
+  } catch (e) {
+    tModalErr.textContent = t('tournament.error.save','Could not save. Please try again.');
+    tModalErr.classList.add('show');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = t('tournament.form.save','Save');
+  }
+});
+
+// re-render text-heavy dynamic bits when the language changes
+window.ZenithI18n = window.ZenithI18n || {};
+const prevOnLangChange = window.ZenithI18n.onLangChange;
+window.ZenithI18n.onLangChange = function(lang, dict){
+  if (prevOnLangChange) prevOnLangChange(lang, dict);
+  setAdminUI();
+  renderGrids();
+};
+
+loadTournaments();
+</script>
 </body>
 </html>
