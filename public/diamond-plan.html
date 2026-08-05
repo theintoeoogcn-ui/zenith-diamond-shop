@@ -49,19 +49,15 @@
   }
   .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
   .brand .mark{
-    width:30px;height:30px;border-radius:8px;
-    background:linear-gradient(135deg,var(--violet),var(--cyan));
+    width:32px;height:32px;border-radius:8px;
     display:flex;align-items:center;justify-content:center;
-    font-size:14px;color:#0A0713;font-weight:800;
+    overflow:hidden;background:#fff;
   }
+  .brand .mark img{width:100%;height:100%;object-fit:contain;display:block;}
   nav{display:flex;gap:34px;font-weight:600;font-size:15px;color:var(--mid);}
   nav a.active{color:var(--hi);position:relative;}
   nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:2px;background:var(--violet);}
   nav a:hover{color:var(--hi);}
-  .header-cta{
-    background:var(--violet);color:#fff;font-weight:700;font-size:14px;
-    padding:10px 22px;border-radius:10px;letter-spacing:0.3px;
-  }
   @media (max-width:900px){ nav{display:none;} header{padding:16px 20px;} }
 
   /* ---------- hero ---------- */
@@ -114,7 +110,7 @@
     background:var(--panel-raised);
   }
   .card .amt{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;margin-bottom:10px;}
-  .card svg{width:30px;height:30px;margin-bottom:8px;}
+  .card img.card-icon{width:30px;height:30px;margin-bottom:8px;}
   .card .price{font-size:15px;color:var(--cyan);font-weight:700;}
   .card .badge{
     position:absolute;top:-9px;left:10px;background:var(--signal);color:#fff;
@@ -157,6 +153,18 @@
   .field-row{display:flex;gap:10px;padding:16px 22px 0;}
   .field-row .field{padding:0;flex:1;}
 
+  .ign-row{
+    display:flex;align-items:center;gap:8px;margin:10px 22px 0;padding:9px 12px;
+    background:var(--void);border:1px solid var(--line);border-radius:9px;
+    font-size:13px;font-weight:600;color:var(--mid);
+  }
+  .ign-row .ign-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;}
+  .ign-row.loading .ign-dot{background:var(--cyan);animation:pulse 1.1s ease-in-out infinite;}
+  .ign-row.found{border-color:var(--violet-dim);color:var(--hi);}
+  .ign-row.found .ign-dot{background:var(--violet);}
+  .ign-row.error{border-color:rgba(255,62,154,0.4);color:var(--signal);}
+  .ign-row.error .ign-dot{background:var(--signal);}
+
   .perforation{
     position:relative;height:0;margin:18px 0;
   }
@@ -183,7 +191,8 @@
     padding:10px 4px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:11px;font-weight:700;color:var(--mid);
   }
   .pay-chip.selected{border-color:var(--cyan);color:var(--hi);box-shadow:0 0 0 1px var(--cyan) inset;}
-  .pay-chip .swatch{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#0A0713;}
+  .pay-chip .swatch{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
+  .pay-chip .swatch img{width:100%;height:100%;object-fit:contain;display:block;}
 
   .total-row{
     display:flex;align-items:baseline;justify-content:space-between;
@@ -247,15 +256,13 @@
 <body>
 
 <header>
-  <div class="brand"><span class="mark">Z</span>ZENITH ESPORTS</div>
+  <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
   <nav>
     <a href="#">Home</a>
     <a href="#">Tournament</a>
-    <a href="#" class="active">Diamond</a>
-    <a href="#">About</a>
-    <a href="#">FAQ</a>
+    <a href="diamond-plan.html" class="active">Diamond</a>
+    <a href="#">Customer Service</a>
   </nav>
-  <div class="header-cta">Sign in</div>
 </header>
 
 <div class="hero">
@@ -308,6 +315,11 @@
         </div>
       </div>
 
+      <div class="ign-row" id="ign-row" style="display:none;">
+        <span class="ign-dot"></span>
+        <span id="ign-text">Checking account…</span>
+      </div>
+
       <div class="perforation"><div class="notch l"></div><div class="notch r"></div></div>
 
       <div class="summary-row" id="summary-row" style="display:none;">
@@ -319,9 +331,9 @@
         <label>Payment method</label>
       </div>
       <div class="pay-options">
-        <div class="pay-chip" data-pay="KBZ Pay"><div class="swatch" style="background:#37a5e0;">KBZ</div>KBZ Pay</div>
-        <div class="pay-chip" data-pay="Wave Pay"><div class="swatch" style="background:#f9c53d;">W</div>Wave Pay</div>
-        <div class="pay-chip" data-pay="AYA Pay"><div class="swatch" style="background:#e0384a;">AYA</div>AYA Pay</div>
+        <div class="pay-chip" data-pay="KBZ Pay"><div class="swatch"><img src="assets/kbz-pay.png" alt="KBZ Pay"></div>KBZ Pay</div>
+        <div class="pay-chip" data-pay="Wave Pay"><div class="swatch"><img src="assets/wave-money.png" alt="Wave Pay"></div>Wave Pay</div>
+        <div class="pay-chip" data-pay="AYA Pay"><div class="swatch"><img src="assets/aya-pay.png" alt="AYA Pay"></div>AYA Pay</div>
       </div>
 
       <div class="total-row">
@@ -362,8 +374,6 @@
 </footer>
 
 <script>
-const gemSVG = `<svg viewBox="0 0 24 24" fill="none"><path d="M4 8 8 3h8l4 5-9 13L4 8Z" fill="url(#g)"/><path d="M4 8h16M8 3l3 5-3 13M16 3l-3 5 3 13" stroke="#0A0713" stroke-opacity=".25" stroke-width=".6"/><defs><linearGradient id="g" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#4FE0E8"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs></svg>`;
-
 const diamondPacks = [
   {amt:86,price:5500},{amt:172,price:11000},{amt:257,price:15500},
   {amt:343,price:20700},{amt:429,price:25800},{amt:514,price:31000},
@@ -378,7 +388,7 @@ const doublePacks = [
 function renderGrid(el, packs, group){
   el.innerHTML = packs.map((p,i)=>`
     <div class="card" data-group="${group}" data-idx="${i}">
-      ${gemSVG}
+      <img class="card-icon" src="assets/diamond-icon.png" alt="diamond">
       <div class="amt">${p.amt}</div>
       <div class="price">${p.price.toLocaleString()} Ks</div>
     </div>`).join('');
@@ -434,14 +444,62 @@ function updateTotal(){
   checkReady();
 }
 
+let confirmedIgn = null;
+let ignLookupToken = 0;
+let ignDebounce = null;
+
 function checkReady(){
   const gameId = document.getElementById('game-id').value.trim();
   const serverId = document.getElementById('server-id').value.trim();
   const ready = selected && selectedPayment && gameId && serverId;
   document.getElementById('submit-btn').disabled = !ready;
 }
-document.getElementById('game-id').addEventListener('input', checkReady);
-document.getElementById('server-id').addEventListener('input', checkReady);
+
+function setIgnRow(state, text){
+  const row = document.getElementById('ign-row');
+  row.style.display = 'flex';
+  row.className = 'ign-row' + (state ? ' ' + state : '');
+  document.getElementById('ign-text').textContent = text;
+}
+
+async function lookupIgn(){
+  const gameId = document.getElementById('game-id').value.trim();
+  const serverId = document.getElementById('server-id').value.trim();
+  confirmedIgn = null;
+
+  if (!gameId || !serverId) {
+    document.getElementById('ign-row').style.display = 'none';
+    return;
+  }
+
+  const myToken = ++ignLookupToken;
+  setIgnRow('loading', 'Checking account…');
+
+  try {
+    const res = await fetch(`/api/ign?id=${encodeURIComponent(gameId)}&server=${encodeURIComponent(serverId)}`);
+    const data = await res.json();
+    if (myToken !== ignLookupToken) return; // a newer lookup superseded this one
+
+    if (data.success && data.name) {
+      confirmedIgn = data.name;
+      setIgnRow('found', data.name);
+    } else {
+      setIgnRow('error', 'Account not found — check your Game ID and Server');
+    }
+  } catch (err) {
+    if (myToken !== ignLookupToken) return;
+    setIgnRow('error', "Couldn't verify account right now — you can still continue");
+  }
+}
+
+function onIdFieldChange(){
+  checkReady();
+  clearTimeout(ignDebounce);
+  ignDebounce = setTimeout(lookupIgn, 500);
+}
+
+document.getElementById('game-id').addEventListener('input', onIdFieldChange);
+document.getElementById('server-id').addEventListener('input', onIdFieldChange);
 
 let pollTimer = null;
 

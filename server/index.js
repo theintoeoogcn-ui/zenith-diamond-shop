@@ -14,6 +14,10 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 const orderRoutes = require('./routes/orders');
 app.use('/api/orders', orderRoutes);
 
+// Mobile Legends in-game name lookup (Game ID + Server -> nickname)
+const ignRoutes = require('./routes/ign');
+app.use('/api/ign', ignRoutes);
+
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
