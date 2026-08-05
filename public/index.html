@@ -6,7 +6,8 @@
 <title>Zenith Esports — Home</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
 <style>
   :root{
     --void:#0A0713;
@@ -30,7 +31,7 @@
       radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
       var(--void);
     color:var(--hi);
-    font-family:'Rajdhani',sans-serif;
+    font-family:var(--font-main);
     font-weight:500;
     min-height:100vh;
     overflow-x:hidden;
@@ -101,7 +102,7 @@
   .hero-btns{display:flex;gap:14px;margin-bottom:44px;flex-wrap:wrap;}
   .hero-btn{
     display:flex;align-items:center;gap:10px;
-    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;
+    font-family:var(--font-main);font-weight:700;font-size:14px;letter-spacing:1px;
     text-transform:uppercase;padding:14px 26px;border-radius:12px;cursor:pointer;
     transition:transform .15s, box-shadow .15s;
   }
@@ -143,20 +144,69 @@
     0%,100%{opacity:0.5;transform:translateX(-50%) scaleX(1);}
     50%{opacity:0.9;transform:translateX(-50%) scaleX(1.15);}
   }
-  .hero-art img{
-    position:relative;z-index:2;
-    max-width:520px;width:100%;height:auto;
-    filter:drop-shadow(0 20px 40px rgba(0,0,0,0.55)) drop-shadow(0 0 40px rgba(139,92,246,0.25));
+  .char-stage{
+    position:relative;z-index:2;max-width:520px;width:100%;
+    /* --- tune these to line up the overlays with your artwork --- */
+    --hair-top:2%;   --hair-left:24%;  --hair-width:38%;
+    --bow-top:30%;   --bow-left:8%;    --bow-width:20%;
     animation:floatLoop 4.5s ease-in-out infinite;
+  }
+  .char-img{
+    position:relative;z-index:2;display:block;width:100%;height:auto;
+    filter:drop-shadow(0 20px 40px rgba(0,0,0,0.55)) drop-shadow(0 0 40px rgba(139,92,246,0.25));
   }
   @keyframes floatLoop{
     0%,100%{transform:translateY(0px);}
     50%{transform:translateY(-18px);}
   }
   @media (max-width:980px){
-    .hero-art img{max-width:340px;}
+    .char-stage{max-width:340px;}
     .hero-art{margin-top:20px;}
   }
+
+  /* ---- hair strands: gentle sway, like it's caught in a breeze ---- */
+  .hair-fx{
+    position:absolute;z-index:3;top:var(--hair-top);left:var(--hair-left);width:var(--hair-width);
+    height:auto;aspect-ratio:200/220;pointer-events:none;opacity:0.9;mix-blend-mode:screen;
+  }
+  .strand{transform-origin:50% 0%;}
+  .strand-a{animation:swayA 3.2s ease-in-out infinite;}
+  .strand-b{animation:swayB 2.6s ease-in-out infinite .15s;}
+  .strand-c{animation:swayC 3.6s ease-in-out infinite .3s;}
+  @keyframes swayA{0%,100%{transform:rotate(-4deg) translateX(0);}50%{transform:rotate(5deg) translateX(2px);}}
+  @keyframes swayB{0%,100%{transform:rotate(3deg);}50%{transform:rotate(-5deg);}}
+  @keyframes swayC{0%,100%{transform:rotate(-3deg) translateX(-1px);}50%{transform:rotate(4deg) translateX(1px);}}
+  @media (prefers-reduced-motion:reduce){ .strand-a,.strand-b,.strand-c{animation:none;} }
+
+  /* ---- bow + arrow: draw back, release, loop ---- */
+  .bow-fx{
+    position:absolute;z-index:1;top:var(--bow-top);left:var(--bow-left);width:var(--bow-width);
+    aspect-ratio:90/150;pointer-events:none;
+  }
+  .bow-svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 8px rgba(79,224,232,0.35));}
+  .bowstring{animation:bowDraw 2.8s cubic-bezier(.45,0,.2,1) infinite;transform-origin:20px 75px;}
+  @keyframes bowDraw{
+    0%,18%{d:path("M20 8 L20 75 L20 142");}
+    38%,46%{d:path("M20 8 L-6 75 L20 142");}
+    62%,100%{d:path("M20 8 L20 75 L20 142");}
+  }
+  .arrow{
+    position:absolute;left:6%;top:48%;width:60%;height:6px;
+    transform:translate(-40%,-50%) scaleX(0);transform-origin:right center;opacity:0;
+    animation:arrowFly 2.8s cubic-bezier(.45,0,.2,1) infinite;
+  }
+  .arrow-shaft{position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--hi));border-radius:2px;}
+  .arrow-head{
+    position:absolute;right:-4px;top:50%;width:0;height:0;transform:translateY(-50%);
+    border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid var(--signal);
+  }
+  @keyframes arrowFly{
+    0%,38%{opacity:0;transform:translate(-40%,-50%) scaleX(0);}
+    46%{opacity:1;transform:translate(-40%,-50%) scaleX(.3);}
+    70%{opacity:1;transform:translate(140%,-50%) scaleX(1);}
+    82%,100%{opacity:0;transform:translate(160%,-50%) scaleX(1);}
+  }
+  @media (prefers-reduced-motion:reduce){ .bowstring,.arrow{animation:none;opacity:0;} }
 
   /* floating particles */
   .particle{
@@ -184,43 +234,94 @@
 <header>
   <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
   <nav>
-    <a href="index.html" class="active">Home</a>
-    <a href="tournament.html">Tournament</a>
-    <a href="diamond-plan.html">Diamond</a>
-    <a href="#">Customer Service</a>
+    <a href="index.html" class="active" data-i18n="nav.home">Home</a>
+    <a href="tournament.html" data-i18n="nav.tournament">Tournament</a>
+    <a href="diamond-plan.html" data-i18n="nav.diamond">Diamond</a>
+    <a href="#" data-i18n="nav.service">Customer Service</a>
   </nav>
+  <div class="hdr-controls">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <div class="pill"></div>
+      <button type="button" data-lang="mm">MM</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="th">TH</button>
+    </div>
+    <button type="button" class="theme-toggle" aria-label="Toggle light / dark mode">
+      <span class="icon-wrap">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><g class="ray"><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 15.2A8.5 8.5 0 1 1 8.8 3.3a7 7 0 0 0 11.9 11.9Z"/></svg>
+      </span>
+    </button>
+  </div>
 </header>
 
 <div class="hero">
   <div class="hero-glow"></div>
 
   <div class="hero-text">
-    <p class="eyebrow">Est. 2026 &nbsp;·&nbsp; Beyond the peak</p>
-    <h1>The Ultimate Hub for<br>Esports Tournaments &amp;<br>MLBB Top-Ups</h1>
-    <p>Join competitive gaming events and get the fastest, most affordable Diamond services tailored for you.</p>
+    <p class="eyebrow reveal" data-i18n="home.eyebrow">Est. 2026 &nbsp;·&nbsp; Beyond the peak</p>
+    <h1 class="reveal" data-i18n="home.h1">The Ultimate Hub for Esports Tournaments &amp; MLBB Top-Ups</h1>
+    <p class="reveal" data-i18n="home.desc">Join competitive gaming events and get the fastest, most affordable Diamond services tailored for you.</p>
 
-    <div class="hero-btns">
-      <a class="hero-btn primary" href="tournament.html">🏆 Tournament</a>
-      <a class="hero-btn secondary" href="diamond-plan.html">💎 Diamond</a>
+    <div class="hero-btns reveal">
+      <a class="hero-btn primary" href="tournament.html" data-i18n="home.btn.tournament">🏆 Tournament</a>
+      <a class="hero-btn secondary" href="diamond-plan.html" data-i18n="home.btn.diamond">💎 Diamond</a>
     </div>
 
-    <div class="stats">
-      <div class="stat"><span class="icon">🏆</span><span class="num">2+</span><span class="lbl">Tournament</span></div>
-      <div class="stat"><span class="icon">💎</span><span class="num">3,000+</span><span class="lbl">Diamond Sold</span></div>
-      <div class="stat"><span class="icon">👥</span><span class="num">700+</span><span class="lbl">Players</span></div>
-      <div class="stat"><span class="icon">⭐</span><span class="num">4.9 / 5</span><span class="lbl">Rating</span></div>
+    <div class="stats reveal-stagger">
+      <div class="stat"><span class="icon">🏆</span><span class="num">2+</span><span class="lbl" data-i18n="home.stat.tournament">Tournament</span></div>
+      <div class="stat"><span class="icon">💎</span><span class="num">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
+      <div class="stat"><span class="icon">👥</span><span class="num">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
+      <div class="stat"><span class="icon">⭐</span><span class="num">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
     </div>
   </div>
 
   <div class="hero-art" id="hero-art">
     <div class="ring"></div>
-    <img src="assets/hero-character.png" alt="Zenith Esports hero">
+    <div class="char-stage">
+      <img src="assets/hero-character.png" alt="Zenith Esports hero" class="char-img">
+
+      <!-- Flowing hair strands, layered above the artwork. Positions are set in
+           percentages of .char-stage — nudge --hair-top/--hair-left in the CSS
+           below to line them up with the head in your actual artwork. -->
+      <svg class="hair-fx" viewBox="0 0 200 220" preserveAspectRatio="none" aria-hidden="true">
+        <g class="strand strand-a">
+          <path d="M60 6 C 30 40, 20 90, 40 160 C 48 185, 42 200, 30 214" fill="none" stroke="url(#hairGrad)" stroke-width="7" stroke-linecap="round"/>
+        </g>
+        <g class="strand strand-b">
+          <path d="M100 2 C 90 46, 96 100, 78 168 C 72 190, 78 204, 70 218" fill="none" stroke="url(#hairGrad)" stroke-width="6" stroke-linecap="round"/>
+        </g>
+        <g class="strand strand-c">
+          <path d="M138 8 C 158 44, 164 96, 146 158 C 138 184, 146 200, 136 216" fill="none" stroke="url(#hairGrad)" stroke-width="6" stroke-linecap="round"/>
+        </g>
+        <defs>
+          <linearGradient id="hairGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--violet)"/>
+            <stop offset="100%" stop-color="var(--cyan)"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <!-- Bow + arrow draw/release loop. Position with --bow-top/--bow-left below
+           to sit it in the character's hand. -->
+      <div class="bow-fx" aria-hidden="true">
+        <svg viewBox="0 0 90 150" class="bow-svg">
+          <path d="M20 8 C 60 40, 60 110, 20 142" fill="none" stroke="var(--hi)" stroke-width="5" stroke-linecap="round"/>
+          <path class="bowstring" d="M20 8 L20 75 L20 142" fill="none" stroke="var(--cyan)" stroke-width="2"/>
+        </svg>
+        <div class="arrow">
+          <div class="arrow-shaft"></div>
+          <div class="arrow-head"></div>
+        </div>
+        <div class="arrow-trail"></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <footer>
-  <span>EST 2026</span>
-  <span>Beyond the peak — Zenith Esports</span>
+  <span data-i18n="footer.est">EST 2026</span>
+  <span data-i18n="footer.tagline">Beyond the peak — Zenith Esports</span>
 </footer>
 
 <script>
@@ -239,6 +340,7 @@
     art.appendChild(p);
   }
 </script>
+<script src="js/app-shared.js"></script>
 
 </body>
 </html>

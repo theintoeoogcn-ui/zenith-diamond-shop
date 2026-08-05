@@ -6,7 +6,8 @@
 <title>Zenith Esports — Diamond Plan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
 <style>
   :root{
     --void:#0A0713;
@@ -30,7 +31,7 @@
       radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
       var(--void);
     color:var(--hi);
-    font-family:'Rajdhani',sans-serif;
+    font-family:var(--font-main);
     font-weight:500;
     min-height:100vh;
   }
@@ -85,7 +86,7 @@
   /* ---------- tabs ---------- */
   .tabs{display:flex;gap:8px;margin-bottom:22px;}
   .tab{
-    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;
+    font-family:var(--font-main);font-weight:700;font-size:14px;letter-spacing:0.5px;
     padding:10px 18px;border-radius:10px;color:var(--dim);cursor:pointer;
     border:1px solid var(--line);background:var(--panel);
   }
@@ -93,7 +94,8 @@
     box-shadow:0 0 0 1px var(--violet-dim) inset;}
 
   .section{display:none;}
-  .section.active{display:block;}
+  .section.active{display:block;animation:sectionFadeIn .35s ease;}
+  @keyframes sectionFadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
   @media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr);} }
@@ -108,7 +110,9 @@
     border-color:var(--violet);
     box-shadow:0 0 0 1px var(--violet), 0 0 22px rgba(139,92,246,0.35);
     background:var(--panel-raised);
+    animation:cardPop .25s ease;
   }
+  @keyframes cardPop{0%{transform:scale(.94);}100%{transform:scale(1);}}
   .card .amt{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;margin-bottom:10px;}
   .card img.card-icon{width:30px;height:30px;margin-bottom:8px;}
   .card .price{font-size:15px;color:var(--cyan);font-weight:700;}
@@ -146,7 +150,7 @@
   .field label{display:block;font-size:13px;color:var(--mid);margin-bottom:6px;font-weight:600;}
   .field input,.field select{
     width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
-    padding:11px 12px;color:var(--hi);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;
+    padding:11px 12px;color:var(--hi);font-family:var(--font-main);font-size:15px;font-weight:600;
     outline:none;
   }
   .field input:focus{border-color:var(--violet);}
@@ -211,7 +215,7 @@
   .proof-field label{display:block;font-size:13px;color:var(--mid);margin-bottom:6px;font-weight:600;}
   .proof-field input[type="text"]{
     width:100%;background:var(--panel);border:1px solid var(--line);border-radius:9px;
-    padding:11px 12px;color:var(--hi);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;outline:none;
+    padding:11px 12px;color:var(--hi);font-family:var(--font-main);font-size:15px;font-weight:600;outline:none;
   }
   .proof-field input[type="text"]:focus{border-color:var(--violet);}
 
@@ -240,7 +244,7 @@
   .submit-btn{
     display:block;width:calc(100% - 44px);margin:0 22px 22px;padding:14px;
     background:var(--violet);color:#fff;border:none;border-radius:10px;
-    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.5px;cursor:pointer;
+    font-family:var(--font-main);font-weight:700;font-size:15px;letter-spacing:0.5px;cursor:pointer;
   }
   .submit-btn:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
   .submit-btn:not(:disabled):hover{background:#7C4CED;}
@@ -265,7 +269,8 @@
     display:flex;align-items:center;justify-content:center;
     z-index:1;
   }
-  .step.done .dot{background:var(--violet);border-color:var(--violet);}
+  .step.done .dot{background:var(--violet);border-color:var(--violet);animation:dotPop .3s ease;}
+  @keyframes dotPop{0%{transform:scale(.5);}70%{transform:scale(1.2);}100%{transform:scale(1);}}
   .step.active .dot{border-color:var(--signal);}
   .step.active .dot::after{
     content:"";width:8px;height:8px;border-radius:50%;background:var(--signal);
@@ -294,39 +299,53 @@
 <header>
   <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
   <nav>
-    <a href="index.html">Home</a>
-    <a href="tournament.html">Tournament</a>
-    <a href="diamond-plan.html" class="active">Diamond</a>
-    <a href="#">Customer Service</a>
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="tournament.html" data-i18n="nav.tournament">Tournament</a>
+    <a href="diamond-plan.html" class="active" data-i18n="nav.diamond">Diamond</a>
+    <a href="#" data-i18n="nav.service">Customer Service</a>
   </nav>
+  <div class="hdr-controls">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <div class="pill"></div>
+      <button type="button" data-lang="mm">MM</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="th">TH</button>
+    </div>
+    <button type="button" class="theme-toggle" aria-label="Toggle light / dark mode">
+      <span class="icon-wrap">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><g class="ray"><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 15.2A8.5 8.5 0 1 1 8.8 3.3a7 7 0 0 0 11.9 11.9Z"/></svg>
+      </span>
+    </button>
+  </div>
 </header>
 
-<div class="hero">
-  <p class="eyebrow">Top-up center</p>
-  <h1>Diamond Plan</h1>
-  <p>Pick a pack, enter your game ID, and pay. Our team confirms every order on Telegram before diamonds are sent — usually within minutes.</p>
+<div class="hero reveal">
+  <p class="eyebrow" data-i18n="diamond.eyebrow">Top-up center</p>
+  <h1 data-i18n="diamond.title">Diamond Plan</h1>
+  <p data-i18n="diamond.desc">Pick a pack, enter your game ID, and pay. Our team confirms every order on Telegram before diamonds are sent — usually within minutes.</p>
 </div>
 
 <div class="layout">
 
   <div class="left">
     <div class="tabs">
-      <div class="tab active" data-tab="diamond">Diamond</div>
-      <div class="tab" data-tab="double">Double diamond</div>
+      <div class="tab active" data-tab="diamond" data-i18n="diamond.tab.diamond">Diamond</div>
+      <div class="tab" data-tab="double" data-i18n="diamond.tab.double">Double diamond</div>
     </div>
 
     <div class="section active" id="section-diamond">
-      <div class="grid" id="grid-diamond"></div>
+      <div class="grid reveal-stagger" id="grid-diamond"></div>
     </div>
 
     <div class="section" id="section-double">
-      <div class="grid" id="grid-double"></div>
+      <div class="grid reveal-stagger" id="grid-double"></div>
       <div class="pass-card" id="pass-card">
         <div class="icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 12l9 10 9-10-9-10Z" fill="#fff"/></svg>
         </div>
         <div class="info">
-          <div class="name">Weekly pass <span style="color:var(--signal);font-size:11px;font-family:'JetBrains Mono',monospace;">+445%</span></div>
+          <div class="name"><span data-i18n="diamond.passcard.name">Weekly pass</span> <span style="color:var(--signal);font-size:11px;font-family:'JetBrains Mono',monospace;">+445%</span></div>
           <div class="price">35,000 Ks</div>
         </div>
       </div>
@@ -336,17 +355,17 @@
   <div class="ticket-wrap">
     <div class="ticket">
       <div class="ticket-head">
-        <div class="label">Order ticket</div>
-        <h3>Enter your account</h3>
+        <div class="label" data-i18n="diamond.ticket.label">Order ticket</div>
+        <h3 data-i18n="diamond.ticket.title">Enter your account</h3>
       </div>
 
       <div class="field-row">
         <div class="field">
-          <label for="game-id">Game ID</label>
+          <label for="game-id" data-i18n="diamond.field.gameid">Game ID</label>
           <input id="game-id" type="text" placeholder="e.g. 812394021" inputmode="numeric">
         </div>
         <div class="field">
-          <label for="server-id">Server</label>
+          <label for="server-id" data-i18n="diamond.field.server">Server</label>
           <input id="server-id" type="text" placeholder="e.g. 2891">
         </div>
       </div>
@@ -361,10 +380,10 @@
       <div class="summary-row" id="summary-row" style="display:none;">
         <span>Package</span><span class="val" id="summary-val">—</span>
       </div>
-      <div class="summary-empty" id="summary-empty">No package selected yet — choose one on the left.</div>
+      <div class="summary-empty" id="summary-empty" data-i18n="diamond.summary.empty">No package selected yet — choose one on the left.</div>
 
       <div class="field" style="margin-top:6px;">
-        <label>Payment method</label>
+        <label data-i18n="diamond.field.payment">Payment method</label>
       </div>
       <div class="pay-options">
         <div class="pay-chip" data-pay="KBZ Pay"><div class="swatch"><img src="assets/kbz-pay.png" alt="KBZ Pay"></div>KBZ Pay</div>
@@ -381,47 +400,47 @@
         <div class="proof-recap" id="proof-recap"></div>
 
         <div class="proof-field">
-          <label for="sender-number">Your account / phone number</label>
+          <label for="sender-number" data-i18n="diamond.field.sender">Your account / phone number</label>
           <input id="sender-number" type="text" placeholder="e.g. 09xxxxxxxxx" inputmode="tel">
         </div>
 
         <div class="proof-field">
-          <label>Payment screenshot</label>
+          <label data-i18n="diamond.field.screenshot">Payment screenshot</label>
           <label class="upload-box" id="upload-box" for="screenshot-input">
             <div class="thumb" id="upload-thumb">📎</div>
-            <div class="txt" id="upload-text">Tap to add a screenshot<small>Proof of your transfer</small></div>
+            <div class="txt" id="upload-text"><span data-i18n="diamond.field.screenshot.tap">Tap to add a screenshot</span><small data-i18n="diamond.field.screenshot.sub">Proof of your transfer</small></div>
           </label>
           <input type="file" id="screenshot-input" accept="image/*" style="display:none;">
         </div>
       </div>
 
       <div class="total-row">
-        <span class="t-label">Total</span>
+        <span class="t-label" data-i18n="diamond.total">Total</span>
         <span class="t-val" id="total-val">0 Ks</span>
       </div>
 
-      <button class="submit-btn" id="submit-btn" disabled>Send for verification</button>
+      <button class="submit-btn" id="submit-btn" disabled data-i18n="diamond.submit">Send for verification</button>
 
       <div class="status" id="status">
         <div class="order-code" id="order-code"></div>
         <div class="step done">
           <div class="dot"></div>
-          <div class="text"><div class="t-title">Order placed</div><div class="t-sub">Your details were submitted</div></div>
+          <div class="text"><div class="t-title" data-i18n="diamond.step.placed.title">Order placed</div><div class="t-sub" data-i18n="diamond.step.placed.sub">Your details were submitted</div></div>
         </div>
         <div class="step" id="step-telegram">
           <div class="dot"></div>
-          <div class="text"><div class="t-title">Sent to Telegram</div><div class="t-sub">Admin notified of your payment</div></div>
+          <div class="text"><div class="t-title" data-i18n="diamond.step.telegram.title">Sent to Telegram</div><div class="t-sub" data-i18n="diamond.step.telegram.sub">Admin notified of your payment</div></div>
         </div>
         <div class="step" id="step-review">
           <div class="dot"></div>
-          <div class="text"><div class="t-title">Awaiting confirmation</div><div class="t-sub">Admin checks the transfer, then approves</div></div>
+          <div class="text"><div class="t-title" data-i18n="diamond.step.review.title">Awaiting confirmation</div><div class="t-sub" data-i18n="diamond.step.review.sub">Admin checks the transfer, then approves</div></div>
         </div>
         <div class="step" id="step-done">
           <div class="dot"></div>
-          <div class="text"><div class="t-title">Diamonds delivered</div><div class="t-sub">Sent straight to your account</div></div>
+          <div class="text"><div class="t-title" data-i18n="diamond.step.done.title">Diamonds delivered</div><div class="t-sub" data-i18n="diamond.step.done.sub">Sent straight to your account</div></div>
         </div>
       </div>
-      <div class="new-order" id="new-order" style="display:none;">Start a new order</div>
+      <div class="new-order" id="new-order" style="display:none;" data-i18n="diamond.neworder">Start a new order</div>
     </div>
   </div>
 
@@ -433,6 +452,11 @@
 </footer>
 
 <script>
+function t(key, fallback){
+  const v = window.ZenithI18n && window.ZenithI18n.t(key);
+  return v || fallback || key;
+}
+
 const diamondPacks = [
   {amt:86,price:5500},{amt:172,price:11000},{amt:257,price:15500},
   {amt:343,price:20700},{amt:429,price:25800},{amt:514,price:31000},
@@ -503,7 +527,7 @@ document.querySelectorAll('.pay-chip').forEach(chip=>{
     selectedPayment = chip.dataset.pay;
 
     document.getElementById('proof-swatch').innerHTML = `<img src="${PAY_ICONS[selectedPayment]}" alt="${selectedPayment}">`;
-    document.getElementById('proof-title').textContent = selectedPayment + ' — payment details';
+    document.getElementById('proof-title').textContent = selectedPayment + ' — ' + t('diamond.proof.suffix', 'payment details');
     document.getElementById('proof-panel').classList.add('show');
     updateProofRecap();
 
@@ -517,9 +541,9 @@ function updateProofRecap(){
   const recap = document.getElementById('proof-recap');
   if (!gameId && !serverId) { recap.innerHTML = ''; return; }
   recap.innerHTML =
-    `<span>Game ID <b>${gameId || '—'}</b></span>` +
-    `<span>Server <b>${serverId || '—'}</b></span>` +
-    `<span>IGN <b>${confirmedIgn || 'not verified yet'}</b></span>`;
+    `<span>${t('diamond.recap.gameid')} <b>${gameId || '—'}</b></span>` +
+    `<span>${t('diamond.recap.server')} <b>${serverId || '—'}</b></span>` +
+    `<span>${t('diamond.recap.ign')} <b>${confirmedIgn || t('diamond.recap.notverified')}</b></span>`;
 }
 
 function updateTotal(){
@@ -559,7 +583,7 @@ async function lookupIgn(){
   }
 
   const myToken = ++ignLookupToken;
-  setIgnRow('loading', 'Checking account…');
+  setIgnRow('loading', t('diamond.ign.checking'));
 
   try {
     const res = await fetch(`/api/ign?id=${encodeURIComponent(gameId)}&server=${encodeURIComponent(serverId)}`);
@@ -570,12 +594,12 @@ async function lookupIgn(){
       confirmedIgn = data.name;
       setIgnRow('found', data.name);
     } else {
-      setIgnRow('error', 'Account not found — check your Game ID and Server');
+      setIgnRow('error', t('diamond.ign.notfound'));
     }
     updateProofRecap();
   } catch (err) {
     if (myToken !== ignLookupToken) return;
-    setIgnRow('error', "Couldn't verify account right now — you can still continue");
+    setIgnRow('error', t('diamond.ign.unavailable'));
   }
 }
 
@@ -600,14 +624,14 @@ document.getElementById('screenshot-input').addEventListener('change', (e)=>{
     screenshotFile = null;
     box.classList.remove('has-file');
     thumb.textContent = '📎';
-    text.innerHTML = 'Tap to add a screenshot<small>Proof of your transfer</small>';
+    text.innerHTML = `${t('diamond.field.screenshot.tap')}<small>${t('diamond.field.screenshot.sub')}</small>`;
     checkReady();
     return;
   }
 
   screenshotFile = file;
   box.classList.add('has-file');
-  text.innerHTML = 'Screenshot attached<small>' + file.name + '</small>';
+  text.innerHTML = `${t('diamond.field.screenshot.attached')}<small>${file.name}</small>`;
 
   const reader = new FileReader();
   reader.onload = () => { thumb.innerHTML = `<img src="${reader.result}" alt="preview">`; };
@@ -634,7 +658,7 @@ async function fileToBase64(file){
 async function submitOrder(){
   const submitBtn = document.getElementById('submit-btn');
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Sending…';
+  submitBtn.textContent = t('diamond.submit.sending');
 
   const payload = {
     gameId: document.getElementById('game-id').value.trim(),
@@ -671,7 +695,7 @@ async function submitOrder(){
     pollTimer = setInterval(()=>pollOrder(data.code), 2500);
   } catch (err) {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Send for verification';
+    submitBtn.textContent = t('diamond.submit');
     alert(err.message);
   }
 }
@@ -687,14 +711,14 @@ async function pollOrder(code){
       document.getElementById('step-review').classList.remove('active');
       document.getElementById('step-review').classList.add('done');
       document.getElementById('step-done').classList.add('done');
-      document.querySelector('#step-done .t-title').textContent = 'Payment confirmed';
-      document.querySelector('#step-done .t-sub').textContent = 'Your diamonds are on the way';
+      document.querySelector('#step-done .t-title').textContent = t('diamond.confirmed.title');
+      document.querySelector('#step-done .t-sub').textContent = t('diamond.confirmed.sub');
     } else if (order.status === 'rejected') {
       clearInterval(pollTimer);
       document.getElementById('step-review').classList.remove('active');
-      document.querySelector('#step-review .t-title').textContent = 'Payment not found';
+      document.querySelector('#step-review .t-title').textContent = t('diamond.rejected.title');
       document.querySelector('#step-review .t-title').style.color = 'var(--signal)';
-      document.querySelector('#step-review .t-sub').textContent = 'Contact us on Telegram with your order code';
+      document.querySelector('#step-review .t-sub').textContent = t('diamond.rejected.sub');
     }
   } catch (err) {
   }
@@ -706,6 +730,7 @@ document.getElementById('new-order').addEventListener('click', ()=>{
   location.reload();
 });
 </script>
+<script src="js/app-shared.js"></script>
 
 </body>
 </html>

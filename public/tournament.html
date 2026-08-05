@@ -6,7 +6,8 @@
 <title>Zenith Esports — Tournament</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
 <style>
   :root{
     --void:#0A0713; --panel:#150C29; --panel-raised:#1D1237; --line:#2C1F4D;
@@ -20,7 +21,7 @@
       radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
       radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
       var(--void);
-    color:var(--hi); font-family:'Rajdhani',sans-serif; font-weight:500; min-height:100vh;
+    color:var(--hi); font-family:var(--font-main); font-weight:500; min-height:100vh;
   }
   a{color:inherit;text-decoration:none;}
   header{
@@ -41,7 +42,11 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;min-height:calc(100vh - 73px);padding:40px 20px;
   }
-  .empty .icon{font-size:52px;margin-bottom:18px;}
+  .empty .icon{font-size:52px;margin-bottom:18px;animation:trophyFloat 3s ease-in-out infinite;}
+  @keyframes trophyFloat{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-10px) rotate(3deg);}}
+  @media (prefers-reduced-motion:reduce){ .empty .icon{animation:none;} }
+  .empty a.back{transition:transform .15s ease, box-shadow .15s ease;}
+  .empty a.back:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(139,92,246,0.35);}
   .empty h1{font-family:'Orbitron',sans-serif;font-size:28px;margin:0 0 12px;}
   .empty p{color:var(--mid);max-width:420px;line-height:1.6;margin:0 0 26px;}
   .empty a.back{
@@ -55,19 +60,34 @@
 <header>
   <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
   <nav>
-    <a href="index.html">Home</a>
-    <a href="tournament.html" class="active">Tournament</a>
-    <a href="diamond-plan.html">Diamond</a>
-    <a href="#">Customer Service</a>
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="tournament.html" class="active" data-i18n="nav.tournament">Tournament</a>
+    <a href="diamond-plan.html" data-i18n="nav.diamond">Diamond</a>
+    <a href="#" data-i18n="nav.service">Customer Service</a>
   </nav>
+  <div class="hdr-controls">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <div class="pill"></div>
+      <button type="button" data-lang="mm">MM</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="th">TH</button>
+    </div>
+    <button type="button" class="theme-toggle" aria-label="Toggle light / dark mode">
+      <span class="icon-wrap">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><g class="ray"><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 15.2A8.5 8.5 0 1 1 8.8 3.3a7 7 0 0 0 11.9 11.9Z"/></svg>
+      </span>
+    </button>
+  </div>
 </header>
 
-<div class="empty">
+<div class="empty reveal">
   <div class="icon">🏆</div>
-  <h1>Tournaments coming soon</h1>
-  <p>We're setting up the next Zenith Esports tournament. Check back soon, or head over to the Diamond store in the meantime.</p>
-  <a class="back" href="diamond-plan.html">Go to Diamond store</a>
+  <h1 data-i18n="tournament.title">Tournaments coming soon</h1>
+  <p data-i18n="tournament.desc">We're setting up the next Zenith Esports tournament. Check back soon, or head over to the Diamond store in the meantime.</p>
+  <a class="back" href="diamond-plan.html" data-i18n="tournament.cta">Go to Diamond store</a>
 </div>
 
+<script src="js/app-shared.js"></script>
 </body>
 </html>
