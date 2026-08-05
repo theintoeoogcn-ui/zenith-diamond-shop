@@ -33,7 +33,7 @@ function generateCode() {
   return `ZE-${n}`;
 }
 
-function createOrder({ gameId, serverId, packageLabel, amount, paymentMethod }) {
+function createOrder({ gameId, serverId, ignName, packageLabel, amount, paymentMethod, senderNumber, hasScreenshot }) {
   const orders = readAll();
   let code;
   do {
@@ -44,9 +44,12 @@ function createOrder({ gameId, serverId, packageLabel, amount, paymentMethod }) 
     code,
     gameId,
     serverId,
+    ignName: ignName || null,
     packageLabel,
     amount,
     paymentMethod,
+    senderNumber: senderNumber || null,
+    hasScreenshot: !!hasScreenshot,
     status: 'pending', // pending -> notified -> confirmed | rejected
     createdAt: new Date().toISOString(),
     telegramMessageId: null,

@@ -23,26 +23,44 @@ function formatOrderText(order) {
     `Package: ${order.packageLabel}\n` +
     `Amount: ${order.amount.toLocaleString()} Ks\n` +
     `Payment: ${order.paymentMethod}\n` +
+    (order.senderNumber ? `Sender number: \`${order.senderNumber}\`\n` : '') +
     `Game ID: \`${order.gameId}\`\n` +
-    `Server: \`${order.serverId}\`\n\n` +
-    `Check your ${order.paymentMethod} account for this transfer, then tap a button below.`
+    `Server: \`${order.serverId}\`\n` +
+    (order.ignName ? `IGN: ${order.ignName}\n` : '') +
+    `\nCheck your ${order.paymentMethod} account for this transfer, then tap a button below.`
   );
 }
 
-async function notifyAdmin(order) {
+async function notifyAdmin(order, screenshotBuffer) {
   const text = formatOrderText(order);
-  const sent = await bot.sendMessage(ADMIN_CHAT_ID, text, {
-    parse_mode: 'Markdown',
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: '✅ Confirm payment', callback_data: `confirm:${order.code}` },
-          { text: '❌ Reject', callback_data: `reject:${order.code}` },
-        ],
+  const keyboard = {
+    inline_keyboard: [
+      [
+        { text: '✅ Confirm payment', callback_data: `confirm:${order.code}` },
+        { text: '❌ Reject', callback_data: `reject:${order.code}` },
       ],
-    },
+    ],
+  };
+
+  let sent;
+  if (screenshotBuffer) {
+    sent = await bot.sendPhoto(ADMIN_CHAT_ID, screenshotBuffer, {
+      caption: text,
+      parse_mode: 'Markdown',
+      reply_markup: keyboard,
+    });
+  } else {
+    sent = await bot.sendMessage(ADMIN_CHAT_ID, text, {
+      parse_mode: 'Markdown',
+      reply_markup: keyboard,
+    });
+  }
+
+  updateOrder(order.code, {
+    status: 'notified',
+    telegramMessageId: sent.message_id,
+    hasScreenshot: !!screenshotBuffer,
   });
-  updateOrder(order.code, { status: 'notified', telegramMessageId: sent.message_id });
   return sent;
 }
 
@@ -62,19 +80,22 @@ bot.on('callback_query', async (query) => {
     return;
   }
 
+  const editParams = { chat_id: query.message.chat.id, message_id: query.message.message_id, parse_mode: 'Markdown' };
+  const editFn = order.hasScreenshot
+    ? (newText) => bot.editMessageCaption(newText, editParams)
+    : (newText) => bot.editMessageText(newText, editParams);
+
   if (action === 'confirm') {
     updateOrder(code, { status: 'confirmed' });
     await bot.answerCallbackQuery(query.id, { text: 'Marked as confirmed' });
-    await bot.editMessageText(
-      formatOrderText(order) + `\n\n✅ *Confirmed* — deliver ${order.packageLabel} to game ID ${order.gameId} (server ${order.serverId}).`,
-      { chat_id: query.message.chat.id, message_id: query.message.message_id, parse_mode: 'Markdown' }
+    await editFn(
+      formatOrderText(order) + `\n\n✅ *Confirmed* — deliver ${order.packageLabel} to game ID ${order.gameId} (server ${order.serverId}).`
     );
   } else if (action === 'reject') {
     updateOrder(code, { status: 'rejected' });
     await bot.answerCallbackQuery(query.id, { text: 'Marked as rejected' });
-    await bot.editMessageText(
-      formatOrderText(order) + `\n\n❌ *Rejected* — no payment found for this code.`,
-      { chat_id: query.message.chat.id, message_id: query.message.message_id, parse_mode: 'Markdown' }
+    await editFn(
+      formatOrderText(order) + `\n\n❌ *Rejected* — no payment found for this code.`
     );
   }
 });
