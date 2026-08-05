@@ -73,7 +73,7 @@
   }
 
   .hero-media{position:absolute;inset:0;z-index:0;background:var(--void);}
-  .hero-media video{width:100%;height:100%;object-fit:cover;display:block;}
+  .hero-media video{width:100%;height:100%;object-fit:cover;object-position:78% center;display:block;}
   .hero-scrim{
     position:absolute;inset:0;z-index:1;pointer-events:none;
     background:
@@ -94,7 +94,7 @@
     color:#8CF3EF;text-transform:uppercase;margin:0 0 16px;
   }
   h1{
-    font-family:'Orbitron',sans-serif;font-weight:800;font-size:46px;line-height:1.15;
+    font-family:var(--font-main);font-weight:800;font-size:46px;line-height:1.15;
     margin:0 0 18px;letter-spacing:0.5px;color:#fff;
     text-shadow:0 4px 30px rgba(0,0,0,0.45);
   }
@@ -140,13 +140,13 @@
 
   /* ---------- admin toggle pill in header ---------- */
   .admin-toggle{
-    display:flex;align-items:center;gap:6px;
+    display:none;align-items:center;gap:6px;
     background:var(--panel);border:1px solid var(--line);border-radius:999px;
     padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
     font-family:var(--font-main);
   }
   .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
-  .admin-toggle.on{background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+  .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
 
   /* ---------- modal ---------- */
   .modal-overlay{
@@ -315,6 +315,16 @@ loadStats();
 
 /* ---- admin unlock (shared pattern with other pages) ---- */
 const adminToggle = document.getElementById('admin-toggle');
+
+// Admin login is intentionally not advertised in the UI 2014 tap the logo
+// 5 times quickly to reveal the passcode prompt.
+let brandClicks = 0, brandClickTimer = null;
+document.querySelector('.brand').addEventListener('click', () => {
+  brandClicks++;
+  clearTimeout(brandClickTimer);
+  brandClickTimer = setTimeout(() => { brandClicks = 0; }, 1200);
+  if (brandClicks >= 5) { brandClicks = 0; adminToggle.click(); }
+});
 const adminToggleLabel = document.getElementById('admin-toggle-label');
 const adminModal = document.getElementById('admin-modal');
 const adminInput = document.getElementById('admin-passcode-input');

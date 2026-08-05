@@ -64,13 +64,13 @@
 
   /* ---------- admin toggle pill in header ---------- */
   .admin-toggle{
-    display:flex;align-items:center;gap:6px;
+    display:none;align-items:center;gap:6px;
     background:var(--panel);border:1px solid var(--line);border-radius:999px;
     padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
     font-family:var(--font-main);
   }
   .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
-  .admin-toggle.on{background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+  .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
 
   /* ---------- admin controls on package cards ---------- */
   .card{position:relative;}
@@ -136,7 +136,7 @@
     color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
   }
   h1{
-    font-family:'Orbitron',sans-serif;font-weight:800;font-size:44px;
+    font-family:var(--font-main);font-weight:800;font-size:44px;
     margin:0 0 12px;letter-spacing:0.5px;
     background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -280,6 +280,28 @@
   .proof-head .swatch img{width:100%;height:100%;object-fit:contain;display:block;}
   .proof-head span{font-size:13px;font-weight:700;color:var(--mid);}
 
+  .transfer-info{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    margin-bottom:14px;padding:12px 14px;border-radius:10px;
+    background:linear-gradient(135deg, rgba(139,92,246,0.14), rgba(79,224,232,0.08));
+    border:1px solid var(--violet-dim);
+  }
+  .transfer-info.pop{animation:transferPop .45s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes transferPop{
+    0%{opacity:0;transform:translateY(-6px) scale(.97);}
+    60%{opacity:1;transform:translateY(1px) scale(1.01);}
+    100%{opacity:1;transform:translateY(0) scale(1);}
+  }
+  .transfer-info .t-num{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--hi);letter-spacing:0.5px;}
+  .transfer-info .t-name{font-size:12.5px;color:var(--mid);margin-top:2px;}
+  .transfer-info .t-copy{
+    background:var(--violet);color:#fff;border:none;border-radius:8px;padding:8px 14px;
+    font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:transform .15s;
+  }
+  .transfer-info .t-copy:hover{transform:translateY(-1px);}
+  .transfer-info .t-copy.copied{background:#2AA96C;}
+  @media (prefers-reduced-motion:reduce){ .transfer-info.pop{animation:none;} }
+
   .proof-recap{
     display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:14px;padding:10px 12px;
     background:var(--panel);border-radius:9px;font-size:12px;color:var(--dim);
@@ -403,7 +425,6 @@
   <p class="eyebrow" data-i18n="diamond.eyebrow">Top-up center</p>
   <h1 data-i18n="diamond.title">Diamond Plan</h1>
   <p data-i18n="diamond.desc">Pick a pack, enter your game ID, and pay. Our team confirms every order on Telegram before diamonds are sent — usually within minutes.</p>
-  <a class="tg-link" href="https://t.me/Zenithdiamond2026" target="_blank" rel="noopener">✈️ <span data-i18n="diamond.telegram.cta">Message us on Telegram</span></a>
 </div>
 
 <div class="layout">
@@ -477,6 +498,8 @@
           <div class="swatch" id="proof-swatch"></div>
           <span id="proof-title">Payment details</span>
         </div>
+
+        <div id="transfer-info"></div>
 
         <div class="proof-recap" id="proof-recap"></div>
 
@@ -667,6 +690,40 @@ const PAY_ICONS = {
   'AYA Pay': 'assets/aya-pay.png',
 };
 
+const PAY_TRANSFER = {
+  'KBZ Pay': { number: '09663105576', name: 'Wai Yan Htet' },
+  'Wave Pay': { number: '09989961930', name: 'Thandar Soe' },
+  'AYA Pay': { number: '09663105576', name: 'Wai Yan Htet' },
+};
+
+function renderTransferInfo(method){
+  const info = PAY_TRANSFER[method];
+  const el = document.getElementById('transfer-info');
+  if (!info) { el.innerHTML = ''; el.classList.remove('pop'); return; }
+  el.innerHTML = `
+    <div>
+      <div class="t-num">${info.number}</div>
+      <div class="t-name">${escapeHtmlDp(info.name)} · ${escapeHtmlDp(method)}</div>
+    </div>
+    <button type="button" class="t-copy" id="transfer-copy-btn" data-i18n="diamond.transfer.copy">Copy number</button>`;
+  // restart the pop animation every time the payment method changes
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+  document.getElementById('transfer-copy-btn').addEventListener('click', (e) => {
+    navigator.clipboard.writeText(info.number).then(() => {
+      const btn = e.currentTarget;
+      const original = btn.textContent;
+      btn.textContent = t('diamond.transfer.copied','Copied!');
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+    });
+  });
+}
+function escapeHtmlDp(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -713,6 +770,7 @@ document.querySelectorAll('.pay-chip').forEach(chip=>{
     document.getElementById('proof-swatch').innerHTML = `<img src="${PAY_ICONS[selectedPayment]}" alt="${selectedPayment}">`;
     document.getElementById('proof-title').textContent = selectedPayment + ' — ' + t('diamond.proof.suffix', 'payment details');
     document.getElementById('proof-panel').classList.add('show');
+    renderTransferInfo(selectedPayment);
     updateProofRecap();
 
     updateTotal();
@@ -917,6 +975,16 @@ document.getElementById('new-order').addEventListener('click', ()=>{
 /* ================= admin: unlock, edit/add/delete packages, edit pass price ================= */
 
 const adminToggle = document.getElementById('admin-toggle');
+
+// Admin login is intentionally not advertised in the UI 2014 tap the logo
+// 5 times quickly to reveal the passcode prompt.
+let brandClicks = 0, brandClickTimer = null;
+document.querySelector('.brand').addEventListener('click', () => {
+  brandClicks++;
+  clearTimeout(brandClickTimer);
+  brandClickTimer = setTimeout(() => { brandClicks = 0; }, 1200);
+  if (brandClicks >= 5) { brandClicks = 0; adminToggle.click(); }
+});
 const adminToggleLabel = document.getElementById('admin-toggle-label');
 const adminModal = document.getElementById('admin-modal');
 const adminInput = document.getElementById('admin-passcode-input');

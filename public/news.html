@@ -40,12 +40,12 @@
   @media (max-width:940px){ nav{display:none;} header{padding:16px 20px;} }
 
   .admin-toggle{
-    display:flex;align-items:center;gap:6px;
+    display:none;align-items:center;gap:6px;
     background:var(--panel);border:1px solid var(--line);border-radius:999px;
     padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
   }
   .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
-  .admin-toggle.on{background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+  .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
 
   .hero{padding:56px 48px 10px;}
   .eyebrow{
@@ -53,7 +53,7 @@
     color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
   }
   h1{
-    font-family:'Orbitron',sans-serif;font-weight:800;font-size:40px;
+    font-family:var(--font-main);font-weight:800;font-size:40px;
     margin:0 0 12px;letter-spacing:0.5px;
     background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -89,6 +89,19 @@
   .n-admin-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
 
   .n-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;margin:0 0 6px;padding-right:60px;}
+  .live-check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--mid);cursor:pointer;user-select:none;}
+  .live-check input{width:15px;height:15px;accent-color:var(--signal);cursor:pointer;}
+  .n-live-badge{
+    display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:5px 12px;border-radius:999px;
+    background:rgba(255,62,154,0.15);border:1px solid var(--signal);color:var(--signal);
+    font-size:11px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;
+  }
+  .n-live-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--signal);animation:liveDotPulse 1.2s ease-in-out infinite;}
+  @keyframes liveDotPulse{
+    0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(255,62,154,0.6);}
+    50%{opacity:0.6;transform:scale(0.8);box-shadow:0 0 0 6px rgba(255,62,154,0);}
+  }
+  @media (prefers-reduced-motion:reduce){ .n-live-badge .dot{animation:none;} }
   .n-date{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:12px;}
   .n-body{font-size:14px;color:var(--mid);line-height:1.65;white-space:pre-wrap;margin-bottom:12px;}
   .n-media{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;margin-bottom:12px;background:var(--void);}
@@ -289,6 +302,10 @@
       </div>
       <div class="modal-media-field" id="media-video-field">
         <input type="url" id="f-media-video" placeholder="https://youtube.com/... or https://facebook.com/...">
+        <label class="live-check">
+          <input type="checkbox" id="f-is-live">
+          <span>🔴 <span data-i18n="news.form.field.islive">Mark as Live Now</span></span>
+        </label>
       </div>
     </div>
 
@@ -387,12 +404,14 @@ function renderCard(item){
       <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="deletePost('${item.id}')">🗑</button>
     </div>` : '';
   const linkHtml = item.link ? `<a class="n-link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">🔗 ${escapeHtml(t('news.readmore','Open link'))}</a><br>` : '';
+  const liveHtml = item.isLive ? `<div class="n-live-badge"><span class="dot"></span>${escapeHtml(t('news.live.now','Live now'))}</div>` : '';
   const liked = getLikedIds().includes(item.id);
   const commentCount = (item.comments || []).length;
 
   return `
     <div class="n-card" data-id="${item.id}">
       ${adminHtml}
+      ${liveHtml}
       <div class="n-title">${escapeHtml(item.title)}</div>
       <div class="n-date">${timeAgo(item.createdAt)}</div>
       ${renderMedia(item)}
@@ -494,6 +513,16 @@ window.deletePost = async function(id){
 
 /* ---------------- admin unlock ---------------- */
 const adminToggle = document.getElementById('admin-toggle');
+
+// Admin login is intentionally not advertised in the UI 2014 tap the logo
+// 5 times quickly to reveal the passcode prompt.
+let brandClicks = 0, brandClickTimer = null;
+document.querySelector('.brand').addEventListener('click', () => {
+  brandClicks++;
+  clearTimeout(brandClickTimer);
+  brandClickTimer = setTimeout(() => { brandClicks = 0; }, 1200);
+  if (brandClicks >= 5) { brandClicks = 0; adminToggle.click(); }
+});
 const adminToggleLabel = document.getElementById('admin-toggle-label');
 const adminModal = document.getElementById('admin-modal');
 const adminInput = document.getElementById('admin-passcode-input');
@@ -561,6 +590,7 @@ const fBody = document.getElementById('f-body');
 const fLink = document.getElementById('f-link');
 const fMediaFile = document.getElementById('f-media-file');
 const fMediaVideo = document.getElementById('f-media-video');
+const fIsLive = document.getElementById('f-is-live');
 
 document.querySelectorAll('[data-media-tab]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -573,6 +603,24 @@ document.querySelectorAll('[data-media-tab]').forEach(btn => {
 fMediaFile.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) { mediaFileData = null; return; }
+
+  postModalErr.classList.remove('show');
+  if (!file.type.startsWith('image/')) {
+    postModalErr.textContent = t('news.error.filetype','Please choose an image file (JPG, PNG, etc.) — this file type can\'t be displayed on the page.');
+    postModalErr.classList.add('show');
+    fMediaFile.value = '';
+    mediaFileData = null;
+    return;
+  }
+  const MAX_BYTES = 5 * 1024 * 1024; // 5MB
+  if (file.size > MAX_BYTES) {
+    postModalErr.textContent = t('news.error.filesize','That image is too large (max 5MB). Please choose a smaller file.');
+    postModalErr.classList.add('show');
+    fMediaFile.value = '';
+    mediaFileData = null;
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = () => { mediaFileData = reader.result; };
   reader.readAsDataURL(file);
@@ -582,7 +630,7 @@ function openCreate(){
   editingId = null;
   postModalTitle.textContent = t('news.form.title.create','Create post');
   fTitle.value = ''; fBody.value = ''; fLink.value = ''; fMediaVideo.value = '';
-  fMediaFile.value = ''; mediaFileData = null;
+  fMediaFile.value = ''; mediaFileData = null; fIsLive.checked = false;
   mediaTab = 'image';
   document.querySelector('[data-media-tab="image"]').click();
   postModalErr.classList.remove('show');
@@ -596,7 +644,7 @@ window.openEdit = function(id){
   editingId = id;
   postModalTitle.textContent = t('news.form.title.edit','Edit post');
   fTitle.value = item.title || ''; fBody.value = item.body || ''; fLink.value = item.link || '';
-  fMediaFile.value = ''; mediaFileData = null; fMediaVideo.value = '';
+  fMediaFile.value = ''; mediaFileData = null; fMediaVideo.value = ''; fIsLive.checked = !!item.isLive;
   if (item.mediaType === 'video') {
     mediaTab = 'video';
     fMediaVideo.value = item.media || '';
@@ -623,9 +671,11 @@ document.getElementById('post-modal-save').addEventListener('click', async () =>
   if (mediaTab === 'video') {
     payload.media = fMediaVideo.value.trim();
     payload.mediaType = payload.media ? 'video' : '';
+    payload.isLive = fIsLive.checked;
   } else {
     payload.media = mediaFileData || '';
     payload.mediaType = payload.media ? 'image' : '';
+    payload.isLive = false;
   }
   if (!payload.title) {
     postModalErr.textContent = t('news.error.save','Could not save. Please try again.');

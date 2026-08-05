@@ -41,12 +41,12 @@
 
   /* ---------- admin toggle pill in header ---------- */
   .admin-toggle{
-    display:flex;align-items:center;gap:6px;
+    display:none;align-items:center;gap:6px;
     background:var(--panel);border:1px solid var(--line);border-radius:999px;
     padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
   }
   .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
-  .admin-toggle.on{background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+  .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
 
   /* ---------- hero ---------- */
   .hero{padding:56px 48px 10px;}
@@ -55,7 +55,7 @@
     color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
   }
   h1{
-    font-family:'Orbitron',sans-serif;font-weight:800;font-size:40px;
+    font-family:var(--font-main);font-weight:800;font-size:40px;
     margin:0 0 12px;letter-spacing:0.5px;
     background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -473,6 +473,16 @@ async function loadTournaments(){
 
 /* ---------------- admin unlock ---------------- */
 const adminToggle = document.getElementById('admin-toggle');
+
+// Admin login is intentionally not advertised in the UI 2014 tap the logo
+// 5 times quickly to reveal the passcode prompt.
+let brandClicks = 0, brandClickTimer = null;
+document.querySelector('.brand').addEventListener('click', () => {
+  brandClicks++;
+  clearTimeout(brandClickTimer);
+  brandClickTimer = setTimeout(() => { brandClicks = 0; }, 1200);
+  if (brandClicks >= 5) { brandClicks = 0; adminToggle.click(); }
+});
 const adminToggleLabel = document.getElementById('admin-toggle-label');
 const adminModal = document.getElementById('admin-modal');
 const adminInput = document.getElementById('admin-passcode-input');
