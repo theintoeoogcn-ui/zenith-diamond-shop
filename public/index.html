@@ -88,8 +88,12 @@
     .hero{min-height:auto;}
   }
 
-  .hero-media{position:absolute;inset:0;z-index:0;background:var(--void);}
-  .hero-media video{width:100%;height:100%;object-fit:cover;object-position:78% center;display:block;}
+  .hero-media{position:absolute;inset:0;z-index:0;background:var(--void);overflow:hidden;}
+  .hero-media video{
+    width:100%;height:100%;object-fit:cover;object-position:78% center;display:block;
+    filter:blur(45px) saturate(1.15) brightness(0.85);
+    transform:scale(1.15); /* avoid soft/transparent edges from the blur showing through */
+  }
   .hero-scrim{
     position:absolute;inset:0;z-index:1;pointer-events:none;
     background:
