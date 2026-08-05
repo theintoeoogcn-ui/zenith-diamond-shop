@@ -52,6 +52,8 @@ function createTournament(data) {
     description: data.description ? String(data.description).trim() : '',
     icon: data.icon ? String(data.icon).trim() : '🏆',
     coverImage: data.coverImage ? String(data.coverImage) : '',
+    watchLink: data.watchLink ? String(data.watchLink).trim() : '',
+    registerLink: data.registerLink ? String(data.registerLink).trim() : '',
     createdAt: new Date().toISOString(),
   };
   list.push(item);
@@ -65,7 +67,7 @@ function updateTournament(id, patch) {
   if (idx === -1) return null;
 
   const clean = { ...list[idx] };
-  const fields = ['title', 'status', 'date', 'prize', 'format', 'slots', 'description', 'icon'];
+  const fields = ['title', 'status', 'date', 'prize', 'format', 'slots', 'description', 'icon', 'watchLink', 'registerLink'];
   fields.forEach((f) => {
     if (patch[f] !== undefined) {
       clean[f] = f === 'status'

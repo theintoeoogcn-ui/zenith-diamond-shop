@@ -210,6 +210,13 @@
     background:var(--panel);border:1px solid var(--line);border-radius:16px;
     overflow:hidden;
   }
+  .tg-link{
+    display:inline-flex;align-items:center;gap:8px;margin-top:14px;
+    padding:9px 16px;border-radius:999px;background:rgba(79,224,232,0.12);
+    border:1px solid var(--line);color:var(--cyan);font-weight:700;font-size:13px;
+    transition:border-color .15s, transform .15s;
+  }
+  .tg-link:hover{border-color:var(--cyan);transform:translateY(-1px);}
   .ticket-head{padding:20px 22px 16px;border-bottom:1px dashed var(--line);}
   .ticket-head .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:2px;font-family:'JetBrains Mono',monospace;}
   .ticket-head h3{margin:6px 0 0;font-family:'Orbitron',sans-serif;font-size:16px;}
@@ -395,6 +402,7 @@
   <p class="eyebrow" data-i18n="diamond.eyebrow">Top-up center</p>
   <h1 data-i18n="diamond.title">Diamond Plan</h1>
   <p data-i18n="diamond.desc">Pick a pack, enter your game ID, and pay. Our team confirms every order on Telegram before diamonds are sent — usually within minutes.</p>
+  <a class="tg-link" href="https://t.me/Zenithdiamond2026" target="_blank" rel="noopener">✈️ <span data-i18n="diamond.telegram.cta">Message us on Telegram</span></a>
 </div>
 
 <div class="layout">

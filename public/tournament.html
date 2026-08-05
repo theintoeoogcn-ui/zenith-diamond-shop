@@ -107,6 +107,17 @@
   .t-meta .k{color:var(--dim);}
   .t-meta .v{color:var(--mid);font-weight:600;text-align:right;}
   .t-desc{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:4px;}
+  .t-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .t-link-btn{
+    display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;
+    font-size:11px;font-weight:700;border:1px solid var(--line);color:var(--hi);
+    transition:transform .12s, border-color .12s;
+  }
+  .t-link-btn:hover{transform:translateY(-1px);}
+  .t-link-btn.youtube{background:rgba(255,0,0,0.12);border-color:rgba(255,0,0,0.35);color:#FF4B4B;}
+  .t-link-btn.facebook{background:rgba(24,119,242,0.12);border-color:rgba(24,119,242,0.35);color:#4E9BFF;}
+  .t-link-btn.generic{background:var(--panel-raised);}
+  .t-link-btn.register{background:rgba(139,92,246,0.14);border-color:var(--violet-dim);color:var(--violet);}
   .t-cover{
     width:calc(100% + 28px);aspect-ratio:16/9;object-fit:cover;display:block;
     margin:-18px -14px 6px;border-top-left-radius:var(--radius);border-top-right-radius:var(--radius);
@@ -331,6 +342,16 @@
       <textarea id="f-desc" rows="3"></textarea>
     </div>
 
+    <div class="field">
+      <label data-i18n="tournament.form.field.watchlink">Watch link (YouTube / Facebook)</label>
+      <input type="url" id="f-watchlink" placeholder="https://youtube.com/... or https://facebook.com/...">
+    </div>
+
+    <div class="field">
+      <label data-i18n="tournament.form.field.registerlink">Register link</label>
+      <input type="url" id="f-registerlink" placeholder="https://forms.gle/...">
+    </div>
+
     <div class="modal-err" id="t-modal-err">Error</div>
     <div class="modal-actions">
       <button class="cancel" id="t-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
@@ -386,6 +407,15 @@ function renderCard(item){
       <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="deleteItem('${item.id}')">🗑</button>
     </div>` : '';
 
+  const watchHtml = item.watchLink ? (() => {
+    const p = detectLinkPlatform(item.watchLink);
+    return `<a class="t-link-btn ${p.cls}" href="${escapeHtml(item.watchLink)}" target="_blank" rel="noopener">${p.icon} ${escapeHtml(p.label)}</a>`;
+  })() : '';
+  const registerHtml = item.registerLink
+    ? `<a class="t-link-btn register" href="${escapeHtml(item.registerLink)}" target="_blank" rel="noopener">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
+    : '';
+  const linksHtml = (watchHtml || registerHtml) ? `<div class="t-links">${watchHtml}${registerHtml}</div>` : '';
+
   return `
     <div class="t-card" data-id="${item.id}">
       ${adminHtml}
@@ -395,7 +425,17 @@ function renderCard(item){
       <div class="t-title">${escapeHtml(item.title)}</div>
       <div class="t-meta">${metaHtml}</div>
       ${descHtml}
+      ${linksHtml}
     </div>`;
+}
+
+// Auto-detects the platform from a watch-link URL so the right icon/label
+// shows on the card without the admin having to pick one manually.
+function detectLinkPlatform(url){
+  const u = String(url).toLowerCase();
+  if (/youtube\.com|youtu\.be/.test(u)) return { cls: 'youtube', icon: '▶️', label: t('tournament.card.watch.youtube','Watch on YouTube') };
+  if (/facebook\.com|fb\.watch|fb\.com/.test(u)) return { cls: 'facebook', icon: '📘', label: t('tournament.card.watch.facebook','Watch on Facebook') };
+  return { cls: 'generic', icon: '🔗', label: t('tournament.card.watch.generic','Watch') };
 }
 
 function escapeHtml(s){
@@ -500,6 +540,8 @@ const fPrize = document.getElementById('f-prize');
 const fSlots = document.getElementById('f-slots');
 const fFormat = document.getElementById('f-format');
 const fIcon = document.getElementById('f-icon');
+const fWatchLink = document.getElementById('f-watchlink');
+const fRegisterLink = document.getElementById('f-registerlink');
 const fDesc = document.getElementById('f-desc');
 const fCover = document.getElementById('f-cover');
 const coverBox = document.getElementById('cover-box');
@@ -546,6 +588,7 @@ function openCreate(){
   tModalTitle.textContent = t('tournament.form.title.create','Create tournament');
   fTitle.value = ''; fStatus.value = 'upcoming'; fDate.value = ''; fPrize.value = '';
   fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = '';
+  fWatchLink.value = ''; fRegisterLink.value = '';
   setCoverPreview(null); fCover.value = '';
   tModalErr.classList.remove('show');
   tModal.classList.add('show');
@@ -560,6 +603,7 @@ window.openEdit = function(id){
   fTitle.value = item.title || ''; fStatus.value = item.status === 'past' ? 'past' : 'upcoming';
   fDate.value = item.date || ''; fPrize.value = item.prize || ''; fSlots.value = item.slots || '';
   fFormat.value = item.format || ''; fIcon.value = item.icon || '🏆'; fDesc.value = item.description || '';
+  fWatchLink.value = item.watchLink || ''; fRegisterLink.value = item.registerLink || '';
   setCoverPreview(item.coverImage || null); fCover.value = '';
   tModalErr.classList.remove('show');
   tModal.classList.add('show');
@@ -595,6 +639,8 @@ document.getElementById('t-modal-save').addEventListener('click', async () => {
     icon: fIcon.value.trim() || '🏆',
     description: fDesc.value.trim(),
     coverImage: coverImageData || '',
+    watchLink: fWatchLink.value.trim(),
+    registerLink: fRegisterLink.value.trim(),
   };
   if (!payload.title) {
     tModalErr.textContent = t('tournament.error.save','Could not save. Please try again.');
