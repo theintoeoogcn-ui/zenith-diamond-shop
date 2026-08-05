@@ -44,6 +44,7 @@ function createNews(data) {
     link: data.link ? String(data.link).trim() : '',
     media: data.media ? String(data.media) : '', // image data URL, or a video URL (YouTube/Facebook/mp4)
     mediaType: data.mediaType === 'video' ? 'video' : (data.media ? 'image' : ''),
+    isLive: !!data.isLive,
     likes: 0,
     comments: [],
     createdAt: new Date().toISOString(),
@@ -65,6 +66,7 @@ function updateNews(id, patch) {
     clean.media = String(patch.media);
     clean.mediaType = patch.mediaType === 'video' ? 'video' : (clean.media ? 'image' : '');
   }
+  if (patch.isLive !== undefined) clean.isLive = !!patch.isLive;
   list[idx] = clean;
   writeAll(list);
   return list[idx];
