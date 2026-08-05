@@ -26,6 +26,14 @@ app.use('/api/tournaments', tournamentRoutes);
 const diamondPricingRoutes = require('./routes/diamond-pricing');
 app.use('/api/diamond-pricing', diamondPricingRoutes);
 
+// Home page stat cards — public to read, admin-passcode-protected to edit
+const homeStatsRoutes = require('./routes/home-stats');
+app.use('/api/home-stats', homeStatsRoutes);
+
+// News posts — public to read/like/comment, admin-passcode-protected to create/edit/delete/moderate
+const newsRoutes = require('./routes/news');
+app.use('/api/news', newsRoutes);
+
 if (!process.env.ADMIN_PASSCODE) {
   console.warn('⚠️  ADMIN_PASSCODE is not set — the "Create Tournament" admin panel is disabled until you set one in server/.env.');
 }

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenith Esports — News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  :root{
+    --void:#0A0713; --void-rgb:10,7,19; --panel:#150C29; --panel-raised:#1D1237; --line:#2C1F4D;
+    --violet:#8B5CF6; --violet-dim:#4C3592; --cyan:#4FE0E8; --signal:#FF3E9A;
+    --hi:#F4EEFF; --mid:#B4A4DC; --dim:#6C6089; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
+      var(--void);
+    color:var(--hi); font-family:var(--font-main); font-weight:500; min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:var(--font-main);}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 48px;border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;background:rgba(var(--void-rgb),0.85);backdrop-filter:blur(10px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
+  .brand .mark{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
+  .brand .mark img{width:100%;height:100%;object-fit:contain;display:block;}
+  nav{display:flex;gap:34px;font-weight:600;font-size:15px;color:var(--mid);}
+  nav a.active{color:var(--hi);position:relative;}
+  nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:2px;background:var(--violet);}
+  nav a:hover{color:var(--hi);}
+  @media (max-width:940px){ nav{display:none;} header{padding:16px 20px;} }
+
+  .admin-toggle{
+    display:flex;align-items:center;gap:6px;
+    background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
+  }
+  .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .admin-toggle.on{background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+
+  .hero{padding:56px 48px 10px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;
+    color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
+  }
+  h1{
+    font-family:'Orbitron',sans-serif;font-weight:800;font-size:40px;
+    margin:0 0 12px;letter-spacing:0.5px;
+    background:linear-gradient(180deg, var(--hi), var(--mid));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p{color:var(--mid);font-size:16px;max-width:560px;line-height:1.6;margin:0;}
+  @media (max-width:900px){ .hero{padding:40px 20px 6px;} h1{font-size:30px;} }
+
+  .create-bar{padding:18px 48px 0;display:flex;justify-content:flex-end;max-width:760px;margin:0 auto;}
+  @media (max-width:900px){ .create-bar{padding:14px 20px 0;} }
+  .create-btn{
+    display:none;align-items:center;gap:8px;
+    background:var(--violet);color:#fff;border:none;border-radius:10px;
+    padding:11px 20px;font-weight:700;font-size:13px;letter-spacing:0.3px;cursor:pointer;
+    box-shadow:0 8px 22px rgba(139,92,246,0.35);
+  }
+  .create-btn.show{display:inline-flex;}
+  .create-btn:hover{transform:translateY(-1px);}
+
+  .feed{max-width:760px;margin:0 auto;padding:26px 48px 60px;display:flex;flex-direction:column;gap:22px;}
+  @media (max-width:900px){ .feed{padding:20px 20px 48px;} }
+
+  .n-card{
+    position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;
+  }
+  .n-admin-actions{display:none;gap:6px;position:absolute;top:16px;right:18px;z-index:2;}
+  .n-admin-actions.show{display:flex;}
+  .n-admin-actions button{
+    width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:var(--panel-raised);
+    color:var(--mid);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
+  }
+  .n-admin-actions button:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .n-admin-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
+
+  .n-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;margin:0 0 6px;padding-right:60px;}
+  .n-date{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:12px;}
+  .n-body{font-size:14px;color:var(--mid);line-height:1.65;white-space:pre-wrap;margin-bottom:12px;}
+  .n-media{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;margin-bottom:12px;background:var(--void);}
+  .n-media iframe{width:100%;height:100%;border:0;display:block;}
+  .n-media-img{width:100%;border-radius:12px;display:block;margin-bottom:12px;max-height:480px;object-fit:cover;}
+  .n-media-link{
+    display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;padding:9px 16px;border-radius:999px;
+    background:rgba(139,92,246,0.14);border:1px solid var(--violet-dim);color:var(--violet);font-weight:700;font-size:13px;
+  }
+  .n-link{
+    display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;padding:8px 14px;border-radius:999px;
+    background:var(--panel-raised);border:1px solid var(--line);color:var(--cyan);font-weight:700;font-size:12.5px;
+  }
+  .n-link:hover{border-color:var(--cyan);}
+
+  .n-actions{display:flex;align-items:center;gap:16px;padding-top:12px;border-top:1px solid var(--line);}
+  .n-like{
+    display:flex;align-items:center;gap:7px;background:none;border:none;color:var(--mid);cursor:pointer;
+    font-size:13px;font-weight:700;padding:6px 10px;border-radius:8px;transition:background .15s,color .15s;
+  }
+  .n-like:hover{background:var(--panel-raised);color:var(--hi);}
+  .n-like.liked{color:var(--signal);}
+  .n-comment-toggle{
+    display:flex;align-items:center;gap:7px;background:none;border:none;color:var(--mid);cursor:pointer;
+    font-size:13px;font-weight:700;padding:6px 10px;border-radius:8px;transition:background .15s,color .15s;
+  }
+  .n-comment-toggle:hover{background:var(--panel-raised);color:var(--hi);}
+
+  .n-comments{display:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
+  .n-comments.show{display:block;}
+  .n-comment-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+  .n-comment-empty{font-size:12.5px;color:var(--dim);margin-bottom:14px;}
+  .n-comment-item{background:var(--panel-raised);border-radius:10px;padding:10px 12px;position:relative;}
+  .n-comment-item .name{font-weight:700;font-size:12.5px;color:var(--hi);}
+  .n-comment-item .time{font-size:10.5px;color:var(--dim);margin-left:6px;font-family:'JetBrains Mono',monospace;}
+  .n-comment-item .text{font-size:13px;color:var(--mid);margin-top:4px;line-height:1.5;}
+  .n-comment-item .del-comment{
+    display:none;position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:6px;
+    border:1px solid var(--line);background:var(--panel);color:var(--dim);cursor:pointer;font-size:10px;
+    align-items:center;justify-content:center;
+  }
+  .n-comment-item .del-comment.show{display:flex;}
+  .n-comment-item .del-comment:hover{border-color:var(--signal);color:var(--signal);}
+
+  .n-comment-form{display:flex;gap:8px;flex-wrap:wrap;}
+  .n-comment-form input[type="text"]{
+    flex:1;min-width:120px;background:var(--void);border:1px solid var(--line);border-radius:9px;
+    padding:9px 12px;color:var(--hi);font-size:13px;font-family:var(--font-main);outline:none;
+  }
+  .n-comment-form input[name="text"]{flex:2;min-width:180px;}
+  .n-comment-form input:focus{border-color:var(--violet);}
+  .n-comment-form button{
+    background:var(--violet);color:#fff;border:none;border-radius:9px;padding:9px 16px;
+    font-weight:700;font-size:12.5px;cursor:pointer;
+  }
+  .n-comment-form button:hover{background:#7C4CED;}
+  .n-comment-form button:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
+
+  .n-empty{
+    text-align:center;padding:60px 20px;color:var(--mid);
+    border:1px dashed var(--line);border-radius:var(--radius);
+  }
+  .n-empty .icon{font-size:36px;margin-bottom:12px;}
+  .n-empty p{margin:0;font-size:13.5px;}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(5,3,12,0.72);backdrop-filter:blur(4px);
+    z-index:100;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    width:100%;max-width:440px;max-height:90vh;overflow-y:auto;padding:26px 24px;
+    animation:modalPop .2s ease;
+  }
+  @keyframes modalPop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .modal h3{font-family:'Orbitron',sans-serif;font-size:17px;margin:0 0 18px;}
+  .modal .field{margin-bottom:14px;}
+  .modal .field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:600;}
+  .modal .field input,.modal .field select,.modal .field textarea{
+    width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
+    padding:10px 12px;color:var(--hi);font-family:var(--font-main);font-size:14px;font-weight:600;outline:none;resize:vertical;
+  }
+  .modal .field input:focus,.modal .field select:focus,.modal .field textarea:focus{border-color:var(--violet);}
+  .modal-tabs{display:flex;gap:8px;margin-bottom:14px;}
+  .modal-tabs button{
+    flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--void);
+    color:var(--mid);font-weight:700;font-size:12.5px;cursor:pointer;
+  }
+  .modal-tabs button.active{background:var(--violet);border-color:transparent;color:#fff;}
+  .modal-media-field{display:none;}
+  .modal-media-field.show{display:block;}
+  .modal-err{color:var(--signal);font-size:12.5px;margin:-6px 0 12px;display:none;}
+  .modal-err.show{display:block;}
+  .modal-actions{display:flex;gap:10px;margin-top:6px;}
+  .modal-actions button{
+    flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;
+  }
+  .modal-actions .save{background:var(--violet);color:#fff;}
+  .modal-actions .save:hover{background:#7C4CED;}
+  .modal-actions .save:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
+  .modal-actions .cancel{background:var(--panel-raised);color:var(--mid);border:1px solid var(--line);}
+  .modal-actions .cancel:hover{color:var(--hi);}
+
+  footer{
+    display:flex;justify-content:space-between;padding:26px 48px;
+    border-top:1px solid var(--line);color:var(--dim);font-size:13px;
+  }
+  @media (max-width:640px){ footer{flex-direction:column;gap:8px;padding:22px 20px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
+  <nav>
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="tournament.html" data-i18n="nav.tournament">Tournament</a>
+    <a href="diamond-plan.html" data-i18n="nav.diamond">Diamond</a>
+    <a href="news.html" class="active" data-i18n="nav.news">News</a>
+    <a href="customer-service.html" data-i18n="nav.service">Customer Service</a>
+  </nav>
+  <div class="hdr-controls">
+    <button type="button" class="admin-toggle" id="admin-toggle">
+      <span id="admin-toggle-label" data-i18n="tournament.admin.locked">Admin</span>
+    </button>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <div class="pill"></div>
+      <button type="button" data-lang="mm">MM</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="th">TH</button>
+    </div>
+    <button type="button" class="theme-toggle" aria-label="Toggle light / dark mode">
+      <span class="icon-wrap">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><g class="ray"><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 15.2A8.5 8.5 0 1 1 8.8 3.3a7 7 0 0 0 11.9 11.9Z"/></svg>
+      </span>
+    </button>
+  </div>
+</header>
+
+<div class="hero reveal">
+  <p class="eyebrow" data-i18n="news.eyebrow">Latest updates</p>
+  <h1 data-i18n="news.title">News</h1>
+  <p data-i18n="news.desc">Announcements, tournament recaps, and updates from Zenith Esports.</p>
+</div>
+
+<div class="create-bar">
+  <button class="create-btn" id="create-btn" data-i18n="news.create.btn">+ Create Post</button>
+</div>
+
+<div class="feed" id="feed"></div>
+
+<footer>
+  <span data-i18n="footer.est">EST 2026</span>
+  <span data-i18n="footer.tagline">Beyond the peak — Zenith Esports</span>
+</footer>
+
+<!-- ---------- admin passcode modal ---------- -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <h3 data-i18n="tournament.admin.prompt.title">Enter admin passcode</h3>
+    <div class="field">
+      <input type="password" id="admin-passcode-input" data-i18n-placeholder="tournament.admin.prompt.placeholder" placeholder="Passcode">
+    </div>
+    <div class="modal-err" id="admin-modal-err" data-i18n="tournament.admin.prompt.wrong">Incorrect passcode</div>
+    <div class="modal-actions">
+      <button class="cancel" id="admin-modal-cancel" data-i18n="tournament.admin.prompt.cancel">Cancel</button>
+      <button class="save" id="admin-modal-submit" data-i18n="tournament.admin.prompt.submit">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- create / edit post modal ---------- -->
+<div class="modal-overlay" id="post-modal">
+  <div class="modal">
+    <h3 id="post-modal-title" data-i18n="news.form.title.create">Create post</h3>
+
+    <div class="field">
+      <label data-i18n="news.form.field.title">Title</label>
+      <input type="text" id="f-title">
+    </div>
+
+    <div class="field">
+      <label data-i18n="news.form.field.body">Text</label>
+      <textarea id="f-body" rows="4"></textarea>
+    </div>
+
+    <div class="field">
+      <label data-i18n="news.form.field.media">Media</label>
+      <div class="modal-tabs">
+        <button type="button" class="tab-image active" data-media-tab="image" data-i18n="news.form.field.media.image">Image</button>
+        <button type="button" class="tab-video" data-media-tab="video" data-i18n="news.form.field.media.video">Video link</button>
+      </div>
+      <div class="modal-media-field show" id="media-image-field">
+        <input type="file" id="f-media-file" accept="image/*">
+      </div>
+      <div class="modal-media-field" id="media-video-field">
+        <input type="url" id="f-media-video" placeholder="https://youtube.com/... or https://facebook.com/...">
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="news.form.field.link">Link (optional)</label>
+      <input type="url" id="f-link" placeholder="https://...">
+    </div>
+
+    <div class="modal-err" id="post-modal-err">Error</div>
+    <div class="modal-actions">
+      <button class="cancel" id="post-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
+      <button class="save" id="post-modal-save" data-i18n="tournament.form.save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shared.js"></script>
+<script>
+function t(key, fallback){
+  const v = window.ZenithI18n && window.ZenithI18n.t(key);
+  return v || fallback || key;
+}
+
+const ADMIN_KEY = 'zenith-admin-passcode';
+const LIKED_KEY = 'zenith-news-liked';
+let isAdmin = false;
+let posts = [];
+let editingId = null;
+let mediaFileData = null; // base64 data URL for the chosen image
+let mediaTab = 'image';
+const openCommentPanels = new Set();
+
+function getPasscode(){ return sessionStorage.getItem(ADMIN_KEY) || ''; }
+function getLikedIds(){ try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); } catch(e){ return []; } }
+function markLiked(id){
+  const liked = getLikedIds();
+  if (!liked.includes(id)) { liked.push(id); localStorage.setItem(LIKED_KEY, JSON.stringify(liked)); }
+}
+
+function youtubeEmbedUrl(url){
+  const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{6,15})/i);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+}
+function facebookEmbedUrl(url){
+  return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function timeAgo(iso){
+  const diff = Math.max(0, Date.now() - new Date(iso).getTime());
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return t('news.time.now','just now');
+  if (mins < 60) return mins + t('news.time.min','m ago');
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + t('news.time.hour','h ago');
+  return Math.floor(hrs / 24) + t('news.time.day','d ago');
+}
+
+function renderMedia(item){
+  if (!item.media) return '';
+  if (item.mediaType === 'video') {
+    const yt = youtubeEmbedUrl(item.media);
+    if (yt) return `<div class="n-media"><iframe src="${yt}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
+    if (/facebook\.com|fb\.watch/i.test(item.media)) return `<div class="n-media"><iframe src="${facebookEmbedUrl(item.media)}" loading="lazy" allowfullscreen></iframe></div>`;
+    return `<a class="n-media-link" href="${escapeHtml(item.media)}" target="_blank" rel="noopener">▶️ ${escapeHtml(t('news.watch.generic','Watch video'))}</a>`;
+  }
+  return `<img class="n-media-img" src="${item.media}" alt="">`;
+}
+
+function renderComments(item){
+  const liked = getLikedIds().includes(item.id);
+  const list = (item.comments || []).map(c => `
+    <div class="n-comment-item">
+      <button class="del-comment ${isAdmin ? 'show' : ''}" onclick="deleteComment('${item.id}','${c.id}')">🗑</button>
+      <span class="name">${escapeHtml(c.name)}</span><span class="time">${timeAgo(c.createdAt)}</span>
+      <div class="text">${escapeHtml(c.text)}</div>
+    </div>`).join('');
+
+  return `
+    <div class="n-comments${openCommentPanels.has(item.id) ? ' show' : ''}" id="comments-${item.id}">
+      <div class="n-comment-list">${list || `<div class="n-comment-empty">${escapeHtml(t('news.comments.empty','No comments yet — be the first!'))}</div>`}</div>
+      <div class="n-comment-form">
+        <input type="text" name="name" placeholder="${escapeHtml(t('news.comment.name','Your name (optional)'))}" id="cname-${item.id}">
+        <input type="text" name="text" placeholder="${escapeHtml(t('news.comment.placeholder','Write a comment...'))}" id="ctext-${item.id}">
+        <button onclick="submitComment('${item.id}')">${escapeHtml(t('news.comment.send','Send'))}</button>
+      </div>
+    </div>`;
+}
+
+function renderCard(item){
+  const adminHtml = isAdmin ? `
+    <div class="n-admin-actions show">
+      <button class="edit" title="${t('tournament.card.edit','Edit')}" onclick="openEdit('${item.id}')">✏️</button>
+      <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="deletePost('${item.id}')">🗑</button>
+    </div>` : '';
+  const linkHtml = item.link ? `<a class="n-link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener">🔗 ${escapeHtml(t('news.readmore','Open link'))}</a><br>` : '';
+  const liked = getLikedIds().includes(item.id);
+  const commentCount = (item.comments || []).length;
+
+  return `
+    <div class="n-card" data-id="${item.id}">
+      ${adminHtml}
+      <div class="n-title">${escapeHtml(item.title)}</div>
+      <div class="n-date">${timeAgo(item.createdAt)}</div>
+      ${renderMedia(item)}
+      ${item.body ? `<div class="n-body">${escapeHtml(item.body)}</div>` : ''}
+      ${linkHtml}
+      <div class="n-actions">
+        <button class="n-like ${liked ? 'liked' : ''}" onclick="likePost('${item.id}')" ${liked ? 'disabled' : ''}>
+          ${liked ? '❤️' : '🤍'} <span id="likes-${item.id}">${item.likes || 0}</span>
+        </button>
+        <button class="n-comment-toggle" onclick="toggleComments('${item.id}')">💬 ${commentCount}</button>
+      </div>
+      ${renderComments(item)}
+    </div>`;
+}
+
+function renderFeed(){
+  const feed = document.getElementById('feed');
+  feed.innerHTML = posts.length
+    ? posts.map(renderCard).join('')
+    : `<div class="n-empty"><div class="icon">📰</div><p>${t('news.empty','No news posts yet — check back soon.')}</p></div>`;
+  document.getElementById('create-btn').classList.toggle('show', isAdmin);
+}
+
+async function loadNews(){
+  try {
+    const res = await fetch('/api/news');
+    posts = await res.json();
+  } catch (e) { posts = []; }
+  renderFeed();
+}
+
+window.toggleComments = function(id){
+  if (openCommentPanels.has(id)) openCommentPanels.delete(id); else openCommentPanels.add(id);
+  document.getElementById('comments-' + id).classList.toggle('show');
+};
+
+window.likePost = async function(id){
+  if (getLikedIds().includes(id)) return;
+  try {
+    const res = await fetch('/api/news/' + id + '/like', { method: 'POST' });
+    if (!res.ok) throw new Error('like failed');
+    const data = await res.json();
+    markLiked(id);
+    const post = posts.find(p => p.id === id);
+    if (post) post.likes = data.likes;
+    renderFeed();
+  } catch (e) { /* silently ignore */ }
+};
+
+window.submitComment = async function(id){
+  const nameEl = document.getElementById('cname-' + id);
+  const textEl = document.getElementById('ctext-' + id);
+  const text = textEl.value.trim();
+  if (!text) { textEl.focus(); return; }
+  try {
+    const res = await fetch('/api/news/' + id + '/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: nameEl.value.trim(), text }),
+    });
+    if (!res.ok) throw new Error('comment failed');
+    const updated = await res.json();
+    posts = posts.map(p => p.id === id ? updated : p);
+    openCommentPanels.add(id);
+    renderFeed();
+    document.getElementById('comments-' + id).classList.add('show');
+  } catch (e) {
+    alert(t('news.error.comment','Could not post your comment. Please try again.'));
+  }
+};
+
+window.deleteComment = async function(id, commentId){
+  if (!confirm(t('news.comment.delete.confirm','Delete this comment?'))) return;
+  try {
+    const res = await fetch(`/api/news/${id}/comments/${commentId}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-passcode': getPasscode() },
+    });
+    if (!res.ok) throw new Error('delete failed');
+    const post = posts.find(p => p.id === id);
+    if (post) post.comments = post.comments.filter(c => c.id !== commentId);
+    renderFeed();
+  } catch (e) {
+    alert(t('news.error.delete','Could not delete. Please try again.'));
+  }
+};
+
+window.deletePost = async function(id){
+  if (!confirm(t('news.delete.confirm','Delete this post?'))) return;
+  try {
+    const res = await fetch('/api/news/' + id, { method: 'DELETE', headers: { 'x-admin-passcode': getPasscode() } });
+    if (!res.ok) throw new Error('delete failed');
+    posts = posts.filter(p => p.id !== id);
+    renderFeed();
+  } catch (e) {
+    alert(t('news.error.delete','Could not delete. Please try again.'));
+  }
+};
+
+/* ---------------- admin unlock ---------------- */
+const adminToggle = document.getElementById('admin-toggle');
+const adminToggleLabel = document.getElementById('admin-toggle-label');
+const adminModal = document.getElementById('admin-modal');
+const adminInput = document.getElementById('admin-passcode-input');
+const adminErr = document.getElementById('admin-modal-err');
+
+async function verifyPasscode(pass){
+  try {
+    const res = await fetch('/api/tournaments/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': pass },
+      body: '{}',
+    });
+    const data = await res.json();
+    return !!data.ok;
+  } catch (e) { return false; }
+}
+
+function setAdminUI(){
+  adminToggle.classList.toggle('on', isAdmin);
+  adminToggleLabel.textContent = isAdmin ? t('tournament.admin.unlocked','Admin mode') : t('tournament.admin.locked','Admin');
+  adminToggleLabel.setAttribute('data-i18n', isAdmin ? 'tournament.admin.unlocked' : 'tournament.admin.locked');
+}
+
+adminToggle.addEventListener('click', async () => {
+  if (isAdmin) {
+    isAdmin = false;
+    sessionStorage.removeItem(ADMIN_KEY);
+    setAdminUI();
+    renderFeed();
+    return;
+  }
+  adminErr.classList.remove('show');
+  adminInput.value = '';
+  adminModal.classList.add('show');
+  adminInput.focus();
+});
+document.getElementById('admin-modal-cancel').addEventListener('click', () => adminModal.classList.remove('show'));
+document.getElementById('admin-modal-submit').addEventListener('click', async () => {
+  const ok = await verifyPasscode(adminInput.value);
+  if (!ok) { adminErr.classList.add('show'); return; }
+  sessionStorage.setItem(ADMIN_KEY, adminInput.value);
+  isAdmin = true;
+  adminModal.classList.remove('show');
+  setAdminUI();
+  renderFeed();
+});
+adminInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('admin-modal-submit').click(); });
+
+(async () => {
+  const stored = getPasscode();
+  if (stored) {
+    const ok = await verifyPasscode(stored);
+    if (ok) { isAdmin = true; } else { sessionStorage.removeItem(ADMIN_KEY); }
+    setAdminUI();
+    renderFeed();
+  }
+})();
+
+/* ---------------- create / edit post ---------------- */
+const postModal = document.getElementById('post-modal');
+const postModalTitle = document.getElementById('post-modal-title');
+const postModalErr = document.getElementById('post-modal-err');
+const fTitle = document.getElementById('f-title');
+const fBody = document.getElementById('f-body');
+const fLink = document.getElementById('f-link');
+const fMediaFile = document.getElementById('f-media-file');
+const fMediaVideo = document.getElementById('f-media-video');
+
+document.querySelectorAll('[data-media-tab]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    mediaTab = btn.dataset.mediaTab;
+    document.querySelectorAll('[data-media-tab]').forEach(b => b.classList.toggle('active', b === btn));
+    document.getElementById('media-image-field').classList.toggle('show', mediaTab === 'image');
+    document.getElementById('media-video-field').classList.toggle('show', mediaTab === 'video');
+  });
+});
+fMediaFile.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) { mediaFileData = null; return; }
+  const reader = new FileReader();
+  reader.onload = () => { mediaFileData = reader.result; };
+  reader.readAsDataURL(file);
+});
+
+function openCreate(){
+  editingId = null;
+  postModalTitle.textContent = t('news.form.title.create','Create post');
+  fTitle.value = ''; fBody.value = ''; fLink.value = ''; fMediaVideo.value = '';
+  fMediaFile.value = ''; mediaFileData = null;
+  mediaTab = 'image';
+  document.querySelector('[data-media-tab="image"]').click();
+  postModalErr.classList.remove('show');
+  postModal.classList.add('show');
+  fTitle.focus();
+}
+
+window.openEdit = function(id){
+  const item = posts.find(p => p.id === id);
+  if (!item) return;
+  editingId = id;
+  postModalTitle.textContent = t('news.form.title.edit','Edit post');
+  fTitle.value = item.title || ''; fBody.value = item.body || ''; fLink.value = item.link || '';
+  fMediaFile.value = ''; mediaFileData = null; fMediaVideo.value = '';
+  if (item.mediaType === 'video') {
+    mediaTab = 'video';
+    fMediaVideo.value = item.media || '';
+    document.querySelector('[data-media-tab="video"]').click();
+  } else {
+    mediaTab = 'image';
+    mediaFileData = item.media || null;
+    document.querySelector('[data-media-tab="image"]').click();
+  }
+  postModalErr.classList.remove('show');
+  postModal.classList.add('show');
+  fTitle.focus();
+};
+
+document.getElementById('create-btn').addEventListener('click', openCreate);
+document.getElementById('post-modal-cancel').addEventListener('click', () => postModal.classList.remove('show'));
+
+document.getElementById('post-modal-save').addEventListener('click', async () => {
+  const payload = {
+    title: fTitle.value.trim(),
+    body: fBody.value.trim(),
+    link: fLink.value.trim(),
+  };
+  if (mediaTab === 'video') {
+    payload.media = fMediaVideo.value.trim();
+    payload.mediaType = payload.media ? 'video' : '';
+  } else {
+    payload.media = mediaFileData || '';
+    payload.mediaType = payload.media ? 'image' : '';
+  }
+  if (!payload.title) {
+    postModalErr.textContent = t('news.error.save','Could not save. Please try again.');
+    postModalErr.classList.add('show');
+    return;
+  }
+  const saveBtn = document.getElementById('post-modal-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = t('tournament.form.saving','Saving…');
+
+  try {
+    const url = editingId ? '/api/news/' + editingId : '/api/news';
+    const method = editingId ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('save failed');
+    const saved = await res.json();
+    if (editingId) {
+      posts = posts.map(p => p.id === editingId ? saved : p);
+    } else {
+      posts.unshift(saved);
+    }
+    postModal.classList.remove('show');
+    renderFeed();
+  } catch (e) {
+    postModalErr.textContent = t('news.error.save','Could not save. Please try again.');
+    postModalErr.classList.add('show');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = t('tournament.form.save','Save');
+  }
+});
+
+window.ZenithI18n = window.ZenithI18n || {};
+const prevOnLangChange = window.ZenithI18n.onLangChange;
+window.ZenithI18n.onLangChange = function(lang, dict){
+  if (prevOnLangChange) prevOnLangChange(lang, dict);
+  setAdminUI();
+  renderFeed();
+};
+
+loadNews();
+</script>
+</body>
+</html>

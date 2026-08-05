@@ -1,5 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 const { getOrder, updateOrder } = require('./db');
+const { appendOrderRow } = require('./googleSheets');
 
 const TOKEN = process.env.BOT_TOKEN;
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
@@ -98,11 +99,12 @@ if (BOT_ENABLED) {
       : (newText) => bot.editMessageText(newText, editParams);
 
     if (action === 'confirm') {
-      updateOrder(code, { status: 'confirmed' });
+      const updated = updateOrder(code, { status: 'confirmed' });
       await bot.answerCallbackQuery(query.id, { text: 'Marked as confirmed' });
       await editFn(
         formatOrderText(order) + `\n\n✅ *Confirmed* — deliver ${order.packageLabel} to game ID ${order.gameId} (server ${order.serverId}).`
       );
+      appendOrderRow(updated).catch(() => {});
     } else if (action === 'reject') {
       updateOrder(code, { status: 'rejected' });
       await bot.answerCallbackQuery(query.id, { text: 'Marked as rejected' });

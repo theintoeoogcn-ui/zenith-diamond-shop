@@ -55,8 +55,8 @@
   .contact-wrap{max-width:1000px;margin:0 auto;padding:36px 48px 20px;}
   @media (max-width:900px){ .contact-wrap{padding:24px 20px 10px;} }
 
-  .contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-  @media (max-width:820px){ .contact-grid{grid-template-columns:1fr;} }
+  .contact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:640px;margin:0 auto;}
+  @media (max-width:620px){ .contact-grid{grid-template-columns:1fr;} }
 
   .contact-card{
     background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
@@ -71,6 +71,7 @@
     background:linear-gradient(135deg,var(--violet),#6D3FE0);
     box-shadow:0 8px 20px rgba(139,92,246,0.35);
   }
+  .contact-card .icon img{width:56px;height:56px;border-radius:16px;display:block;}
   .contact-card .label{font-family:'Orbitron',sans-serif;font-weight:700;font-size:15px;margin-top:4px;}
   .contact-card .value{
     font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--mid);
@@ -82,10 +83,10 @@
     transition:transform .15s, box-shadow .15s;
   }
   .contact-card .cta:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(139,92,246,0.4);}
-  .contact-card.telegram .icon{background:linear-gradient(135deg,#4FE0E8,#2AA9C7);box-shadow:0 8px 20px rgba(79,224,232,0.3);}
+  .contact-card.telegram .icon{background:transparent;box-shadow:none;}
   .contact-card.telegram .cta{background:#2AA9C7;}
   .contact-card.telegram .cta:hover{box-shadow:0 8px 20px rgba(42,169,199,0.4);}
-  .contact-card.viber .icon{background:linear-gradient(135deg,#FF3E9A,#B4257A);box-shadow:0 8px 20px rgba(255,62,154,0.3);}
+  .contact-card.viber .icon{background:transparent;box-shadow:none;}
   .contact-card.viber .cta{background:#B4257A;}
   .contact-card.viber .cta:hover{box-shadow:0 8px 20px rgba(180,37,122,0.4);}
 
@@ -115,6 +116,7 @@
     <a href="index.html" data-i18n="nav.home">Home</a>
     <a href="tournament.html" data-i18n="nav.tournament">Tournament</a>
     <a href="diamond-plan.html" data-i18n="nav.diamond">Diamond</a>
+    <a href="news.html" data-i18n="nav.news">News</a>
     <a href="customer-service.html" class="active" data-i18n="nav.service">Customer Service</a>
   </nav>
   <div class="hdr-controls">
@@ -141,20 +143,14 @@
 
 <div class="contact-wrap">
   <div class="contact-grid reveal-stagger">
-    <div class="contact-card">
-      <div class="icon">📞</div>
-      <div class="label" data-i18n="service.phone.label">Phone</div>
-      <div class="value">09 698 376 511</div>
-      <a class="cta" href="tel:+959698376511" data-i18n="service.phone.cta">Call now</a>
-    </div>
     <div class="contact-card telegram">
-      <div class="icon">✈️</div>
+      <div class="icon"><img src="assets/telegram-icon.png" alt="Telegram"></div>
       <div class="label" data-i18n="service.telegram.label">Telegram</div>
       <div class="value">@Zenithdiamond2026</div>
       <a class="cta" href="https://t.me/Zenithdiamond2026" target="_blank" rel="noopener" data-i18n="service.telegram.cta">Message us</a>
     </div>
     <div class="contact-card viber">
-      <div class="icon">💬</div>
+      <div class="icon"><img src="assets/viber-icon.png" alt="Viber"></div>
       <div class="label" data-i18n="service.viber.label">Viber</div>
       <div class="value">09 698 376 511</div>
       <a class="cta" href="viber://chat?number=%2B959698376511" data-i18n="service.viber.cta">Message us</a>
