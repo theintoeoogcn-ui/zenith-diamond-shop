@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenith Esports — Diamond Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0713;
+    --panel:#150C29;
+    --panel-raised:#1D1237;
+    --line:#2C1F4D;
+    --violet:#8B5CF6;
+    --violet-dim:#4C3592;
+    --cyan:#4FE0E8;
+    --signal:#FF3E9A;
+    --hi:#F4EEFF;
+    --mid:#B4A4DC;
+    --dim:#6C6089;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
+      var(--void);
+    color:var(--hi);
+    font-family:'Rajdhani',sans-serif;
+    font-weight:500;
+    min-height:100vh;
+  }
+  ::selection{background:var(--violet);color:#fff;}
+
+  a{color:inherit;text-decoration:none;}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 48px;
+    border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;
+    background:rgba(10,7,19,0.85);
+    backdrop-filter:blur(10px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
+  .brand .mark{
+    width:32px;height:32px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;background:#fff;
+  }
+  .brand .mark img{width:100%;height:100%;object-fit:contain;display:block;}
+  nav{display:flex;gap:34px;font-weight:600;font-size:15px;color:var(--mid);}
+  nav a.active{color:var(--hi);position:relative;}
+  nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:2px;background:var(--violet);}
+  nav a:hover{color:var(--hi);}
+  @media (max-width:900px){ nav{display:none;} header{padding:16px 20px;} }
+
+  /* ---------- hero ---------- */
+  .hero{padding:56px 48px 20px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;
+    color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
+  }
+  h1{
+    font-family:'Orbitron',sans-serif;font-weight:800;font-size:44px;
+    margin:0 0 12px;letter-spacing:0.5px;
+    background:linear-gradient(180deg,#fff, var(--mid));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p{color:var(--mid);font-size:17px;max-width:540px;line-height:1.6;margin:0;}
+
+  /* ---------- layout ---------- */
+  .layout{
+    display:grid;grid-template-columns:1fr 380px;gap:28px;
+    padding:12px 48px 64px;align-items:start;
+  }
+  @media (max-width:1050px){ .layout{grid-template-columns:1fr;} }
+  @media (max-width:900px){ .hero{padding:40px 20px 10px;} .layout{padding:12px 20px 48px;} h1{font-size:32px;} }
+
+  /* ---------- tabs ---------- */
+  .tabs{display:flex;gap:8px;margin-bottom:22px;}
+  .tab{
+    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;
+    padding:10px 18px;border-radius:10px;color:var(--dim);cursor:pointer;
+    border:1px solid var(--line);background:var(--panel);
+  }
+  .tab.active{color:var(--hi);border-color:var(--violet);background:var(--panel-raised);
+    box-shadow:0 0 0 1px var(--violet-dim) inset;}
+
+  .section{display:none;}
+  .section.active{display:block;}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr);} }
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 14px;text-align:center;cursor:pointer;position:relative;
+    transition:border-color .15s, transform .1s;
+  }
+  .card:hover{border-color:var(--violet-dim);transform:translateY(-2px);}
+  .card.selected{
+    border-color:var(--violet);
+    box-shadow:0 0 0 1px var(--violet), 0 0 22px rgba(139,92,246,0.35);
+    background:var(--panel-raised);
+  }
+  .card .amt{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;margin-bottom:10px;}
+  .card img.card-icon{width:30px;height:30px;margin-bottom:8px;}
+  .card .price{font-size:15px;color:var(--cyan);font-weight:700;}
+  .card .badge{
+    position:absolute;top:-9px;left:10px;background:var(--signal);color:#fff;
+    font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  .pass-card{
+    display:flex;align-items:center;gap:14px;padding:16px;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    cursor:pointer;margin-top:14px;
+  }
+  .pass-card.selected{border-color:var(--signal);box-shadow:0 0 22px rgba(255,62,154,0.3);}
+  .pass-card .icon{
+    width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--signal),var(--violet));
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .pass-card .info{flex:1;}
+  .pass-card .name{font-weight:700;font-size:15px;}
+  .pass-card .price{color:var(--cyan);font-weight:700;font-size:14px;margin-top:2px;}
+
+  /* ---------- ticket (signature element) ---------- */
+  .ticket-wrap{position:sticky;top:96px;}
+  .ticket{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;
+  }
+  .ticket-head{padding:20px 22px 16px;border-bottom:1px dashed var(--line);}
+  .ticket-head .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:2px;font-family:'JetBrains Mono',monospace;}
+  .ticket-head h3{margin:6px 0 0;font-family:'Orbitron',sans-serif;font-size:16px;}
+
+  .field{padding:16px 22px 0;}
+  .field label{display:block;font-size:13px;color:var(--mid);margin-bottom:6px;font-weight:600;}
+  .field input,.field select{
+    width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
+    padding:11px 12px;color:var(--hi);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;
+    outline:none;
+  }
+  .field input:focus{border-color:var(--violet);}
+  .field-row{display:flex;gap:10px;padding:16px 22px 0;}
+  .field-row .field{padding:0;flex:1;}
+
+  .ign-row{
+    display:flex;align-items:center;gap:8px;margin:10px 22px 0;padding:9px 12px;
+    background:var(--void);border:1px solid var(--line);border-radius:9px;
+    font-size:13px;font-weight:600;color:var(--mid);
+  }
+  .ign-row .ign-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;}
+  .ign-row.loading .ign-dot{background:var(--cyan);animation:pulse 1.1s ease-in-out infinite;}
+  .ign-row.found{border-color:var(--violet-dim);color:var(--hi);}
+  .ign-row.found .ign-dot{background:var(--violet);}
+  .ign-row.error{border-color:rgba(255,62,154,0.4);color:var(--signal);}
+  .ign-row.error .ign-dot{background:var(--signal);}
+
+  .perforation{
+    position:relative;height:0;margin:18px 0;
+  }
+  .perforation::before{
+    content:"";position:absolute;left:0;right:0;top:0;
+    border-top:1.5px dashed var(--line);
+  }
+  .perforation .notch{
+    position:absolute;top:-9px;width:18px;height:18px;border-radius:50%;background:var(--void);
+  }
+  .perforation .notch.l{left:-9px;}
+  .perforation .notch.r{right:-9px;}
+
+  .summary-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 22px;font-size:14px;color:var(--mid);margin-bottom:10px;
+  }
+  .summary-row .val{color:var(--hi);font-weight:700;}
+  .summary-empty{padding:0 22px;font-size:13px;color:var(--dim);font-style:italic;}
+
+  .pay-options{display:flex;gap:8px;padding:0 22px;margin-top:6px;}
+  .pay-chip{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+    padding:10px 4px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:11px;font-weight:700;color:var(--mid);
+  }
+  .pay-chip.selected{border-color:var(--cyan);color:var(--hi);box-shadow:0 0 0 1px var(--cyan) inset;}
+  .pay-chip .swatch{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
+  .pay-chip .swatch img{width:100%;height:100%;object-fit:contain;display:block;}
+
+  .proof-panel{display:none;margin:16px 22px 0;padding:14px;background:var(--void);border:1px solid var(--line);border-radius:12px;}
+  .proof-panel.show{display:block;}
+  .proof-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .proof-head .swatch{width:22px;height:22px;border-radius:6px;overflow:hidden;background:#fff;flex-shrink:0;}
+  .proof-head .swatch img{width:100%;height:100%;object-fit:contain;display:block;}
+  .proof-head span{font-size:13px;font-weight:700;color:var(--mid);}
+
+  .proof-recap{
+    display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:14px;padding:10px 12px;
+    background:var(--panel);border-radius:9px;font-size:12px;color:var(--dim);
+  }
+  .proof-recap b{color:var(--hi);font-weight:700;}
+
+  .proof-field{margin-bottom:12px;}
+  .proof-field label{display:block;font-size:13px;color:var(--mid);margin-bottom:6px;font-weight:600;}
+  .proof-field input[type="text"]{
+    width:100%;background:var(--panel);border:1px solid var(--line);border-radius:9px;
+    padding:11px 12px;color:var(--hi);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;outline:none;
+  }
+  .proof-field input[type="text"]:focus{border-color:var(--violet);}
+
+  .upload-box{
+    display:flex;align-items:center;gap:12px;
+    border:1.5px dashed var(--line);border-radius:10px;padding:12px;cursor:pointer;
+    background:var(--panel);transition:border-color .15s;
+  }
+  .upload-box:hover{border-color:var(--violet-dim);}
+  .upload-box.has-file{border-style:solid;border-color:var(--violet);}
+  .upload-box .thumb{
+    width:44px;height:44px;border-radius:8px;background:var(--panel-raised);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;font-size:18px;
+  }
+  .upload-box .thumb img{width:100%;height:100%;object-fit:cover;}
+  .upload-box .txt{font-size:13px;color:var(--mid);font-weight:600;}
+  .upload-box .txt small{display:block;color:var(--dim);font-weight:500;margin-top:2px;}
+
+  .total-row{
+    display:flex;align-items:baseline;justify-content:space-between;
+    padding:16px 22px;margin-top:12px;border-top:1px solid var(--line);
+  }
+  .total-row .t-label{font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;}
+  .total-row .t-val{font-family:'Orbitron',sans-serif;font-size:22px;color:var(--cyan);}
+
+  .submit-btn{
+    display:block;width:calc(100% - 44px);margin:0 22px 22px;padding:14px;
+    background:var(--violet);color:#fff;border:none;border-radius:10px;
+    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.5px;cursor:pointer;
+  }
+  .submit-btn:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
+  .submit-btn:not(:disabled):hover{background:#7C4CED;}
+
+  /* ---------- status stepper ---------- */
+  .status{display:none;padding:6px 22px 22px;}
+  .status.show{display:block;}
+  .order-code{
+    font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cyan);
+    background:var(--void);border:1px solid var(--line);border-radius:8px;
+    padding:8px 10px;margin-bottom:16px;text-align:center;letter-spacing:1px;
+  }
+  .step{display:flex;gap:12px;position:relative;padding-bottom:22px;}
+  .step:last-child{padding-bottom:0;}
+  .step::before{
+    content:"";position:absolute;left:9px;top:22px;bottom:0;width:1.5px;background:var(--line);
+  }
+  .step:last-child::before{display:none;}
+  .step .dot{
+    width:20px;height:20px;border-radius:50%;flex-shrink:0;
+    background:var(--panel-raised);border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    z-index:1;
+  }
+  .step.done .dot{background:var(--violet);border-color:var(--violet);}
+  .step.active .dot{border-color:var(--signal);}
+  .step.active .dot::after{
+    content:"";width:8px;height:8px;border-radius:50%;background:var(--signal);
+    animation:pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
+  .step .text{padding-top:1px;}
+  .step .t-title{font-size:14px;font-weight:700;color:var(--hi);}
+  .step:not(.done):not(.active) .t-title{color:var(--dim);}
+  .step .t-sub{font-size:12px;color:var(--dim);margin-top:2px;}
+
+  .new-order{
+    display:block;text-align:center;font-size:13px;color:var(--mid);
+    padding:0 22px 20px;text-decoration:underline;cursor:pointer;
+  }
+
+  footer{
+    display:flex;justify-content:space-between;padding:26px 48px;
+    border-top:1px solid var(--line);color:var(--dim);font-size:13px;
+  }
+  @media (max-width:640px){ footer{flex-direction:column;gap:8px;padding:22px 20px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tournament.html">Tournament</a>
+    <a href="diamond-plan.html" class="active">Diamond</a>
+    <a href="#">Customer Service</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <p class="eyebrow">Top-up center</p>
+  <h1>Diamond Plan</h1>
+  <p>Pick a pack, enter your game ID, and pay. Our team confirms every order on Telegram before diamonds are sent — usually within minutes.</p>
+</div>
+
+<div class="layout">
+
+  <div class="left">
+    <div class="tabs">
+      <div class="tab active" data-tab="diamond">Diamond</div>
+      <div class="tab" data-tab="double">Double diamond</div>
+    </div>
+
+    <div class="section active" id="section-diamond">
+      <div class="grid" id="grid-diamond"></div>
+    </div>
+
+    <div class="section" id="section-double">
+      <div class="grid" id="grid-double"></div>
+      <div class="pass-card" id="pass-card">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 12l9 10 9-10-9-10Z" fill="#fff"/></svg>
+        </div>
+        <div class="info">
+          <div class="name">Weekly pass <span style="color:var(--signal);font-size:11px;font-family:'JetBrains Mono',monospace;">+445%</span></div>
+          <div class="price">35,000 Ks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticket-wrap">
+    <div class="ticket">
+      <div class="ticket-head">
+        <div class="label">Order ticket</div>
+        <h3>Enter your account</h3>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="game-id">Game ID</label>
+          <input id="game-id" type="text" placeholder="e.g. 812394021" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="server-id">Server</label>
+          <input id="server-id" type="text" placeholder="e.g. 2891">
+        </div>
+      </div>
+
+      <div class="ign-row" id="ign-row" style="display:none;">
+        <span class="ign-dot"></span>
+        <span id="ign-text">Checking account…</span>
+      </div>
+
+      <div class="perforation"><div class="notch l"></div><div class="notch r"></div></div>
+
+      <div class="summary-row" id="summary-row" style="display:none;">
+        <span>Package</span><span class="val" id="summary-val">—</span>
+      </div>
+      <div class="summary-empty" id="summary-empty">No package selected yet — choose one on the left.</div>
+
+      <div class="field" style="margin-top:6px;">
+        <label>Payment method</label>
+      </div>
+      <div class="pay-options">
+        <div class="pay-chip" data-pay="KBZ Pay"><div class="swatch"><img src="assets/kbz-pay.png" alt="KBZ Pay"></div>KBZ Pay</div>
+        <div class="pay-chip" data-pay="Wave Pay"><div class="swatch"><img src="assets/wave-money.png" alt="Wave Pay"></div>Wave Pay</div>
+        <div class="pay-chip" data-pay="AYA Pay"><div class="swatch"><img src="assets/aya-pay.png" alt="AYA Pay"></div>AYA Pay</div>
+      </div>
+
+      <div class="proof-panel" id="proof-panel">
+        <div class="proof-head">
+          <div class="swatch" id="proof-swatch"></div>
+          <span id="proof-title">Payment details</span>
+        </div>
+
+        <div class="proof-recap" id="proof-recap"></div>
+
+        <div class="proof-field">
+          <label for="sender-number">Your account / phone number</label>
+          <input id="sender-number" type="text" placeholder="e.g. 09xxxxxxxxx" inputmode="tel">
+        </div>
+
+        <div class="proof-field">
+          <label>Payment screenshot</label>
+          <label class="upload-box" id="upload-box" for="screenshot-input">
+            <div class="thumb" id="upload-thumb">📎</div>
+            <div class="txt" id="upload-text">Tap to add a screenshot<small>Proof of your transfer</small></div>
+          </label>
+          <input type="file" id="screenshot-input" accept="image/*" style="display:none;">
+        </div>
+      </div>
+
+      <div class="total-row">
+        <span class="t-label">Total</span>
+        <span class="t-val" id="total-val">0 Ks</span>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" disabled>Send for verification</button>
+
+      <div class="status" id="status">
+        <div class="order-code" id="order-code"></div>
+        <div class="step done">
+          <div class="dot"></div>
+          <div class="text"><div class="t-title">Order placed</div><div class="t-sub">Your details were submitted</div></div>
+        </div>
+        <div class="step" id="step-telegram">
+          <div class="dot"></div>
+          <div class="text"><div class="t-title">Sent to Telegram</div><div class="t-sub">Admin notified of your payment</div></div>
+        </div>
+        <div class="step" id="step-review">
+          <div class="dot"></div>
+          <div class="text"><div class="t-title">Awaiting confirmation</div><div class="t-sub">Admin checks the transfer, then approves</div></div>
+        </div>
+        <div class="step" id="step-done">
+          <div class="dot"></div>
+          <div class="text"><div class="t-title">Diamonds delivered</div><div class="t-sub">Sent straight to your account</div></div>
+        </div>
+      </div>
+      <div class="new-order" id="new-order" style="display:none;">Start a new order</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>EST 2026</span>
+  <span>Beyond the peak — Zenith Esports</span>
+</footer>
+
+<script>
+const diamondPacks = [
+  {amt:86,price:5500},{amt:172,price:11000},{amt:257,price:15500},
+  {amt:343,price:20700},{amt:429,price:25800},{amt:514,price:31000},
+  {amt:600,price:36000},{amt:706,price:41200},{amt:792,price:46350},
+  {amt:878,price:51500},{amt:963,price:56650},{amt:1049,price:62000}
+];
+const doublePacks = [
+  {amt:'50 + 50',price:3500},{amt:'150 + 150',price:10500},
+  {amt:'250 + 250',price:17500},{amt:'500 + 500',price:35000}
+];
+
+function renderGrid(el, packs, group){
+  el.innerHTML = packs.map((p,i)=>`
+    <div class="card" data-group="${group}" data-idx="${i}">
+      <img class="card-icon" src="assets/diamond-icon.png" alt="diamond">
+      <div class="amt">${p.amt}</div>
+      <div class="price">${p.price.toLocaleString()} Ks</div>
+    </div>`).join('');
+}
+renderGrid(document.getElementById('grid-diamond'), diamondPacks, 'diamond');
+renderGrid(document.getElementById('grid-double'), doublePacks, 'double');
+
+let selected = null;
+let selectedPayment = null;
+let screenshotFile = null;
+
+const PAY_ICONS = {
+  'KBZ Pay': 'assets/kbz-pay.png',
+  'Wave Pay': 'assets/wave-money.png',
+  'AYA Pay': 'assets/aya-pay.png',
+};
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('section-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+function selectPack(node, data){
+  document.querySelectorAll('.card, .pass-card').forEach(c=>c.classList.remove('selected'));
+  node.classList.add('selected');
+  selected = data;
+  document.getElementById('summary-row').style.display = 'flex';
+  document.getElementById('summary-empty').style.display = 'none';
+  document.getElementById('summary-val').textContent = data.label + ' — ' + data.price.toLocaleString() + ' Ks';
+  updateTotal();
+}
+
+document.querySelectorAll('#grid-diamond .card, #grid-double .card').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    const group = card.dataset.group;
+    const packs = group === 'diamond' ? diamondPacks : doublePacks;
+    const p = packs[card.dataset.idx];
+    selectPack(card, {label: p.amt + ' diamonds', price: p.price});
+  });
+});
+document.getElementById('pass-card').addEventListener('click', function(){
+  selectPack(this, {label:'Weekly pass', price:35000});
+});
+
+document.querySelectorAll('.pay-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.pay-chip').forEach(c=>c.classList.remove('selected'));
+    chip.classList.add('selected');
+    selectedPayment = chip.dataset.pay;
+
+    document.getElementById('proof-swatch').innerHTML = `<img src="${PAY_ICONS[selectedPayment]}" alt="${selectedPayment}">`;
+    document.getElementById('proof-title').textContent = selectedPayment + ' — payment details';
+    document.getElementById('proof-panel').classList.add('show');
+    updateProofRecap();
+
+    updateTotal();
+  });
+});
+
+function updateProofRecap(){
+  const gameId = document.getElementById('game-id').value.trim();
+  const serverId = document.getElementById('server-id').value.trim();
+  const recap = document.getElementById('proof-recap');
+  if (!gameId && !serverId) { recap.innerHTML = ''; return; }
+  recap.innerHTML =
+    `<span>Game ID <b>${gameId || '—'}</b></span>` +
+    `<span>Server <b>${serverId || '—'}</b></span>` +
+    `<span>IGN <b>${confirmedIgn || 'not verified yet'}</b></span>`;
+}
+
+function updateTotal(){
+  document.getElementById('total-val').textContent = (selected ? selected.price.toLocaleString() : 0) + ' Ks';
+  checkReady();
+}
+
+let confirmedIgn = null;
+let ignLookupToken = 0;
+let ignDebounce = null;
+
+function checkReady(){
+  const gameId = document.getElementById('game-id').value.trim();
+  const serverId = document.getElementById('server-id').value.trim();
+  const senderNumber = document.getElementById('sender-number').value.trim();
+  const proofNeeded = document.getElementById('proof-panel').classList.contains('show');
+  const proofReady = !proofNeeded || (senderNumber && screenshotFile);
+  const ready = selected && selectedPayment && gameId && serverId && proofReady;
+  document.getElementById('submit-btn').disabled = !ready;
+}
+
+function setIgnRow(state, text){
+  const row = document.getElementById('ign-row');
+  row.style.display = 'flex';
+  row.className = 'ign-row' + (state ? ' ' + state : '');
+  document.getElementById('ign-text').textContent = text;
+}
+
+async function lookupIgn(){
+  const gameId = document.getElementById('game-id').value.trim();
+  const serverId = document.getElementById('server-id').value.trim();
+  confirmedIgn = null;
+
+  if (!gameId || !serverId) {
+    document.getElementById('ign-row').style.display = 'none';
+    return;
+  }
+
+  const myToken = ++ignLookupToken;
+  setIgnRow('loading', 'Checking account…');
+
+  try {
+    const res = await fetch(`/api/ign?id=${encodeURIComponent(gameId)}&server=${encodeURIComponent(serverId)}`);
+    const data = await res.json();
+    if (myToken !== ignLookupToken) return; // a newer lookup superseded this one
+
+    if (data.success && data.name) {
+      confirmedIgn = data.name;
+      setIgnRow('found', data.name);
+    } else {
+      setIgnRow('error', 'Account not found — check your Game ID and Server');
+    }
+    updateProofRecap();
+  } catch (err) {
+    if (myToken !== ignLookupToken) return;
+    setIgnRow('error', "Couldn't verify account right now — you can still continue");
+  }
+}
+
+function onIdFieldChange(){
+  checkReady();
+  updateProofRecap();
+  clearTimeout(ignDebounce);
+  ignDebounce = setTimeout(lookupIgn, 500);
+}
+
+document.getElementById('game-id').addEventListener('input', onIdFieldChange);
+document.getElementById('server-id').addEventListener('input', onIdFieldChange);
+document.getElementById('sender-number').addEventListener('input', checkReady);
+
+document.getElementById('screenshot-input').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  const box = document.getElementById('upload-box');
+  const thumb = document.getElementById('upload-thumb');
+  const text = document.getElementById('upload-text');
+
+  if (!file) {
+    screenshotFile = null;
+    box.classList.remove('has-file');
+    thumb.textContent = '📎';
+    text.innerHTML = 'Tap to add a screenshot<small>Proof of your transfer</small>';
+    checkReady();
+    return;
+  }
+
+  screenshotFile = file;
+  box.classList.add('has-file');
+  text.innerHTML = 'Screenshot attached<small>' + file.name + '</small>';
+
+  const reader = new FileReader();
+  reader.onload = () => { thumb.innerHTML = `<img src="${reader.result}" alt="preview">`; };
+  reader.readAsDataURL(file);
+
+  checkReady();
+});
+
+let pollTimer = null;
+
+async function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result; // "data:image/png;base64,AAAA..."
+      const [, mime, base64] = result.match(/^data:(.+);base64,(.*)$/) || [];
+      resolve({ mime, base64 });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function submitOrder(){
+  const submitBtn = document.getElementById('submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending…';
+
+  const payload = {
+    gameId: document.getElementById('game-id').value.trim(),
+    serverId: document.getElementById('server-id').value.trim(),
+    ignName: confirmedIgn || null,
+    packageLabel: selected.label,
+    amount: selected.price,
+    paymentMethod: selectedPayment,
+    senderNumber: document.getElementById('sender-number').value.trim(),
+  };
+
+  try {
+    if (screenshotFile) {
+      const { mime, base64 } = await fileToBase64(screenshotFile);
+      payload.screenshotMime = mime;
+      payload.screenshotBase64 = base64;
+    }
+
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Could not submit order.');
+    const data = await res.json();
+
+    document.getElementById('order-code').textContent = data.code;
+    document.getElementById('status').classList.add('show');
+    submitBtn.style.display = 'none';
+    document.getElementById('new-order').style.display = 'block';
+    document.getElementById('step-telegram').classList.add('done');
+    document.getElementById('step-review').classList.add('active');
+
+    pollTimer = setInterval(()=>pollOrder(data.code), 2500);
+  } catch (err) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send for verification';
+    alert(err.message);
+  }
+}
+
+async function pollOrder(code){
+  try {
+    const res = await fetch('/api/orders/' + code);
+    if (!res.ok) return;
+    const order = await res.json();
+
+    if (order.status === 'confirmed') {
+      clearInterval(pollTimer);
+      document.getElementById('step-review').classList.remove('active');
+      document.getElementById('step-review').classList.add('done');
+      document.getElementById('step-done').classList.add('done');
+      document.querySelector('#step-done .t-title').textContent = 'Payment confirmed';
+      document.querySelector('#step-done .t-sub').textContent = 'Your diamonds are on the way';
+    } else if (order.status === 'rejected') {
+      clearInterval(pollTimer);
+      document.getElementById('step-review').classList.remove('active');
+      document.querySelector('#step-review .t-title').textContent = 'Payment not found';
+      document.querySelector('#step-review .t-title').style.color = 'var(--signal)';
+      document.querySelector('#step-review .t-sub').textContent = 'Contact us on Telegram with your order code';
+    }
+  } catch (err) {
+  }
+}
+
+document.getElementById('submit-btn').addEventListener('click', submitOrder);
+
+document.getElementById('new-order').addEventListener('click', ()=>{
+  location.reload();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenith Esports — Tournament</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0713; --panel:#150C29; --panel-raised:#1D1237; --line:#2C1F4D;
+    --violet:#8B5CF6; --violet-dim:#4C3592; --cyan:#4FE0E8; --signal:#FF3E9A;
+    --hi:#F4EEFF; --mid:#B4A4DC; --dim:#6C6089;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
+      var(--void);
+    color:var(--hi); font-family:'Rajdhani',sans-serif; font-weight:500; min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none;}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 48px;border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;background:rgba(10,7,19,0.85);backdrop-filter:blur(10px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
+  .brand .mark{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
+  .brand .mark img{width:100%;height:100%;object-fit:contain;display:block;}
+  nav{display:flex;gap:34px;font-weight:600;font-size:15px;color:var(--mid);}
+  nav a.active{color:var(--hi);position:relative;}
+  nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:2px;background:var(--violet);}
+  nav a:hover{color:var(--hi);}
+  @media (max-width:900px){ nav{display:none;} header{padding:16px 20px;} }
+
+  .empty{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;min-height:calc(100vh - 73px);padding:40px 20px;
+  }
+  .empty .icon{font-size:52px;margin-bottom:18px;}
+  .empty h1{font-family:'Orbitron',sans-serif;font-size:28px;margin:0 0 12px;}
+  .empty p{color:var(--mid);max-width:420px;line-height:1.6;margin:0 0 26px;}
+  .empty a.back{
+    background:var(--violet);color:#fff;font-weight:700;padding:12px 26px;
+    border-radius:10px;letter-spacing:0.3px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tournament.html" class="active">Tournament</a>
+    <a href="diamond-plan.html">Diamond</a>
+    <a href="#">Customer Service</a>
+  </nav>
+</header>
+
+<div class="empty">
+  <div class="icon">🏆</div>
+  <h1>Tournaments coming soon</h1>
+  <p>We're setting up the next Zenith Esports tournament. Check back soon, or head over to the Diamond store in the meantime.</p>
+  <a class="back" href="diamond-plan.html">Go to Diamond store</a>
+</div>
+
+</body>
+</html>

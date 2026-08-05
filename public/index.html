@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenith Esports — Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0713;
+    --panel:#150C29;
+    --panel-raised:#1D1237;
+    --line:#2C1F4D;
+    --violet:#8B5CF6;
+    --violet-dim:#4C3592;
+    --cyan:#4FE0E8;
+    --signal:#FF3E9A;
+    --hi:#F4EEFF;
+    --mid:#B4A4DC;
+    --dim:#6C6089;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
+      var(--void);
+    color:var(--hi);
+    font-family:'Rajdhani',sans-serif;
+    font-weight:500;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--violet);color:#fff;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 48px;
+    border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;
+    background:rgba(10,7,19,0.85);
+    backdrop-filter:blur(10px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
+  .brand .mark{
+    width:32px;height:32px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;background:#fff;
+  }
+  .brand .mark img{width:100%;height:100%;object-fit:contain;display:block;}
+  nav{display:flex;gap:34px;font-weight:600;font-size:15px;color:var(--mid);}
+  nav a.active{color:var(--hi);position:relative;}
+  nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:2px;background:var(--violet);}
+  nav a:hover{color:var(--hi);}
+  @media (max-width:900px){ nav{display:none;} header{padding:16px 20px;} }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    display:grid;grid-template-columns:1fr 1fr;align-items:center;
+    min-height:calc(100vh - 73px);
+    padding:0 48px;
+    overflow:hidden;
+  }
+  @media (max-width:980px){
+    .hero{grid-template-columns:1fr;padding:40px 20px;min-height:auto;}
+  }
+
+  .hero-glow{
+    position:absolute;right:-10%;top:50%;transform:translateY(-50%);
+    width:900px;height:900px;border-radius:50%;
+    background:radial-gradient(circle, rgba(139,92,246,0.35), rgba(79,224,232,0.12) 45%, transparent 70%);
+    filter:blur(40px);
+    animation:glowPulse 6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes glowPulse{
+    0%,100%{opacity:0.7;transform:translateY(-50%) scale(1);}
+    50%{opacity:1;transform:translateY(-50%) scale(1.08);}
+  }
+
+  .hero-text{position:relative;z-index:2;padding:60px 0;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;
+    color:var(--cyan);text-transform:uppercase;margin:0 0 16px;
+  }
+  h1{
+    font-family:'Orbitron',sans-serif;font-weight:800;font-size:46px;line-height:1.15;
+    margin:0 0 18px;letter-spacing:0.5px;
+    background:linear-gradient(180deg,#fff, var(--mid));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero-text p{color:var(--mid);font-size:17px;max-width:480px;line-height:1.65;margin:0 0 30px;}
+
+  .hero-btns{display:flex;gap:14px;margin-bottom:44px;flex-wrap:wrap;}
+  .hero-btn{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;
+    text-transform:uppercase;padding:14px 26px;border-radius:12px;cursor:pointer;
+    transition:transform .15s, box-shadow .15s;
+  }
+  .hero-btn:hover{transform:translateY(-2px);}
+  .hero-btn.primary{
+    background:linear-gradient(135deg,var(--violet),#6D3FE0);
+    color:#fff;box-shadow:0 8px 26px rgba(139,92,246,0.4);
+  }
+  .hero-btn.primary:hover{box-shadow:0 10px 32px rgba(139,92,246,0.55);}
+  .hero-btn.secondary{
+    background:var(--panel);border:1px solid var(--line);color:var(--hi);
+  }
+  .hero-btn.secondary:hover{border-color:var(--cyan);box-shadow:0 0 18px rgba(79,224,232,0.25);}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:560px;}
+  @media (max-width:640px){ .stats{grid-template-columns:repeat(2,1fr);} }
+  .stat{
+    display:flex;flex-direction:column;gap:6px;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 12px;
+  }
+  .stat .icon{font-size:18px;}
+  .stat .num{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;color:var(--hi);}
+  .stat .lbl{font-size:12px;color:var(--dim);}
+
+  /* ---------- hero character ---------- */
+  .hero-art{
+    position:relative;z-index:1;height:100%;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .hero-art .ring{
+    position:absolute;left:50%;bottom:6%;width:340px;height:70px;
+    transform:translateX(-50%);
+    background:radial-gradient(ellipse, rgba(139,92,246,0.55), transparent 70%);
+    filter:blur(14px);
+    animation:ringPulse 3.6s ease-in-out infinite;
+  }
+  @keyframes ringPulse{
+    0%,100%{opacity:0.5;transform:translateX(-50%) scaleX(1);}
+    50%{opacity:0.9;transform:translateX(-50%) scaleX(1.15);}
+  }
+  .hero-art img{
+    position:relative;z-index:2;
+    max-width:520px;width:100%;height:auto;
+    filter:drop-shadow(0 20px 40px rgba(0,0,0,0.55)) drop-shadow(0 0 40px rgba(139,92,246,0.25));
+    animation:floatLoop 4.5s ease-in-out infinite;
+  }
+  @keyframes floatLoop{
+    0%,100%{transform:translateY(0px);}
+    50%{transform:translateY(-18px);}
+  }
+  @media (max-width:980px){
+    .hero-art img{max-width:340px;}
+    .hero-art{margin-top:20px;}
+  }
+
+  /* floating particles */
+  .particle{
+    position:absolute;border-radius:50%;pointer-events:none;
+    background:var(--cyan);opacity:0.5;filter:blur(1px);
+    animation:drift linear infinite;
+  }
+  @keyframes drift{
+    0%{transform:translateY(0) translateX(0);opacity:0;}
+    10%{opacity:0.6;}
+    90%{opacity:0.6;}
+    100%{transform:translateY(-140px) translateX(20px);opacity:0;}
+  }
+
+  footer{
+    display:flex;justify-content:space-between;padding:26px 48px;
+    border-top:1px solid var(--line);color:var(--dim);font-size:13px;
+    position:relative;z-index:2;
+  }
+  @media (max-width:640px){ footer{flex-direction:column;gap:8px;padding:22px 20px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
+  <nav>
+    <a href="index.html" class="active">Home</a>
+    <a href="tournament.html">Tournament</a>
+    <a href="diamond-plan.html">Diamond</a>
+    <a href="#">Customer Service</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="hero-glow"></div>
+
+  <div class="hero-text">
+    <p class="eyebrow">Est. 2026 &nbsp;·&nbsp; Beyond the peak</p>
+    <h1>The Ultimate Hub for<br>Esports Tournaments &amp;<br>MLBB Top-Ups</h1>
+    <p>Join competitive gaming events and get the fastest, most affordable Diamond services tailored for you.</p>
+
+    <div class="hero-btns">
+      <a class="hero-btn primary" href="tournament.html">🏆 Tournament</a>
+      <a class="hero-btn secondary" href="diamond-plan.html">💎 Diamond</a>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="icon">🏆</span><span class="num">2+</span><span class="lbl">Tournament</span></div>
+      <div class="stat"><span class="icon">💎</span><span class="num">3,000+</span><span class="lbl">Diamond Sold</span></div>
+      <div class="stat"><span class="icon">👥</span><span class="num">700+</span><span class="lbl">Players</span></div>
+      <div class="stat"><span class="icon">⭐</span><span class="num">4.9 / 5</span><span class="lbl">Rating</span></div>
+    </div>
+  </div>
+
+  <div class="hero-art" id="hero-art">
+    <div class="ring"></div>
+    <img src="assets/hero-character.png" alt="Zenith Esports hero">
+  </div>
+</div>
+
+<footer>
+  <span>EST 2026</span>
+  <span>Beyond the peak — Zenith Esports</span>
+</footer>
+
+<script>
+  // gentle drifting particles behind the hero art
+  const art = document.getElementById('hero-art');
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 2 + Math.random() * 3;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = (10 + Math.random() * 80) + '%';
+    p.style.bottom = (Math.random() * 30) + '%';
+    p.style.animationDuration = (4 + Math.random() * 4) + 's';
+    p.style.animationDelay = (Math.random() * 5) + 's';
+    art.appendChild(p);
+  }
+</script>
+
+</body>
+</html>
