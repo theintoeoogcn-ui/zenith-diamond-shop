@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="css/theme.css">
 <style>
   :root{
-    --void:#0A0713; --panel:#150C29; --panel-raised:#1D1237; --line:#2C1F4D;
+    --void:#0A0713; --void-rgb:10,7,19; --panel:#150C29; --panel-raised:#1D1237; --line:#2C1F4D;
     --violet:#8B5CF6; --violet-dim:#4C3592; --cyan:#4FE0E8; --signal:#FF3E9A;
     --hi:#F4EEFF; --mid:#B4A4DC; --dim:#6C6089; --radius:14px;
   }
@@ -28,7 +28,7 @@
   header{
     display:flex;align-items:center;justify-content:space-between;
     padding:20px 48px;border-bottom:1px solid var(--line);
-    position:sticky;top:0;z-index:30;background:rgba(10,7,19,0.85);backdrop-filter:blur(10px);
+    position:sticky;top:0;z-index:30;background:rgba(var(--void-rgb),0.85);backdrop-filter:blur(10px);
   }
   .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
   .brand .mark{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}

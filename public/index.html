@@ -11,6 +11,7 @@
 <style>
   :root{
     --void:#0A0713;
+    --void-rgb:10,7,19;
     --panel:#150C29;
     --panel-raised:#1D1237;
     --line:#2C1F4D;
@@ -45,7 +46,7 @@
     padding:20px 48px;
     border-bottom:1px solid var(--line);
     position:sticky;top:0;z-index:30;
-    background:rgba(10,7,19,0.85);
+    background:rgba(var(--void-rgb),0.85);
     backdrop-filter:blur(10px);
   }
   .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
@@ -64,40 +65,40 @@
   /* ---------- hero ---------- */
   .hero{
     position:relative;
-    display:grid;grid-template-columns:1fr 1fr;align-items:center;
     min-height:calc(100vh - 73px);
-    padding:0 48px;
     overflow:hidden;
   }
   @media (max-width:980px){
-    .hero{grid-template-columns:1fr;padding:40px 20px;min-height:auto;}
+    .hero{min-height:auto;}
   }
 
-  .hero-glow{
-    position:absolute;right:-10%;top:50%;transform:translateY(-50%);
-    width:900px;height:900px;border-radius:50%;
-    background:radial-gradient(circle, rgba(139,92,246,0.35), rgba(79,224,232,0.12) 45%, transparent 70%);
-    filter:blur(40px);
-    animation:glowPulse 6s ease-in-out infinite;
-    pointer-events:none;
-  }
-  @keyframes glowPulse{
-    0%,100%{opacity:0.7;transform:translateY(-50%) scale(1);}
-    50%{opacity:1;transform:translateY(-50%) scale(1.08);}
+  .hero-media{position:absolute;inset:0;z-index:0;background:var(--void);}
+  .hero-media video{width:100%;height:100%;object-fit:cover;display:block;}
+  .hero-scrim{
+    position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:
+      linear-gradient(100deg, rgba(6,4,14,0.90) 0%, rgba(6,4,14,0.62) 36%, rgba(6,4,14,0.18) 62%, rgba(6,4,14,0.34) 100%),
+      linear-gradient(180deg, rgba(6,4,14,0.05) 0%, rgba(6,4,14,0.12) 55%, rgba(6,4,14,0.68) 100%);
   }
 
-  .hero-text{position:relative;z-index:2;padding:60px 0;}
+  .hero-text{
+    position:relative;z-index:2;min-height:calc(100vh - 73px);
+    display:flex;flex-direction:column;justify-content:center;
+    max-width:740px;padding:64px 48px;
+  }
+  @media (max-width:980px){
+    .hero-text{min-height:auto;padding:52px 20px 40px;}
+  }
   .eyebrow{
     font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;
-    color:var(--cyan);text-transform:uppercase;margin:0 0 16px;
+    color:#8CF3EF;text-transform:uppercase;margin:0 0 16px;
   }
   h1{
     font-family:'Orbitron',sans-serif;font-weight:800;font-size:46px;line-height:1.15;
-    margin:0 0 18px;letter-spacing:0.5px;
-    background:linear-gradient(180deg, var(--hi), var(--mid));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+    margin:0 0 18px;letter-spacing:0.5px;color:#fff;
+    text-shadow:0 4px 30px rgba(0,0,0,0.45);
   }
-  .hero-text p{color:var(--mid);font-size:17px;max-width:480px;line-height:1.65;margin:0 0 30px;}
+  .hero-text p{color:rgba(255,255,255,0.82);font-size:17px;max-width:480px;line-height:1.65;margin:0 0 30px;}
 
   .hero-btns{display:flex;gap:14px;margin-bottom:44px;flex-wrap:wrap;}
   .hero-btn{
@@ -113,77 +114,21 @@
   }
   .hero-btn.primary:hover{box-shadow:0 10px 32px rgba(139,92,246,0.55);}
   .hero-btn.secondary{
-    background:var(--panel);border:1px solid var(--line);color:var(--hi);
+    background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.28);color:#fff;
+    backdrop-filter:blur(6px);
   }
-  .hero-btn.secondary:hover{border-color:var(--cyan);box-shadow:0 0 18px rgba(79,224,232,0.25);}
+  .hero-btn.secondary:hover{border-color:#8CF3EF;box-shadow:0 0 18px rgba(79,224,232,0.25);}
 
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:560px;}
   @media (max-width:640px){ .stats{grid-template-columns:repeat(2,1fr);} }
   .stat{
     display:flex;flex-direction:column;gap:6px;
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    padding:14px 12px;
+    background:rgba(10,8,20,0.55);border:1px solid rgba(255,255,255,0.14);border-radius:12px;
+    padding:14px 12px;backdrop-filter:blur(6px);
   }
   .stat .icon{font-size:18px;}
-  .stat .num{font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;color:var(--hi);}
-  .stat .lbl{font-size:12px;color:var(--dim);}
-
-  /* ---------- hero character ---------- */
-  .hero-art{
-    position:relative;z-index:1;height:100%;
-    display:flex;align-items:flex-end;justify-content:center;
-  }
-  .hero-art .ring{
-    position:absolute;left:50%;bottom:6%;width:340px;height:70px;
-    transform:translateX(-50%);
-    background:radial-gradient(ellipse, rgba(139,92,246,0.55), transparent 70%);
-    filter:blur(14px);
-    animation:ringPulse 3.6s ease-in-out infinite;
-  }
-  @keyframes ringPulse{
-    0%,100%{opacity:0.5;transform:translateX(-50%) scaleX(1);}
-    50%{opacity:0.9;transform:translateX(-50%) scaleX(1.15);}
-  }
-  .char-stage{
-    position:relative;z-index:2;max-width:480px;width:100%;
-    animation:floatLoop 4.5s ease-in-out infinite;
-  }
-  .char-frame{
-    position:relative;width:100%;aspect-ratio:1920/1280;border-radius:28px;overflow:hidden;
-    border:1px solid var(--line);
-    box-shadow:0 25px 60px rgba(0,0,0,0.45), 0 0 50px rgba(139,92,246,0.22);
-    -webkit-mask-image:radial-gradient(120% 120% at 50% 38%, #000 62%, transparent 100%);
-            mask-image:radial-gradient(120% 120% at 50% 38%, #000 62%, transparent 100%);
-  }
-  [data-theme="light"] .char-frame{
-    box-shadow:0 20px 50px rgba(124,76,237,0.16), 0 0 36px rgba(124,76,237,0.12);
-  }
-  .char-frame::after{
-    content:"";position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(180deg, transparent 55%, var(--void) 100%);
-  }
-  .char-video{display:block;width:100%;height:100%;object-fit:cover;}
-  @keyframes floatLoop{
-    0%,100%{transform:translateY(0px);}
-    50%{transform:translateY(-18px);}
-  }
-  @media (max-width:980px){
-    .char-stage{max-width:320px;}
-    .hero-art{margin-top:20px;}
-  }
-
-  /* floating particles */
-  .particle{
-    position:absolute;border-radius:50%;pointer-events:none;
-    background:var(--cyan);opacity:0.5;filter:blur(1px);
-    animation:drift linear infinite;
-  }
-  @keyframes drift{
-    0%{transform:translateY(0) translateX(0);opacity:0;}
-    10%{opacity:0.6;}
-    90%{opacity:0.6;}
-    100%{transform:translateY(-140px) translateX(20px);opacity:0;}
-  }
+  .stat .num{font-family:var(--font-main);font-weight:700;font-size:18px;color:#fff;}
+  .stat .lbl{font-size:12px;color:rgba(255,255,255,0.65);}
 
   footer{
     display:flex;justify-content:space-between;padding:26px 48px;
@@ -220,7 +165,12 @@
 </header>
 
 <div class="hero">
-  <div class="hero-glow"></div>
+  <div class="hero-media">
+    <video autoplay muted loop playsinline poster="assets/miya-hero-poster.jpg">
+      <source src="assets/miya-hero-loop.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-scrim"></div>
 
   <div class="hero-text">
     <p class="eyebrow reveal" data-i18n="home.eyebrow">Est. 2026 &nbsp;·&nbsp; Beyond the peak</p>
@@ -239,17 +189,6 @@
       <div class="stat"><span class="icon">⭐</span><span class="num">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
     </div>
   </div>
-
-  <div class="hero-art" id="hero-art">
-    <div class="ring"></div>
-    <div class="char-stage">
-      <div class="char-frame">
-        <video class="char-video" autoplay muted loop playsinline poster="assets/miya-hero-poster.jpg">
-          <source src="assets/miya-hero-loop.mp4" type="video/mp4">
-        </video>
-      </div>
-    </div>
-  </div>
 </div>
 
 <footer>
@@ -257,22 +196,6 @@
   <span data-i18n="footer.tagline">Beyond the peak — Zenith Esports</span>
 </footer>
 
-<script>
-  // gentle drifting particles behind the hero art
-  const art = document.getElementById('hero-art');
-  for (let i = 0; i < 14; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const size = 2 + Math.random() * 3;
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-    p.style.left = (10 + Math.random() * 80) + '%';
-    p.style.bottom = (Math.random() * 30) + '%';
-    p.style.animationDuration = (4 + Math.random() * 4) + 's';
-    p.style.animationDelay = (Math.random() * 5) + 's';
-    art.appendChild(p);
-  }
-</script>
 <script src="js/app-shared.js"></script>
 
 </body>

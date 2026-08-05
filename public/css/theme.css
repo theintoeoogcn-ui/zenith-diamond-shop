@@ -18,6 +18,7 @@
    in the HTML wins — which was silently canceling the whole toggle. */
 :root[data-theme="light"]{
   --void:#F3EFFC;
+  --void-rgb:243,239,252;
   --panel:#FFFFFF;
   --panel-raised:#F4EFFF;
   --line:#DDD3F3;
