@@ -6,7 +6,7 @@
 <title>Zenith Esports — Tournament</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/theme.css">
 <style>
   :root{
@@ -30,7 +30,7 @@
     padding:20px 48px;border-bottom:1px solid var(--line);
     position:sticky;top:0;z-index:30;background:rgba(var(--void-rgb),0.85);backdrop-filter:blur(10px);
   }
-  .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-main);font-weight:700;font-size:17px;letter-spacing:0.3px;}
   .brand .mark{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
   .brand .mark img{width:100%;height:100%;object-fit:contain;display:block;}
   nav{display:flex;gap:34px;font-weight:600;font-size:15px;color:var(--mid);}
@@ -67,11 +67,11 @@
   /* ---------- hero ---------- */
   .hero{padding:56px 48px 10px;}
   .eyebrow{
-    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;
+    font-family:var(--font-main);font-weight:600;font-size:12px;letter-spacing:2px;
     color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
   }
   h1{
-    font-family:var(--font-main);font-weight:800;font-size:40px;
+    font-family:var(--font-main);font-weight:800;font-size:40px;line-height:1.4;
     margin:0 0 12px;letter-spacing:0.5px;
     background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -94,7 +94,7 @@
   .t-section{padding:26px 48px 10px;}
   @media (max-width:900px){ .t-section{padding:20px 20px 6px;} }
   .t-section h2{
-    font-family:'Orbitron',sans-serif;font-size:18px;margin:0 0 16px;
+    font-family:var(--font-main);font-weight:700;font-size:18px;margin:0 0 16px;
     display:flex;align-items:center;gap:10px;color:var(--hi);
   }
   .t-section h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--violet);}
@@ -112,12 +112,12 @@
   .t-card:hover{border-color:var(--violet-dim);transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,0.3);}
   .t-badge{
     align-self:flex-start;font-size:10px;font-weight:700;letter-spacing:0.5px;
-    padding:3px 9px;border-radius:6px;font-family:'JetBrains Mono',monospace;
+    padding:3px 9px;border-radius:6px;font-family:var(--font-main);font-weight:600;
     background:rgba(139,92,246,0.18);color:var(--violet);
   }
   .t-badge.past{background:rgba(108,96,137,0.2);color:var(--dim);}
   .t-icon{font-size:28px;line-height:1;margin-top:2px;}
-  .t-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:14px;line-height:1.35;color:var(--hi);}
+  .t-title{font-family:var(--font-main);font-weight:700;font-size:14px;line-height:1.5;color:var(--hi);}
   .t-meta{display:flex;flex-direction:column;gap:3px;margin-top:2px;}
   .t-meta div{display:flex;justify-content:space-between;gap:6px;font-size:11px;}
   .t-meta .k{color:var(--dim);}
@@ -169,7 +169,7 @@
     animation:modalPop .2s ease;
   }
   @keyframes modalPop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
-  .modal h3{font-family:'Orbitron',sans-serif;font-size:17px;margin:0 0 18px;}
+  .modal h3{font-family:var(--font-main);font-weight:700;font-size:17px;margin:0 0 18px;}
   .modal .field{margin-bottom:14px;}
   .modal .field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:600;}
   .modal .field input,.modal .field select,.modal .field textarea{

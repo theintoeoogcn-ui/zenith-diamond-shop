@@ -6,7 +6,7 @@
 <title>Zenith Esports — Diamond Plan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/theme.css">
 <style>
   :root{
@@ -49,7 +49,7 @@
     background:rgba(var(--void-rgb),0.85);
     backdrop-filter:blur(10px);
   }
-  .brand{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;letter-spacing:0.5px;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-main);font-weight:700;font-size:17px;letter-spacing:0.3px;}
   .brand .mark{
     width:32px;height:32px;border-radius:8px;
     display:flex;align-items:center;justify-content:center;
@@ -124,7 +124,7 @@
     animation:modalPop .2s ease;
   }
   @keyframes modalPop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
-  .modal h3{font-family:'Orbitron',sans-serif;font-size:17px;margin:0 0 18px;}
+  .modal h3{font-family:var(--font-main);font-weight:700;font-size:17px;margin:0 0 18px;}
   .modal .field{margin-bottom:14px;}
   .modal .field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:600;}
   .modal .field input{
@@ -148,11 +148,11 @@
   /* ---------- hero ---------- */
   .hero{padding:56px 48px 20px;}
   .eyebrow{
-    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;
+    font-family:var(--font-main);font-weight:600;font-size:12px;letter-spacing:2px;
     color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
   }
   h1{
-    font-family:var(--font-main);font-weight:800;font-size:44px;
+    font-family:var(--font-main);font-weight:800;font-size:44px;line-height:1.4;
     margin:0 0 12px;letter-spacing:0.5px;
     background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -203,7 +203,7 @@
   .card .badge{
     position:absolute;top:-9px;left:10px;background:var(--signal);color:#fff;
     font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;
-    font-family:'JetBrains Mono',monospace;
+    font-family:var(--font-main);font-weight:600;
   }
 
   .pass-card{
@@ -234,8 +234,8 @@
   }
   .tg-link:hover{border-color:var(--cyan);transform:translateY(-1px);}
   .ticket-head{padding:20px 22px 16px;border-bottom:1px dashed var(--line);}
-  .ticket-head .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:2px;font-family:'JetBrains Mono',monospace;}
-  .ticket-head h3{margin:6px 0 0;font-family:'Orbitron',sans-serif;font-size:16px;}
+  .ticket-head .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--font-main);font-weight:600;}
+  .ticket-head h3{margin:6px 0 0;font-family:var(--font-main);font-weight:700;font-size:16px;}
 
   .field{padding:16px 22px 0;}
   .field label{display:block;font-size:13px;color:var(--mid);margin-bottom:6px;font-weight:600;}
@@ -308,7 +308,7 @@
     60%{opacity:1;transform:translateY(1px) scale(1.01);}
     100%{opacity:1;transform:translateY(0) scale(1);}
   }
-  .transfer-info .t-num{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--hi);letter-spacing:0.5px;}
+  .transfer-info .t-num{font-family:var(--font-main);font-size:16px;font-weight:700;color:var(--hi);letter-spacing:0.3px;}
   .transfer-info .t-name{font-size:12.5px;color:var(--mid);margin-top:2px;}
   .transfer-info .t-copy{
     background:var(--violet);color:#fff;border:none;border-radius:8px;padding:8px 14px;
@@ -352,7 +352,7 @@
     padding:16px 22px;margin-top:12px;border-top:1px solid var(--line);
   }
   .total-row .t-label{font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;}
-  .total-row .t-val{font-family:'Orbitron',sans-serif;font-size:22px;color:var(--cyan);}
+  .total-row .t-val{font-family:var(--font-main);font-weight:700;font-size:22px;color:var(--cyan);}
 
   .submit-btn{
     display:block;width:calc(100% - 44px);margin:0 22px 22px;padding:14px;
@@ -366,7 +366,7 @@
   .status{display:none;padding:6px 22px 22px;}
   .status.show{display:block;}
   .order-code{
-    font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cyan);
+    font-family:var(--font-main);font-weight:700;font-size:13px;color:var(--cyan);
     background:var(--void);border:1px solid var(--line);border-radius:8px;
     padding:8px 10px;margin-bottom:16px;text-align:center;letter-spacing:1px;
   }
@@ -463,7 +463,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 12l9 10 9-10-9-10Z" fill="#fff"/></svg>
         </div>
         <div class="info">
-          <div class="name"><span data-i18n="diamond.passcard.name">Weekly pass</span> <span style="color:var(--signal);font-size:11px;font-family:'JetBrains Mono',monospace;">+445%</span></div>
+          <div class="name"><span data-i18n="diamond.passcard.name">Weekly pass</span> <span style="color:var(--signal);font-size:11px;font-family:var(--font-main);font-weight:700;">+445%</span></div>
           <div class="price" id="pass-price">35,000 Ks</div>
         </div>
         <button type="button" class="pass-edit" id="pass-edit-btn" title="Edit price">✏️</button>
