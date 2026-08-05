@@ -60,7 +60,23 @@
   nav a.active{color:var(--hi);position:relative;}
   nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:2px;background:var(--violet);}
   nav a:hover{color:var(--hi);}
-  @media (max-width:900px){ nav{display:none;} header{padding:16px 20px;} }
+  .mobile-menu-btn{
+    display:none;background:none;border:1px solid var(--line);border-radius:8px;
+    color:var(--hi);font-size:18px;cursor:pointer;padding:6px 10px;line-height:1;
+  }
+  @media (max-width:900px){
+    header{padding:16px 20px;position:relative;}
+    nav{
+      display:none;position:absolute;top:100%;left:0;right:0;z-index:29;
+      flex-direction:column;gap:0;background:var(--panel);border-bottom:1px solid var(--line);
+      padding:8px 20px 14px;box-shadow:0 12px 24px rgba(0,0,0,0.35);
+    }
+    nav.mobile-open{display:flex;}
+    nav a{padding:13px 0;border-bottom:1px solid var(--line);}
+    nav a:last-child{border-bottom:none;}
+    nav a.active::after{display:none;}
+    .mobile-menu-btn{display:inline-flex;align-items:center;justify-content:center;}
+  }
 
   /* ---------- hero ---------- */
   .hero{
@@ -192,7 +208,7 @@
 <body>
 
 <header>
-  <div class="brand"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</div>
+  <a class="brand" href="index.html" id="brand-link"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</a>
   <nav>
     <a href="index.html" class="active" data-i18n="nav.home">Home</a>
     <a href="tournament.html" data-i18n="nav.tournament">Tournament</a>
@@ -217,6 +233,7 @@
       </span>
     </button>
   </div>
+  <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">☰</button>
 </header>
 
 <div class="hero">
@@ -316,14 +333,30 @@ loadStats();
 /* ---- admin unlock (shared pattern with other pages) ---- */
 const adminToggle = document.getElementById('admin-toggle');
 
-// Admin login is intentionally not advertised in the UI 2014 tap the logo
-// 5 times quickly to reveal the passcode prompt.
+// Admin login is intentionally not advertised in the UI — tap the logo 5
+// times quickly to reveal the passcode prompt. A single click still
+// behaves as a normal link to Home (slightly delayed so we can tell it
+// apart from the start of a 5-click sequence).
 let brandClicks = 0, brandClickTimer = null;
-document.querySelector('.brand').addEventListener('click', () => {
+const brandLink = document.getElementById('brand-link');
+brandLink.addEventListener('click', (e) => {
+  e.preventDefault();
   brandClicks++;
   clearTimeout(brandClickTimer);
-  brandClickTimer = setTimeout(() => { brandClicks = 0; }, 1200);
-  if (brandClicks >= 5) { brandClicks = 0; adminToggle.click(); }
+  if (brandClicks >= 5) {
+    brandClicks = 0;
+    adminToggle.click();
+    return;
+  }
+  brandClickTimer = setTimeout(() => {
+    const count = brandClicks;
+    brandClicks = 0;
+    if (count < 5) window.location.href = brandLink.href;
+  }, 450);
+});
+
+document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+  document.querySelector('nav').classList.toggle('mobile-open');
 });
 const adminToggleLabel = document.getElementById('admin-toggle-label');
 const adminModal = document.getElementById('admin-modal');
