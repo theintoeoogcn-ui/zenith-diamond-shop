@@ -39,20 +39,30 @@ function generateId(prefix) {
   return prefix + '-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1000);
 }
 
-// Old posts saved before multi-reactions existed only have a `likes` number
-// — fold that into the new shape the first time we touch a post so nothing
-// gets lost.
+// Old posts saved before multi-reactions/views existed only have a `likes`
+// number and no `views` — fold those into the new shape the first time we
+// touch a post so nothing gets lost.
 function normalize(item) {
   if (!item.reactions) {
     item.reactions = emptyReactions();
     if (item.likes) item.reactions.like = item.likes;
   }
   delete item.likes;
+  if (typeof item.views !== 'number') item.views = 0;
+  if (item.scheduledAt === undefined) item.scheduledAt = '';
   return item;
 }
 
-function listNews() {
-  return readAll().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).map(normalize);
+// Public feed: hides posts scheduled for the future. Admin view (passcode
+// verified) sees everything, including not-yet-published scheduled posts,
+// so they can manage them ahead of time.
+function listNews(includeScheduled) {
+  const now = new Date().toISOString();
+  let list = readAll().map(normalize);
+  if (!includeScheduled) {
+    list = list.filter((n) => !n.scheduledAt || n.scheduledAt <= now);
+  }
+  return list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
 }
 
 function createNews(data) {
@@ -65,7 +75,10 @@ function createNews(data) {
     media: data.media ? String(data.media) : '', // image data URL, or a video URL (YouTube/Facebook/mp4)
     mediaType: data.mediaType === 'video' ? 'video' : (data.media ? 'image' : ''),
     isLive: !!data.isLive,
+    // Optional future publish time (ISO string). Blank/omitted = publish now.
+    scheduledAt: data.scheduledAt ? String(data.scheduledAt) : '',
     reactions: emptyReactions(),
+    views: 0,
     comments: [],
     createdAt: new Date().toISOString(),
   };
@@ -87,6 +100,7 @@ function updateNews(id, patch) {
     clean.mediaType = patch.mediaType === 'video' ? 'video' : (clean.media ? 'image' : '');
   }
   if (patch.isLive !== undefined) clean.isLive = !!patch.isLive;
+  if (patch.scheduledAt !== undefined) clean.scheduledAt = String(patch.scheduledAt || '');
   list[idx] = clean;
   writeAll(list);
   return list[idx];
@@ -123,6 +137,19 @@ function reactNews(id, { type, previousType }) {
   return item;
 }
 
+// Called once per visitor per post (frontend de-dupes via sessionStorage)
+// to build a simple view count.
+function viewNews(id) {
+  const list = readAll();
+  const idx = list.findIndex((n) => n.id === id);
+  if (idx === -1) return null;
+  const item = normalize(list[idx]);
+  item.views = (item.views || 0) + 1;
+  list[idx] = item;
+  writeAll(list);
+  return item;
+}
+
 function addComment(id, { name, text }) {
   const list = readAll();
   const idx = list.findIndex((n) => n.id === id);
@@ -154,5 +181,5 @@ function deleteComment(id, commentId) {
 const ready = hydrate(SHEET_KEY, DB_FILE);
 
 module.exports = {
-  listNews, createNews, updateNews, deleteNews, reactNews, addComment, deleteComment, ready, REACTION_TYPES,
+  listNews, createNews, updateNews, deleteNews, reactNews, addComment, deleteComment, viewNews, ready, REACTION_TYPES,
 };

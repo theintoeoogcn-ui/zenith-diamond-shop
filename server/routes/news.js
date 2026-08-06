@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  listNews, createNews, updateNews, deleteNews, reactNews, addComment, deleteComment,
+  listNews, createNews, updateNews, deleteNews, reactNews, addComment, deleteComment, viewNews,
 } = require('../newsDb');
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || '';
@@ -11,9 +11,11 @@ function isAdmin(req) {
   return !!ADMIN_PASSCODE && supplied === ADMIN_PASSCODE;
 }
 
-// Public — anyone can read the news feed.
+// Public — anyone can read the news feed. Admins (passcode verified) also
+// see posts still scheduled for the future so they can manage them ahead
+// of time; everyone else only sees what's actually published.
 router.get('/', (req, res) => {
-  res.json(listNews());
+  res.json(listNews(isAdmin(req)));
 });
 
 // Admin-only — create a post.
@@ -50,6 +52,15 @@ router.post('/:id/react', (req, res) => {
   const item = reactNews(req.params.id, { type, previousType });
   if (!item) return res.status(404).json({ error: 'Post not found.' });
   res.json({ reactions: item.reactions });
+});
+
+// Public — bumps the view count. The frontend only calls this once per
+// visitor per post (tracked client-side via sessionStorage) so a single
+// visitor scrolling past a post repeatedly doesn't inflate the count.
+router.post('/:id/view', (req, res) => {
+  const item = viewNews(req.params.id);
+  if (!item) return res.status(404).json({ error: 'Post not found.' });
+  res.json({ views: item.views });
 });
 
 // Public — anyone can comment, no account needed. Just a display name + text.
