@@ -1,8 +1,15 @@
 const fs = require('fs');
 const path = require('path');
+const { hydrate, sync } = require('./persistentStore');
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'news.json');
+const SHEET_KEY = 'news';
+
+const REACTION_TYPES = ['like', 'love', 'haha', 'wow', 'sad'];
+function emptyReactions() {
+  return { like: 0, love: 0, haha: 0, wow: 0, sad: 0 };
+}
 
 function ensureFile() {
   if (!fs.existsSync(path.dirname(DB_FILE))) {
@@ -25,14 +32,27 @@ function readAll() {
 function writeAll(list) {
   ensureFile();
   fs.writeFileSync(DB_FILE, JSON.stringify(list, null, 2), 'utf8');
+  sync(SHEET_KEY, list);
 }
 
 function generateId(prefix) {
   return prefix + '-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1000);
 }
 
+// Old posts saved before multi-reactions existed only have a `likes` number
+// — fold that into the new shape the first time we touch a post so nothing
+// gets lost.
+function normalize(item) {
+  if (!item.reactions) {
+    item.reactions = emptyReactions();
+    if (item.likes) item.reactions.like = item.likes;
+  }
+  delete item.likes;
+  return item;
+}
+
 function listNews() {
-  return readAll().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  return readAll().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).map(normalize);
 }
 
 function createNews(data) {
@@ -45,7 +65,7 @@ function createNews(data) {
     media: data.media ? String(data.media) : '', // image data URL, or a video URL (YouTube/Facebook/mp4)
     mediaType: data.mediaType === 'video' ? 'video' : (data.media ? 'image' : ''),
     isLive: !!data.isLive,
-    likes: 0,
+    reactions: emptyReactions(),
     comments: [],
     createdAt: new Date().toISOString(),
   };
@@ -58,7 +78,7 @@ function updateNews(id, patch) {
   const list = readAll();
   const idx = list.findIndex((n) => n.id === id);
   if (idx === -1) return null;
-  const clean = { ...list[idx] };
+  const clean = normalize({ ...list[idx] });
   if (patch.title !== undefined) clean.title = String(patch.title).trim();
   if (patch.body !== undefined) clean.body = String(patch.body).trim();
   if (patch.link !== undefined) clean.link = String(patch.link).trim();
@@ -80,13 +100,27 @@ function deleteNews(id) {
   return true;
 }
 
-function likeNews(id) {
+// Facebook-style reactions: a visitor can pick one of several reaction
+// types (no account needed). `previousType` is whatever the browser
+// remembers it picked last (via localStorage) so we can move the count
+// from the old type to the new one, or clear it entirely if they tap the
+// same reaction again to remove it.
+function reactNews(id, { type, previousType }) {
   const list = readAll();
   const idx = list.findIndex((n) => n.id === id);
   if (idx === -1) return null;
-  list[idx].likes = (list[idx].likes || 0) + 1;
+  const item = normalize(list[idx]);
+
+  if (previousType && REACTION_TYPES.includes(previousType) && item.reactions[previousType] > 0) {
+    item.reactions[previousType]--;
+  }
+  if (type && REACTION_TYPES.includes(type) && type !== previousType) {
+    item.reactions[type] = (item.reactions[type] || 0) + 1;
+  }
+
+  list[idx] = item;
   writeAll(list);
-  return list[idx];
+  return item;
 }
 
 function addComment(id, { name, text }) {
@@ -117,6 +151,8 @@ function deleteComment(id, commentId) {
   return true;
 }
 
+const ready = hydrate(SHEET_KEY, DB_FILE);
+
 module.exports = {
-  listNews, createNews, updateNews, deleteNews, likeNews, addComment, deleteComment,
+  listNews, createNews, updateNews, deleteNews, reactNews, addComment, deleteComment, ready, REACTION_TYPES,
 };

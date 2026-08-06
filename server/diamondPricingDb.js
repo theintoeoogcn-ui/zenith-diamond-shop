@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const { hydrate, sync } = require('./persistentStore');
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'diamond-pricing.json');
+const SHEET_KEY = 'diamondPricing';
 
 // These match the prices the site shipped with — used the first time the
 // server runs (before an admin has ever saved anything) and as a fallback
@@ -65,7 +67,10 @@ function savePricing(data) {
       : DEFAULTS.weeklyPassPrice,
   };
   fs.writeFileSync(DB_FILE, JSON.stringify(clean, null, 2), 'utf8');
+  sync(SHEET_KEY, clean);
   return clean;
 }
 
-module.exports = { getPricing, savePricing };
+const ready = hydrate(SHEET_KEY, DB_FILE);
+
+module.exports = { getPricing, savePricing, ready };

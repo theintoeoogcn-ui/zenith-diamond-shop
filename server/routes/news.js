@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  listNews, createNews, updateNews, deleteNews, likeNews, addComment, deleteComment,
+  listNews, createNews, updateNews, deleteNews, reactNews, addComment, deleteComment,
 } = require('../newsDb');
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || '';
@@ -40,14 +40,16 @@ router.delete('/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// Public — anyone can like a post. No login, no de-dup tracking server-side
-// (kept intentionally simple); the frontend remembers what a browser has
-// already liked using localStorage so the same visitor can't spam +1s from
-// the UI, but this is not a hard security guarantee.
-router.post('/:id/like', (req, res) => {
-  const item = likeNews(req.params.id);
+// Public — anyone can react to a post with one of several reaction types
+// (like Facebook). No login, no server-side de-dup tracking (kept
+// intentionally simple); the frontend remembers what a browser last picked
+// via localStorage and sends it along as `previousType` so the count moves
+// from the old reaction to the new one instead of just piling up.
+router.post('/:id/react', (req, res) => {
+  const { type, previousType } = req.body || {};
+  const item = reactNews(req.params.id, { type, previousType });
   if (!item) return res.status(404).json({ error: 'Post not found.' });
-  res.json({ likes: item.likes });
+  res.json({ reactions: item.reactions });
 });
 
 // Public — anyone can comment, no account needed. Just a display name + text.

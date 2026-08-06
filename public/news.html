@@ -132,18 +132,50 @@
   }
   .n-link:hover{border-color:var(--cyan);}
 
-  .n-actions{display:flex;align-items:center;gap:16px;padding-top:12px;border-top:1px solid var(--line);}
-  .n-like{
+  .n-actions{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--line);position:relative;}
+  .n-react-wrap{position:relative;}
+  .n-react-btn{
     display:flex;align-items:center;gap:7px;background:none;border:none;color:var(--mid);cursor:pointer;
     font-size:13px;font-weight:700;padding:6px 10px;border-radius:8px;transition:background .15s,color .15s;
   }
-  .n-like:hover{background:var(--panel-raised);color:var(--hi);}
-  .n-like.liked{color:var(--signal);}
+  .n-react-btn:hover{background:var(--panel-raised);color:var(--hi);}
+  .n-react-btn.reacted{color:var(--signal);}
+  .n-react-picker{
+    display:none;position:absolute;bottom:100%;left:0;margin-bottom:6px;z-index:5;
+    background:var(--panel-raised);border:1px solid var(--line);border-radius:999px;
+    padding:6px 8px;gap:4px;box-shadow:0 10px 24px rgba(0,0,0,0.4);
+  }
+  .n-react-picker.show{display:flex;}
+  .n-react-picker button{
+    background:none;border:none;font-size:20px;cursor:pointer;padding:4px;border-radius:50%;
+    transition:transform .12s;line-height:1;
+  }
+  .n-react-picker button:hover{transform:scale(1.3);}
   .n-comment-toggle{
     display:flex;align-items:center;gap:7px;background:none;border:none;color:var(--mid);cursor:pointer;
     font-size:13px;font-weight:700;padding:6px 10px;border-radius:8px;transition:background .15s,color .15s;
   }
   .n-comment-toggle:hover{background:var(--panel-raised);color:var(--hi);}
+
+  .n-share-wrap{position:relative;margin-left:auto;}
+  .n-share-btn{
+    display:flex;align-items:center;gap:7px;background:none;border:none;color:var(--mid);cursor:pointer;
+    font-size:13px;font-weight:700;padding:6px 10px;border-radius:8px;transition:background .15s,color .15s;
+  }
+  .n-share-btn:hover{background:var(--panel-raised);color:var(--hi);}
+  .n-share-menu{
+    display:none;position:absolute;bottom:100%;right:0;margin-bottom:6px;z-index:5;
+    background:var(--panel-raised);border:1px solid var(--line);border-radius:12px;
+    padding:8px;min-width:190px;box-shadow:0 10px 24px rgba(0,0,0,0.4);
+  }
+  .n-share-menu.show{display:block;}
+  .n-share-menu button, .n-share-menu a{
+    display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;
+    color:var(--mid);font-size:13px;font-weight:600;padding:9px 10px;border-radius:8px;
+    cursor:pointer;text-align:left;transition:background .12s,color .12s;
+  }
+  .n-share-menu button:hover, .n-share-menu a:hover{background:var(--panel);color:var(--hi);}
+  .n-share-menu .icon{font-size:15px;width:18px;text-align:center;}
 
   .n-comments{display:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
   .n-comments.show{display:block;}
@@ -343,7 +375,7 @@ function t(key, fallback){
 }
 
 const ADMIN_KEY = 'zenith-admin-passcode';
-const LIKED_KEY = 'zenith-news-liked';
+const REACTIONS_KEY = 'zenith-news-reactions'; // { [postId]: reactionType }
 let isAdmin = false;
 let posts = [];
 let editingId = null;
@@ -351,11 +383,22 @@ let mediaFileData = null; // base64 data URL for the chosen image
 let mediaTab = 'image';
 const openCommentPanels = new Set();
 
+const REACTION_TYPES = ['like', 'love', 'haha', 'wow', 'sad'];
+const REACTION_META = {
+  like: { emoji: '👍', labelKey: 'news.react.like', fallback: 'Like' },
+  love: { emoji: '❤️', labelKey: 'news.react.love', fallback: 'Love' },
+  haha: { emoji: '😆', labelKey: 'news.react.haha', fallback: 'Haha' },
+  wow: { emoji: '😮', labelKey: 'news.react.wow', fallback: 'Wow' },
+  sad: { emoji: '😢', labelKey: 'news.react.sad', fallback: 'Sad' },
+};
+
 function getPasscode(){ return sessionStorage.getItem(ADMIN_KEY) || ''; }
-function getLikedIds(){ try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); } catch(e){ return []; } }
-function markLiked(id){
-  const liked = getLikedIds();
-  if (!liked.includes(id)) { liked.push(id); localStorage.setItem(LIKED_KEY, JSON.stringify(liked)); }
+function getMyReactions(){ try { return JSON.parse(localStorage.getItem(REACTIONS_KEY) || '{}'); } catch(e){ return {}; } }
+function getMyReaction(postId){ return getMyReactions()[postId] || null; }
+function setMyReaction(postId, type){
+  const map = getMyReactions();
+  if (type) map[postId] = type; else delete map[postId];
+  localStorage.setItem(REACTIONS_KEY, JSON.stringify(map));
 }
 
 function youtubeVideoId(url){
@@ -395,7 +438,6 @@ function renderMedia(item){
 }
 
 function renderComments(item){
-  const liked = getLikedIds().includes(item.id);
   const list = (item.comments || []).map(c => `
     <div class="n-comment-item">
       <button class="del-comment ${isAdmin ? 'show' : ''}" onclick="deleteComment('${item.id}','${c.id}')">🗑</button>
@@ -425,8 +467,11 @@ function renderCard(item){
   const liveHtml = ytId
     ? `<div class="n-live-badge" id="live-badge-${item.id}" style="display:none;"><span class="dot"></span>${escapeHtml(t('news.live.now','Live now'))}</div>`
     : '';
-  const liked = getLikedIds().includes(item.id);
+  const myReaction = getMyReaction(item.id);
+  const totalReactions = REACTION_TYPES.reduce((sum, k) => sum + ((item.reactions && item.reactions[k]) || 0), 0);
   const commentCount = (item.comments || []).length;
+  const reactBtnEmoji = myReaction ? REACTION_META[myReaction].emoji : '🤍';
+  const reactBtnLabel = myReaction ? escapeHtml(t(REACTION_META[myReaction].labelKey, REACTION_META[myReaction].fallback)) : escapeHtml(t('news.react.default','React'));
 
   return `
     <div class="n-card" data-id="${item.id}">
@@ -438,10 +483,25 @@ function renderCard(item){
       ${item.body ? `<div class="n-body">${escapeHtml(item.body)}</div>` : ''}
       ${linkHtml}
       <div class="n-actions">
-        <button class="n-like ${liked ? 'liked' : ''}" onclick="likePost('${item.id}')" ${liked ? 'disabled' : ''}>
-          ${liked ? '❤️' : '🤍'} <span id="likes-${item.id}">${item.likes || 0}</span>
-        </button>
+        <div class="n-react-wrap">
+          <button class="n-react-btn ${myReaction ? 'reacted' : ''}" onclick="toggleReactPicker('${item.id}')">
+            ${reactBtnEmoji} <span>${reactBtnLabel}</span> <span id="react-count-${item.id}">${totalReactions ? '· ' + totalReactions : ''}</span>
+          </button>
+          <div class="n-react-picker" id="react-picker-${item.id}">
+            ${REACTION_TYPES.map(k => `<button title="${escapeHtml(t(REACTION_META[k].labelKey, REACTION_META[k].fallback))}" onclick="setReaction('${item.id}','${k}')">${REACTION_META[k].emoji}</button>`).join('')}
+          </div>
+        </div>
         <button class="n-comment-toggle" onclick="toggleComments('${item.id}')">💬 ${commentCount}</button>
+        <div class="n-share-wrap">
+          <button class="n-share-btn" onclick="toggleShareMenu('${item.id}')">🔗 ${escapeHtml(t('news.share.btn','Share'))}</button>
+          <div class="n-share-menu" id="share-menu-${item.id}">
+            <button onclick="copyPostLink('${item.id}')">📋 ${escapeHtml(t('news.share.copy','Copy link'))}</button>
+            <a href="#" onclick="return openShareWindow(event,'${item.id}','facebook')"><span class="icon">📘</span> Facebook</a>
+            <a href="#" onclick="return openShareWindow(event,'${item.id}','telegram')"><span class="icon">✈️</span> Telegram</a>
+            <a href="#" onclick="return openShareWindow(event,'${item.id}','twitter')"><span class="icon">𝕏</span> Twitter / X</a>
+            <a href="#" onclick="return openShareWindow(event,'${item.id}','viber')"><span class="icon">💬</span> Viber</a>
+          </div>
+        </div>
       </div>
       ${renderComments(item)}
     </div>`;
@@ -490,17 +550,79 @@ window.toggleComments = function(id){
   document.getElementById('comments-' + id).classList.toggle('show');
 };
 
-window.likePost = async function(id){
-  if (getLikedIds().includes(id)) return;
+// Closes any other open reaction/share popup before opening a new one.
+function closeAllPopups(exceptId){
+  document.querySelectorAll('.n-react-picker.show, .n-share-menu.show').forEach(el => {
+    if (el.id !== exceptId) el.classList.remove('show');
+  });
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.n-react-wrap') && !e.target.closest('.n-share-wrap')) closeAllPopups();
+});
+
+window.toggleReactPicker = function(id){
+  const picker = document.getElementById('react-picker-' + id);
+  const wasOpen = picker.classList.contains('show');
+  closeAllPopups();
+  if (!wasOpen) picker.classList.add('show');
+  // if it was already open, this just closes it (cancel) — no reaction change
+};
+
+window.setReaction = async function(id, type){
+  document.getElementById('react-picker-' + id).classList.remove('show');
+  const previousType = getMyReaction(id);
+  const nextType = previousType === type ? null : type; // tapping the same reaction again removes it
   try {
-    const res = await fetch('/api/news/' + id + '/like', { method: 'POST' });
-    if (!res.ok) throw new Error('like failed');
+    const res = await fetch('/api/news/' + id + '/react', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: nextType, previousType }),
+    });
+    if (!res.ok) throw new Error('react failed');
     const data = await res.json();
-    markLiked(id);
+    setMyReaction(id, nextType);
     const post = posts.find(p => p.id === id);
-    if (post) post.likes = data.likes;
+    if (post) post.reactions = data.reactions;
     renderFeed();
   } catch (e) { /* silently ignore */ }
+};
+
+window.toggleShareMenu = function(id){
+  const menu = document.getElementById('share-menu-' + id);
+  const wasOpen = menu.classList.contains('show');
+  closeAllPopups();
+  if (!wasOpen) menu.classList.add('show');
+};
+
+function postUrl(id){
+  return window.location.origin + window.location.pathname + '#post-' + id;
+}
+
+window.copyPostLink = function(id){
+  const url = postUrl(id);
+  navigator.clipboard.writeText(url).then(() => {
+    const menu = document.getElementById('share-menu-' + id);
+    const btn = menu.querySelector('button');
+    const original = btn.textContent;
+    btn.textContent = '✅ ' + t('news.share.copied','Link copied!');
+    setTimeout(() => { btn.innerHTML = `📋 ${t('news.share.copy','Copy link')}`; }, 1500);
+  });
+};
+
+window.openShareWindow = function(e, id, network){
+  e.preventDefault();
+  document.getElementById('share-menu-' + id).classList.remove('show');
+  const post = posts.find(p => p.id === id);
+  const url = encodeURIComponent(postUrl(id));
+  const text = encodeURIComponent(post ? post.title : 'Zenith Esports');
+  const links = {
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    telegram: `https://t.me/share/url?url=${url}&text=${text}`,
+    twitter: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+    viber: `viber://forward?text=${text}%20${url}`,
+  };
+  if (links[network]) window.open(links[network], '_blank', 'noopener,width=600,height=600');
+  return false;
 };
 
 window.submitComment = async function(id){
@@ -775,7 +897,17 @@ window.ZenithI18n.onLangChange = function(lang, dict){
   renderFeed();
 };
 
-loadNews();
+loadNews().then(() => {
+  if (window.location.hash.startsWith('#post-')) {
+    const id = window.location.hash.slice(6);
+    const card = document.querySelector(`.n-card[data-id="${CSS.escape(id)}"]`);
+    if (card) {
+      setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+      card.style.outline = '2px solid var(--violet)';
+      setTimeout(() => { card.style.outline = 'none'; }, 2500);
+    }
+  }
+});
 </script>
 </body>
 </html>

@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const { hydrate, sync } = require('./persistentStore');
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'home-stats.json');
+const SHEET_KEY = 'homeStats';
 
 const DEFAULTS = {
   tournaments: '2+',
@@ -44,7 +46,10 @@ function saveStats(data) {
     rating: String(data.rating || DEFAULTS.rating).trim().slice(0, 20),
   };
   fs.writeFileSync(DB_FILE, JSON.stringify(clean, null, 2), 'utf8');
+  sync(SHEET_KEY, clean);
   return clean;
 }
 
-module.exports = { getStats, saveStats };
+const ready = hydrate(SHEET_KEY, DB_FILE);
+
+module.exports = { getStats, saveStats, ready };

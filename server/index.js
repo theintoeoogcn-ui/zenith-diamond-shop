@@ -46,6 +46,20 @@ if (!process.env.ADMIN_PASSCODE) {
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Zenith diamond server running on http://localhost:${PORT}`);
-});
+
+// Wait for tournaments/pricing/home-stats/news to finish restoring their
+// last-saved state from Google Sheets (if configured) before opening the
+// server up to traffic — otherwise the very first requests after a deploy
+// could briefly see stale/default data instead of what was actually saved.
+const tournamentsDb = require('./tournamentsDb');
+const diamondPricingDb = require('./diamondPricingDb');
+const homeStatsDb = require('./homeStatsDb');
+const newsDb = require('./newsDb');
+
+Promise.all([tournamentsDb.ready, diamondPricingDb.ready, homeStatsDb.ready, newsDb.ready])
+  .catch((e) => console.error('Error while restoring saved data on boot:', e.message))
+  .finally(() => {
+    app.listen(PORT, () => {
+      console.log(`Zenith diamond server running on http://localhost:${PORT}`);
+    });
+  });

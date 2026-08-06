@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const { hydrate, sync } = require('./persistentStore');
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'tournaments.json');
+const SHEET_KEY = 'tournaments';
 
 function ensureFile() {
   if (!fs.existsSync(path.dirname(DB_FILE))) {
@@ -26,6 +28,7 @@ function readAll() {
 function writeAll(list) {
   ensureFile();
   fs.writeFileSync(DB_FILE, JSON.stringify(list, null, 2), 'utf8');
+  sync(SHEET_KEY, list);
 }
 
 function generateId() {
@@ -91,4 +94,6 @@ function deleteTournament(id) {
   return true;
 }
 
-module.exports = { listTournaments, createTournament, updateTournament, deleteTournament };
+const ready = hydrate(SHEET_KEY, DB_FILE);
+
+module.exports = { listTournaments, createTournament, updateTournament, deleteTournament, ready };
