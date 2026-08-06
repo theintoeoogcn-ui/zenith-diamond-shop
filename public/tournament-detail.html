@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenith Esports — Tournament Detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  :root{
+    --void:#0A0713; --void-rgb:10,7,19; --panel:#150C29; --panel-raised:#1D1237; --line:#2C1F4D;
+    --violet:#8B5CF6; --violet-dim:#4C3592; --cyan:#4FE0E8; --signal:#FF3E9A;
+    --hi:#F4EEFF; --mid:#B4A4DC; --dim:#6C6089; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
+      var(--void);
+    color:var(--hi); font-family:var(--font-main); font-weight:500; min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:var(--font-main);}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 48px;border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;background:rgba(var(--void-rgb),0.85);backdrop-filter:blur(10px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:0.3px;}
+  .brand .mark{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
+  .brand .mark img{width:100%;height:100%;object-fit:contain;display:block;}
+  nav{display:flex;gap:34px;font-weight:600;font-size:15px;color:var(--mid);}
+  nav a.active{color:var(--hi);position:relative;}
+  nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:2px;background:var(--violet);}
+  nav a:hover{color:var(--hi);}
+  @media (max-width:900px){ nav{display:none;} }
+
+  .mobile-menu-btn{
+    display:none;background:none;border:1px solid var(--line);border-radius:8px;
+    color:var(--hi);font-size:18px;cursor:pointer;padding:6px 10px;line-height:1;
+  }
+  @media (max-width:900px){
+    header{padding:16px 20px;position:relative;}
+    nav{
+      display:none;position:absolute;top:100%;left:0;right:0;z-index:29;
+      flex-direction:column;gap:0;background:var(--panel);border-bottom:1px solid var(--line);
+      padding:8px 20px 14px;box-shadow:0 12px 24px rgba(0,0,0,0.35);
+    }
+    nav.mobile-open{display:flex;}
+    nav a{padding:13px 0;border-bottom:1px solid var(--line);}
+    nav a:last-child{border-bottom:none;}
+    nav a.active::after{display:none;}
+    .mobile-menu-btn{display:inline-flex;align-items:center;justify-content:center;}
+  }
+
+  .admin-toggle{
+    display:none;align-items:center;gap:6px;
+    background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
+  }
+  .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+
+  .hero{padding:40px 48px 0;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--mid);font-size:13px;font-weight:600;margin-bottom:18px;}
+  .back-link:hover{color:var(--hi);}
+  .hero-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .hero-icon{font-size:40px;}
+  .hero-cover{width:64px;height:64px;border-radius:12px;object-fit:cover;}
+  h1{font-family:var(--font-main);font-weight:800;font-size:32px;line-height:1.3;margin:0;color:var(--hi);}
+  .hero-badge{
+    display:inline-flex;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;
+    background:rgba(139,92,246,0.18);color:var(--violet);margin-bottom:8px;
+  }
+  .hero-meta{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0 0;color:var(--mid);font-size:13px;}
+  .hero-meta span b{color:var(--hi);}
+  @media (max-width:900px){ .hero{padding:30px 20px 0;} h1{font-size:24px;} }
+
+  .tabs-bar{display:flex;gap:6px;padding:26px 48px 0;border-bottom:1px solid var(--line);overflow-x:auto;}
+  @media (max-width:900px){ .tabs-bar{padding:20px 20px 0;} }
+  .tab{
+    padding:12px 16px;color:var(--mid);font-weight:700;font-size:13.5px;cursor:pointer;
+    border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;
+  }
+  .tab.active{color:var(--hi);border-color:var(--violet);}
+  .tab:hover{color:var(--hi);}
+
+  .tab-panel{display:none;padding:24px 48px 60px;}
+  .tab-panel.active{display:block;}
+  @media (max-width:900px){ .tab-panel{padding:20px 20px 48px;} }
+
+  .panel-toolbar{display:flex;justify-content:flex-end;margin-bottom:16px;}
+  .create-btn{
+    display:none;align-items:center;gap:8px;
+    background:var(--violet);color:#fff;border:none;border-radius:10px;
+    padding:10px 18px;font-weight:700;font-size:13px;cursor:pointer;
+    box-shadow:0 8px 22px rgba(139,92,246,0.35);
+  }
+  .create-btn.show{display:inline-flex;}
+  .create-btn:hover{transform:translateY(-1px);}
+
+  /* ---------- team lineup ---------- */
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+  .team-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;}
+  .team-card .tag{
+    display:inline-block;font-weight:800;font-size:11px;letter-spacing:0.5px;color:var(--cyan);
+    background:rgba(79,224,232,0.12);border-radius:6px;padding:2px 8px;margin-bottom:8px;
+  }
+  .team-card .name{font-weight:700;font-size:15px;margin-bottom:8px;}
+  .team-card .players{font-size:12px;color:var(--mid);white-space:pre-wrap;line-height:1.6;}
+  .card-admin-actions{display:none;gap:4px;position:absolute;top:10px;right:10px;}
+  .card-admin-actions.show{display:flex;}
+  .card-admin-actions button{
+    width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:var(--panel-raised);
+    color:var(--mid);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;
+  }
+  .card-admin-actions button:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .card-admin-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
+
+  /* ---------- match schedule ---------- */
+  .match-row{position:relative;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px;}
+  .match-tag{font-size:10.5px;font-weight:700;color:var(--dim);background:var(--panel-raised);border-radius:6px;padding:3px 8px;white-space:nowrap;}
+  .match-teams{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;flex:1;min-width:200px;justify-content:center;}
+  .match-teams .vs{color:var(--dim);font-size:11px;font-weight:600;}
+  .match-teams .score{font-size:16px;font-weight:800;color:var(--cyan);}
+  .match-status{font-size:10.5px;font-weight:800;text-transform:uppercase;padding:3px 9px;border-radius:999px;}
+  .match-status.upcoming{background:rgba(139,92,246,0.15);color:var(--violet);}
+  .match-status.live{background:rgba(255,62,154,0.15);color:var(--signal);}
+  .match-status.completed{background:rgba(108,96,137,0.2);color:var(--dim);}
+  .match-date{font-size:11px;color:var(--dim);white-space:nowrap;}
+  .match-row .card-admin-actions{position:static;display:flex;margin-left:auto;}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--mid);border:1px dashed var(--line);border-radius:var(--radius);}
+  .empty-state .icon{font-size:32px;margin-bottom:10px;}
+  .empty-state p{margin:0;font-size:13px;}
+
+  /* ---------- standings ---------- */
+  .standings-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media (max-width:760px){ .standings-grid{grid-template-columns:1fr;} }
+  .standings-grid h3{font-size:15px;margin:0 0 12px;}
+  table.standings{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  table.standings th{text-align:left;font-size:11px;color:var(--dim);text-transform:uppercase;padding:10px 14px;border-bottom:1px solid var(--line);}
+  table.standings td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--line);}
+  table.standings tr:last-child td{border-bottom:none;}
+  table.standings td.num{text-align:center;color:var(--mid);}
+  table.standings td.pts{text-align:center;color:var(--cyan);font-weight:700;}
+
+  /* ---------- bracket ---------- */
+  .bracket-columns{display:flex;gap:22px;overflow-x:auto;padding-bottom:16px;}
+  .bracket-col{min-width:230px;flex-shrink:0;}
+  .bracket-col h4{font-size:12.5px;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 12px;}
+  .bracket-match{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:16px;}
+  .bracket-match .row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12.5px;}
+  .bracket-match .row.winner{font-weight:800;color:var(--cyan);}
+  .bracket-match .row span:last-child{font-weight:700;}
+  .bracket-match .divider{border-top:1px solid var(--line);margin:2px 0;}
+  .bracket-match .card-admin-actions{top:6px;right:6px;}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,3,12,0.72);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;padding:26px 24px;animation:modalPop .2s ease;}
+  @keyframes modalPop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .modal h3{font-size:17px;margin:0 0 18px;}
+  .modal .field{margin-bottom:14px;}
+  .modal .field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:600;}
+  .modal .field input,.modal .field select,.modal .field textarea{
+    width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
+    padding:10px 12px;color:var(--hi);font-family:var(--font-main);font-size:14px;font-weight:600;outline:none;resize:vertical;
+  }
+  .modal .field input:focus,.modal .field select:focus,.modal .field textarea:focus{border-color:var(--violet);}
+  .modal .field-row{display:flex;gap:10px;}
+  .modal .field-row .field{flex:1;}
+  .modal-err{color:var(--signal);font-size:12.5px;margin:-6px 0 12px;display:none;}
+  .modal-err.show{display:block;}
+  .modal-actions{display:flex;gap:10px;margin-top:6px;}
+  .modal-actions button{flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;}
+  .modal-actions .save{background:var(--violet);color:#fff;}
+  .modal-actions .save:hover{background:#7C4CED;}
+  .modal-actions .save:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
+  .modal-actions .cancel{background:var(--panel-raised);color:var(--mid);border:1px solid var(--line);}
+  .modal-actions .cancel:hover{color:var(--hi);}
+  .stage-toggle{display:flex;gap:8px;margin-bottom:14px;}
+  .stage-toggle button{flex:1;padding:9px;border-radius:8px;border:1px solid var(--line);background:var(--void);color:var(--mid);font-weight:700;font-size:12.5px;cursor:pointer;}
+  .stage-toggle button.active{background:var(--violet);border-color:transparent;color:#fff;}
+  .stage-field{display:none;}
+  .stage-field.show{display:block;}
+
+  footer{display:flex;justify-content:space-between;padding:26px 48px;border-top:1px solid var(--line);color:var(--dim);font-size:13px;}
+  @media (max-width:640px){ footer{flex-direction:column;gap:8px;padding:22px 20px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="index.html" id="brand-link"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tournament.html" class="active">Tournament</a>
+    <a href="diamond-plan.html">Diamond</a>
+    <a href="news.html">News</a>
+    <a href="customer-service.html">Customer Service</a>
+  </nav>
+  <div class="hdr-controls">
+    <button type="button" class="admin-toggle" id="admin-toggle"><span id="admin-toggle-label">Admin</span></button>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <div class="pill"></div>
+      <button type="button" data-lang="mm">MM</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="th">TH</button>
+    </div>
+    <button type="button" class="theme-toggle" aria-label="Toggle light / dark mode">
+      <span class="icon-wrap">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><g class="ray"><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 15.2A8.5 8.5 0 1 1 8.8 3.3a7 7 0 0 0 11.9 11.9Z"/></svg>
+      </span>
+    </button>
+    <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<div class="hero">
+  <a class="back-link" href="tournament.html">← Back to Tournaments</a>
+  <div class="hero-badge" id="hero-badge">Upcoming</div>
+  <div class="hero-top">
+    <img class="hero-cover" id="hero-cover" style="display:none;" alt="">
+    <div class="hero-icon" id="hero-icon" style="display:none;">🏆</div>
+    <h1 id="hero-title">Loading…</h1>
+  </div>
+  <div class="hero-meta" id="hero-meta"></div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab active" data-tab="lineup">Team Lineup</button>
+  <button class="tab" data-tab="schedule">Match Schedule</button>
+  <button class="tab" data-tab="standings">Standings</button>
+  <button class="tab" data-tab="bracket">Bracket</button>
+</div>
+
+<div class="tab-panel active" id="panel-lineup">
+  <div class="panel-toolbar"><button class="create-btn" id="add-team-btn">+ Add Team</button></div>
+  <div class="team-grid" id="team-grid"></div>
+</div>
+
+<div class="tab-panel" id="panel-schedule">
+  <div class="panel-toolbar"><button class="create-btn" id="add-match-btn">+ Add Match</button></div>
+  <div id="match-list"></div>
+</div>
+
+<div class="tab-panel" id="panel-standings">
+  <div class="standings-grid">
+    <div>
+      <h3>Group A</h3>
+      <table class="standings"><thead><tr><th>Team</th><th class="num">W</th><th class="num">L</th><th class="pts">Pts</th></tr></thead><tbody id="standings-a"></tbody></table>
+    </div>
+    <div>
+      <h3>Group B</h3>
+      <table class="standings"><thead><tr><th>Team</th><th class="num">W</th><th class="num">L</th><th class="pts">Pts</th></tr></thead><tbody id="standings-b"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-bracket">
+  <div class="bracket-columns" id="bracket-columns"></div>
+</div>
+
+<footer>
+  <span>EST 2026</span>
+  <span>Beyond the peak — Zenith Esports</span>
+</footer>
+
+<!-- ---------- admin passcode modal ---------- -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <h3>Enter admin passcode</h3>
+    <div class="field"><input type="password" id="admin-passcode-input" placeholder="Passcode"></div>
+    <div class="modal-err" id="admin-modal-err">Incorrect passcode</div>
+    <div class="modal-actions">
+      <button class="cancel" id="admin-modal-cancel">Cancel</button>
+      <button class="save" id="admin-modal-submit">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- team modal ---------- -->
+<div class="modal-overlay" id="team-modal">
+  <div class="modal">
+    <h3 id="team-modal-title">Add team</h3>
+    <div class="field"><label>Team name</label><input type="text" id="f-team-name"></div>
+    <div class="field"><label>Tag (short)</label><input type="text" id="f-team-tag" maxlength="10" placeholder="e.g. TS"></div>
+    <div class="field"><label>Players</label><textarea id="f-team-players" rows="3" placeholder="One per line"></textarea></div>
+    <div class="modal-err" id="team-modal-err">Error</div>
+    <div class="modal-actions">
+      <button class="cancel" id="team-modal-cancel">Cancel</button>
+      <button class="save" id="team-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- match modal ---------- -->
+<div class="modal-overlay" id="match-modal">
+  <div class="modal">
+    <h3 id="match-modal-title">Add match</h3>
+    <div class="stage-toggle">
+      <button type="button" class="active" data-stage="group" id="stage-group-btn">Group Stage</button>
+      <button type="button" data-stage="bracket" id="stage-bracket-btn">Bracket</button>
+    </div>
+
+    <div class="stage-field show" id="group-field">
+      <div class="field"><label>Group</label>
+        <select id="f-match-group"><option value="A">Group A</option><option value="B">Group B</option></select>
+      </div>
+    </div>
+    <div class="stage-field" id="bracket-field">
+      <div class="field-row">
+        <div class="field"><label>Bracket side</label>
+          <select id="f-match-side"><option value="upper">Upper Bracket</option><option value="lower">Lower Bracket</option></select>
+        </div>
+        <div class="field"><label>Round label</label><input type="text" id="f-match-round" placeholder="e.g. Round 1, Grand Final"></div>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field"><label>Team A</label><select id="f-match-teama"></select></div>
+      <div class="field"><label>Team B</label><select id="f-match-teamb"></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Score A</label><input type="number" id="f-match-scorea" min="0"></div>
+      <div class="field"><label>Score B</label><input type="number" id="f-match-scoreb" min="0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Status</label>
+        <select id="f-match-status"><option value="upcoming">Upcoming</option><option value="live">Live</option><option value="completed">Completed</option></select>
+      </div>
+      <div class="field"><label>Date / time</label><input type="datetime-local" id="f-match-when"></div>
+    </div>
+    <div class="modal-err" id="match-modal-err">Error</div>
+    <div class="modal-actions">
+      <button class="cancel" id="match-modal-cancel">Cancel</button>
+      <button class="save" id="match-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shared.js"></script>
+<script>
+function t(key, fallback){
+  const v = window.ZenithI18n && window.ZenithI18n.t(key);
+  return v || fallback || key;
+}
+
+const params = new URLSearchParams(window.location.search);
+const tournamentId = params.get('id');
+const ADMIN_KEY = 'zenith-admin-passcode';
+let isAdmin = false;
+let teams = [];
+let matches = [];
+let standings = { A: [], B: [] };
+let tournamentInfo = null;
+
+function getPasscode(){ return sessionStorage.getItem(ADMIN_KEY) || ''; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function teamName(id){ const tm = teams.find(x => x.id === id); return tm ? tm.name : t('tourdetail.unknown_team','Unknown team'); }
+
+/* ---------------- mobile menu ---------------- */
+document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+  document.querySelector('nav').classList.toggle('mobile-open');
+});
+
+/* ---------------- admin unlock (secret 5-click logo) ---------------- */
+const adminToggle = document.getElementById('admin-toggle');
+const adminToggleLabel = document.getElementById('admin-toggle-label');
+const adminModal = document.getElementById('admin-modal');
+const adminInput = document.getElementById('admin-passcode-input');
+const adminErr = document.getElementById('admin-modal-err');
+
+async function verifyPasscode(pass){
+  try {
+    const res = await fetch('/api/tournaments/verify', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-passcode': pass }, body: '{}',
+    });
+    const data = await res.json();
+    return !!data.ok;
+  } catch (e) { return false; }
+}
+function setAdminUI(){
+  adminToggle.classList.toggle('on', isAdmin);
+  adminToggleLabel.textContent = isAdmin ? t('tournament.admin.unlocked','Admin mode') : t('tournament.admin.locked','Admin');
+}
+adminToggle.addEventListener('click', async () => {
+  if (isAdmin) { isAdmin = false; sessionStorage.removeItem(ADMIN_KEY); setAdminUI(); renderAll(); return; }
+  adminErr.classList.remove('show'); adminInput.value = ''; adminModal.classList.add('show'); adminInput.focus();
+});
+document.getElementById('admin-modal-cancel').addEventListener('click', () => adminModal.classList.remove('show'));
+document.getElementById('admin-modal-submit').addEventListener('click', async () => {
+  const ok = await verifyPasscode(adminInput.value);
+  if (!ok) { adminErr.classList.add('show'); return; }
+  sessionStorage.setItem(ADMIN_KEY, adminInput.value);
+  isAdmin = true; adminModal.classList.remove('show'); setAdminUI(); renderAll();
+});
+adminInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('admin-modal-submit').click(); });
+
+let brandClicks = 0, brandClickTimer = null;
+const brandLink = document.getElementById('brand-link');
+brandLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  brandClicks++;
+  clearTimeout(brandClickTimer);
+  if (brandClicks >= 5) { brandClicks = 0; adminToggle.click(); return; }
+  brandClickTimer = setTimeout(() => {
+    const count = brandClicks; brandClicks = 0;
+    if (count < 5) window.location.href = brandLink.href;
+  }, 450);
+});
+
+(async () => {
+  const stored = getPasscode();
+  if (stored) {
+    const ok = await verifyPasscode(stored);
+    if (ok) isAdmin = true; else sessionStorage.removeItem(ADMIN_KEY);
+    setAdminUI();
+  }
+})();
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+/* ---------------- data loading ---------------- */
+async function loadTournamentInfo(){
+  try {
+    const res = await fetch('/api/tournaments');
+    const all = await res.json();
+    tournamentInfo = all.find(x => x.id === tournamentId) || null;
+  } catch (e) { tournamentInfo = null; }
+  renderHero();
+}
+
+function renderHero(){
+  if (!tournamentInfo) {
+    document.getElementById('hero-title').textContent = t('tourdetail.not_found','Tournament not found');
+    document.getElementById('hero-badge').style.display = 'none';
+    return;
+  }
+  document.getElementById('hero-title').textContent = tournamentInfo.title;
+  const badge = document.getElementById('hero-badge');
+  badge.textContent = tournamentInfo.status === 'past' ? t('tournament.badge.past','Completed') : t('tournament.badge.upcoming','Upcoming');
+  if (tournamentInfo.coverImage) {
+    const img = document.getElementById('hero-cover');
+    img.src = tournamentInfo.coverImage; img.style.display = 'block';
+  } else {
+    const ic = document.getElementById('hero-icon');
+    ic.textContent = tournamentInfo.icon || '🏆'; ic.style.display = 'block';
+  }
+  const metaParts = [];
+  if (tournamentInfo.date) metaParts.push(`<span>${t('tournament.field.date','Date')}: <b>${escapeHtml(tournamentInfo.date)}</b></span>`);
+  if (tournamentInfo.prize) metaParts.push(`<span>${t('tournament.field.prize','Prize pool')}: <b>${escapeHtml(tournamentInfo.prize)}</b></span>`);
+  if (tournamentInfo.format) metaParts.push(`<span>${t('tournament.field.format','Format')}: <b>${escapeHtml(tournamentInfo.format)}</b></span>`);
+  if (tournamentInfo.slots) metaParts.push(`<span>${t('tournament.field.slots','Slots')}: <b>${escapeHtml(tournamentInfo.slots)}</b></span>`);
+  document.getElementById('hero-meta').innerHTML = metaParts.join('');
+}
+
+async function loadDetail(){
+  try {
+    const res = await fetch('/api/tournament-details/' + encodeURIComponent(tournamentId));
+    const data = await res.json();
+    teams = data.teams || [];
+    matches = data.matches || [];
+    standings = data.standings || { A: [], B: [] };
+  } catch (e) { teams = []; matches = []; standings = { A: [], B: [] }; }
+  renderAll();
+}
+
+async function saveDetail(){
+  try {
+    const res = await fetch('/api/tournament-details/' + encodeURIComponent(tournamentId), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
+      body: JSON.stringify({ teams, matches }),
+    });
+    if (!res.ok) throw new Error('save failed');
+    const data = await res.json();
+    teams = data.teams || []; matches = data.matches || []; standings = data.standings || { A: [], B: [] };
+    renderAll();
+    return true;
+  } catch (e) { return false; }
+}
+
+/* ---------------- render ---------------- */
+function renderAll(){
+  document.getElementById('add-team-btn').classList.toggle('show', isAdmin);
+  document.getElementById('add-match-btn').classList.toggle('show', isAdmin);
+  renderTeams();
+  renderMatches();
+  renderStandings();
+  renderBracket();
+}
+
+function renderTeams(){
+  const grid = document.getElementById('team-grid');
+  if (!teams.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">👥</div><p>${t('tourdetail.no_teams','No teams added yet.')}</p></div>`;
+    return;
+  }
+  grid.innerHTML = teams.map(tm => `
+    <div class="team-card">
+      <div class="card-admin-actions ${isAdmin ? 'show' : ''}">
+        <button onclick="openTeamEdit('${tm.id}')">✏️</button>
+        <button class="del" onclick="deleteTeam('${tm.id}')">🗑</button>
+      </div>
+      ${tm.tag ? `<div class="tag">${escapeHtml(tm.tag)}</div>` : ''}
+      <div class="name">${escapeHtml(tm.name)}</div>
+      ${tm.players ? `<div class="players">${escapeHtml(tm.players)}</div>` : ''}
+    </div>`).join('');
+}
+
+function matchLabel(m){
+  if (m.stage === 'bracket') return `${m.bracketSide === 'lower' ? t('tourdetail.lower','Lower') : t('tourdetail.upper','Upper')} · ${escapeHtml(m.round || '')}`;
+  return `${t('tourdetail.group','Group')} ${m.group}${m.round ? ' · ' + escapeHtml(m.round) : ''}`;
+}
+
+function renderMatches(){
+  const list = document.getElementById('match-list');
+  if (!matches.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>${t('tourdetail.no_matches','No matches scheduled yet.')}</p></div>`;
+    return;
+  }
+  const sorted = [...matches].sort((a, b) => (a.scheduledAt || '').localeCompare(b.scheduledAt || ''));
+  list.innerHTML = sorted.map(m => {
+    const hasScore = m.scoreA !== null && m.scoreB !== null;
+    return `
+    <div class="match-row">
+      <span class="match-tag">${matchLabel(m)}</span>
+      <div class="match-teams">
+        <span>${escapeHtml(teamName(m.teamAId))}</span>
+        ${hasScore ? `<span class="score">${m.scoreA} – ${m.scoreB}</span>` : `<span class="vs">${t('tourdetail.vs','vs')}</span>`}
+        <span>${escapeHtml(teamName(m.teamBId))}</span>
+      </div>
+      <span class="match-status ${m.status}">${t('tourdetail.status.' + m.status, m.status)}</span>
+      ${m.scheduledAt ? `<span class="match-date">${new Date(m.scheduledAt).toLocaleString()}</span>` : ''}
+      <div class="card-admin-actions ${isAdmin ? 'show' : ''}">
+        <button onclick="openMatchEdit('${m.id}')">✏️</button>
+        <button class="del" onclick="deleteMatch('${m.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStandingsTable(rows, elId){
+  const el = document.getElementById(elId);
+  if (!rows.length) {
+    el.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--dim);padding:20px;">${t('tourdetail.no_standings','No completed matches yet.')}</td></tr>`;
+    return;
+  }
+  el.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.team.tag ? `<b style="color:var(--cyan);">${escapeHtml(r.team.tag)}</b> ` : ''}${escapeHtml(r.team.name)}</td>
+      <td class="num">${r.wins}</td>
+      <td class="num">${r.losses}</td>
+      <td class="pts">${r.points}</td>
+    </tr>`).join('');
+}
+function renderStandings(){
+  renderStandingsTable(standings.A || [], 'standings-a');
+  renderStandingsTable(standings.B || [], 'standings-b');
+}
+
+function bracketMatchHtml(m){
+  const hasScore = m.scoreA !== null && m.scoreB !== null;
+  const aWins = hasScore && m.scoreA > m.scoreB;
+  const bWins = hasScore && m.scoreB > m.scoreA;
+  return `
+    <div class="bracket-match">
+      <div class="card-admin-actions ${isAdmin ? 'show' : ''}">
+        <button onclick="openMatchEdit('${m.id}')">✏️</button>
+        <button class="del" onclick="deleteMatch('${m.id}')">🗑</button>
+      </div>
+      <div class="row ${aWins ? 'winner' : ''}"><span>${escapeHtml(teamName(m.teamAId))}</span><span>${hasScore ? m.scoreA : ''}</span></div>
+      <div class="divider"></div>
+      <div class="row ${bWins ? 'winner' : ''}"><span>${escapeHtml(teamName(m.teamBId))}</span><span>${hasScore ? m.scoreB : ''}</span></div>
+    </div>`;
+}
+
+function renderBracket(){
+  const wrap = document.getElementById('bracket-columns');
+  const bracketMatches = matches.filter(m => m.stage === 'bracket');
+  if (!bracketMatches.length) {
+    wrap.innerHTML = `<div class="empty-state" style="width:100%;"><div class="icon">🏆</div><p>${t('tourdetail.no_bracket','No bracket matches added yet.')}</p></div>`;
+    return;
+  }
+  const columns = {}; // "upper:Round 1" -> [matches]
+  bracketMatches.forEach(m => {
+    const key = (m.bracketSide || 'upper') + ':' + (m.round || t('tourdetail.round','Round'));
+    if (!columns[key]) columns[key] = [];
+    columns[key].push(m);
+  });
+  const order = { upper: 0, lower: 1 };
+  const keys = Object.keys(columns).sort((a, b) => {
+    const [sideA] = a.split(':'); const [sideB] = b.split(':');
+    return (order[sideA] ?? 2) - (order[sideB] ?? 2);
+  });
+  wrap.innerHTML = keys.map(key => {
+    const [side, round] = key.split(':');
+    const label = `${side === 'lower' ? t('tourdetail.lower','Lower') : t('tourdetail.upper','Upper')} · ${escapeHtml(round)}`;
+    return `<div class="bracket-col"><h4>${label}</h4>${columns[key].map(bracketMatchHtml).join('')}</div>`;
+  }).join('');
+}
+
+/* ---------------- team modal ---------------- */
+const teamModal = document.getElementById('team-modal');
+const teamModalErr = document.getElementById('team-modal-err');
+const fTeamName = document.getElementById('f-team-name');
+const fTeamTag = document.getElementById('f-team-tag');
+const fTeamPlayers = document.getElementById('f-team-players');
+let editingTeamId = null;
+
+document.getElementById('add-team-btn').addEventListener('click', () => {
+  editingTeamId = null;
+  document.getElementById('team-modal-title').textContent = t('tourdetail.add_team','Add team');
+  fTeamName.value = ''; fTeamTag.value = ''; fTeamPlayers.value = '';
+  teamModalErr.classList.remove('show');
+  teamModal.classList.add('show');
+  fTeamName.focus();
+});
+window.openTeamEdit = function(id){
+  const tm = teams.find(x => x.id === id);
+  if (!tm) return;
+  editingTeamId = id;
+  document.getElementById('team-modal-title').textContent = t('tourdetail.edit_team','Edit team');
+  fTeamName.value = tm.name || ''; fTeamTag.value = tm.tag || ''; fTeamPlayers.value = tm.players || '';
+  teamModalErr.classList.remove('show');
+  teamModal.classList.add('show');
+  fTeamName.focus();
+};
+window.deleteTeam = async function(id){
+  if (!confirm(t('tourdetail.delete_team_confirm','Remove this team?'))) return;
+  teams = teams.filter(x => x.id !== id);
+  const ok = await saveDetail();
+  if (!ok) alert(t('tourdetail.error_save','Could not save. Please try again.'));
+};
+document.getElementById('team-modal-cancel').addEventListener('click', () => teamModal.classList.remove('show'));
+document.getElementById('team-modal-save').addEventListener('click', async () => {
+  const name = fTeamName.value.trim();
+  if (!name) { teamModalErr.textContent = t('tourdetail.error_save','Could not save. Please try again.'); teamModalErr.classList.add('show'); return; }
+  const btn = document.getElementById('team-modal-save');
+  btn.disabled = true; btn.textContent = t('tournament.form.saving','Saving…');
+  const data = { id: editingTeamId || undefined, name, tag: fTeamTag.value.trim(), players: fTeamPlayers.value.trim() };
+  if (editingTeamId) {
+    teams = teams.map(x => x.id === editingTeamId ? { ...x, ...data } : x);
+  } else {
+    teams = [...teams, { ...data, id: 'T-' + Date.now().toString(36) + '-' + Math.floor(Math.random()*1000) }];
+  }
+  const ok = await saveDetail();
+  btn.disabled = false; btn.textContent = t('tournament.form.save','Save');
+  if (ok) teamModal.classList.remove('show');
+  else { teamModalErr.textContent = t('tourdetail.error_save','Could not save. Please try again.'); teamModalErr.classList.add('show'); }
+});
+
+/* ---------------- match modal ---------------- */
+const matchModal = document.getElementById('match-modal');
+const matchModalErr = document.getElementById('match-modal-err');
+const fMatchGroup = document.getElementById('f-match-group');
+const fMatchSide = document.getElementById('f-match-side');
+const fMatchRound = document.getElementById('f-match-round');
+const fMatchTeamA = document.getElementById('f-match-teama');
+const fMatchTeamB = document.getElementById('f-match-teamb');
+const fMatchScoreA = document.getElementById('f-match-scorea');
+const fMatchScoreB = document.getElementById('f-match-scoreb');
+const fMatchStatus = document.getElementById('f-match-status');
+const fMatchWhen = document.getElementById('f-match-when');
+let editingMatchId = null;
+let matchStage = 'group';
+
+function populateTeamSelects(){
+  const opts = teams.map(tm => `<option value="${tm.id}">${escapeHtml(tm.name)}</option>`).join('');
+  fMatchTeamA.innerHTML = opts; fMatchTeamB.innerHTML = opts;
+}
+function setMatchStage(stage){
+  matchStage = stage;
+  document.getElementById('stage-group-btn').classList.toggle('active', stage === 'group');
+  document.getElementById('stage-bracket-btn').classList.toggle('active', stage === 'bracket');
+  document.getElementById('group-field').classList.toggle('show', stage === 'group');
+  document.getElementById('bracket-field').classList.toggle('show', stage === 'bracket');
+}
+document.getElementById('stage-group-btn').addEventListener('click', () => setMatchStage('group'));
+document.getElementById('stage-bracket-btn').addEventListener('click', () => setMatchStage('bracket'));
+
+document.getElementById('add-match-btn').addEventListener('click', () => {
+  if (!teams.length) { alert(t('tourdetail.need_teams_first','Add at least one team first.')); return; }
+  editingMatchId = null;
+  document.getElementById('match-modal-title').textContent = t('tourdetail.add_match','Add match');
+  populateTeamSelects();
+  setMatchStage('group');
+  fMatchGroup.value = 'A'; fMatchSide.value = 'upper'; fMatchRound.value = '';
+  fMatchScoreA.value = ''; fMatchScoreB.value = ''; fMatchStatus.value = 'upcoming'; fMatchWhen.value = '';
+  matchModalErr.classList.remove('show');
+  matchModal.classList.add('show');
+});
+window.openMatchEdit = function(id){
+  const m = matches.find(x => x.id === id);
+  if (!m) return;
+  editingMatchId = id;
+  document.getElementById('match-modal-title').textContent = t('tourdetail.edit_match','Edit match');
+  populateTeamSelects();
+  setMatchStage(m.stage === 'bracket' ? 'bracket' : 'group');
+  fMatchGroup.value = m.group || 'A';
+  fMatchSide.value = m.bracketSide || 'upper';
+  fMatchRound.value = m.round || '';
+  fMatchTeamA.value = m.teamAId || ''; fMatchTeamB.value = m.teamBId || '';
+  fMatchScoreA.value = m.scoreA === null || m.scoreA === undefined ? '' : m.scoreA;
+  fMatchScoreB.value = m.scoreB === null || m.scoreB === undefined ? '' : m.scoreB;
+  fMatchStatus.value = m.status || 'upcoming';
+  fMatchWhen.value = m.scheduledAt ? m.scheduledAt.slice(0, 16) : '';
+  matchModalErr.classList.remove('show');
+  matchModal.classList.add('show');
+};
+window.deleteMatch = async function(id){
+  if (!confirm(t('tourdetail.delete_match_confirm','Remove this match?'))) return;
+  matches = matches.filter(x => x.id !== id);
+  const ok = await saveDetail();
+  if (!ok) alert(t('tourdetail.error_save','Could not save. Please try again.'));
+};
+document.getElementById('match-modal-cancel').addEventListener('click', () => matchModal.classList.remove('show'));
+document.getElementById('match-modal-save').addEventListener('click', async () => {
+  const data = {
+    stage: matchStage,
+    group: matchStage === 'group' ? fMatchGroup.value : '',
+    bracketSide: matchStage === 'bracket' ? fMatchSide.value : '',
+    round: matchStage === 'bracket' ? fMatchRound.value.trim() : (matchStage === 'group' ? t('tourdetail.group_stage','Group Stage') : ''),
+    teamAId: fMatchTeamA.value,
+    teamBId: fMatchTeamB.value,
+    scoreA: fMatchScoreA.value === '' ? null : Number(fMatchScoreA.value),
+    scoreB: fMatchScoreB.value === '' ? null : Number(fMatchScoreB.value),
+    status: fMatchStatus.value,
+    scheduledAt: fMatchWhen.value ? new Date(fMatchWhen.value).toISOString() : '',
+  };
+  if (!data.teamAId || !data.teamBId) {
+    matchModalErr.textContent = t('tourdetail.error_save','Could not save. Please try again.');
+    matchModalErr.classList.add('show');
+    return;
+  }
+  const btn = document.getElementById('match-modal-save');
+  btn.disabled = true; btn.textContent = t('tournament.form.saving','Saving…');
+  if (editingMatchId) {
+    matches = matches.map(x => x.id === editingMatchId ? { ...x, ...data, id: editingMatchId } : x);
+  } else {
+    matches = [...matches, { ...data, id: 'M-' + Date.now().toString(36) + '-' + Math.floor(Math.random()*1000) }];
+  }
+  const ok = await saveDetail();
+  btn.disabled = false; btn.textContent = t('tournament.form.save','Save');
+  if (ok) matchModal.classList.remove('show');
+  else { matchModalErr.textContent = t('tourdetail.error_save','Could not save. Please try again.'); matchModalErr.classList.add('show'); }
+});
+
+if (!tournamentId) {
+  document.getElementById('hero-title').textContent = t('tourdetail.not_found','Tournament not found');
+} else {
+  loadTournamentInfo();
+  loadDetail();
+}
+</script>
+</body>
+</html>

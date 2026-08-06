@@ -22,6 +22,11 @@ app.use('/api/ign', ignRoutes);
 const tournamentRoutes = require('./routes/tournaments');
 app.use('/api/tournaments', tournamentRoutes);
 
+// Tournament detail (teams, match schedule, group standings, bracket) —
+// public to read, admin-passcode-protected to edit
+const tournamentDetailsRoutes = require('./routes/tournament-details');
+app.use('/api/tournament-details', tournamentDetailsRoutes);
+
 // Diamond package pricing — public to read, admin-passcode-protected to edit
 const diamondPricingRoutes = require('./routes/diamond-pricing');
 app.use('/api/diamond-pricing', diamondPricingRoutes);
@@ -52,11 +57,12 @@ const PORT = process.env.PORT || 3000;
 // server up to traffic — otherwise the very first requests after a deploy
 // could briefly see stale/default data instead of what was actually saved.
 const tournamentsDb = require('./tournamentsDb');
+const tournamentDetailsDb = require('./tournamentDetailsDb');
 const diamondPricingDb = require('./diamondPricingDb');
 const homeStatsDb = require('./homeStatsDb');
 const newsDb = require('./newsDb');
 
-Promise.all([tournamentsDb.ready, diamondPricingDb.ready, homeStatsDb.ready, newsDb.ready])
+Promise.all([tournamentsDb.ready, tournamentDetailsDb.ready, diamondPricingDb.ready, homeStatsDb.ready, newsDb.ready])
   .catch((e) => console.error('Error while restoring saved data on boot:', e.message))
   .finally(() => {
     app.listen(PORT, () => {

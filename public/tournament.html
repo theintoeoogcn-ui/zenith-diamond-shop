@@ -421,21 +421,21 @@ function renderCard(item){
   const iconHtml = item.coverImage ? '' : `<div class="t-icon">${item.icon || '🏆'}</div>`;
   const adminHtml = isAdmin ? `
     <div class="t-admin-actions">
-      <button class="edit" title="${t('tournament.card.edit','Edit')}" onclick="openEdit('${item.id}')">✏️</button>
-      <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="deleteItem('${item.id}')">🗑</button>
+      <button class="edit" title="${t('tournament.card.edit','Edit')}" onclick="event.stopPropagation();openEdit('${item.id}')">✏️</button>
+      <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="event.stopPropagation();deleteItem('${item.id}')">🗑</button>
     </div>` : '';
 
   const watchHtml = item.watchLink ? (() => {
     const p = detectLinkPlatform(item.watchLink);
-    return `<a class="t-link-btn ${p.cls}" href="${escapeHtml(item.watchLink)}" target="_blank" rel="noopener">${p.icon} ${escapeHtml(p.label)}</a>`;
+    return `<a class="t-link-btn ${p.cls}" href="${escapeHtml(item.watchLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${p.icon} ${escapeHtml(p.label)}</a>`;
   })() : '';
   const registerHtml = item.registerLink
-    ? `<a class="t-link-btn register" href="${escapeHtml(item.registerLink)}" target="_blank" rel="noopener">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
+    ? `<a class="t-link-btn register" href="${escapeHtml(item.registerLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
     : '';
   const linksHtml = (watchHtml || registerHtml) ? `<div class="t-links">${watchHtml}${registerHtml}</div>` : '';
 
   return `
-    <div class="t-card" data-id="${item.id}">
+    <div class="t-card" data-id="${item.id}" onclick="window.location.href='tournament-detail.html?id=${item.id}'" style="cursor:pointer;">
       ${adminHtml}
       ${coverHtml}
       <div class="t-badge ${item.status === 'past' ? 'past' : ''}">${badgeText}</div>
