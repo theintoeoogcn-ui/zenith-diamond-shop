@@ -106,6 +106,15 @@
 
   .n-title{font-family:var(--font-main);font-weight:700;font-size:18px;line-height:1.4;margin:0 0 6px;padding-right:60px;}
   .live-hint{margin:8px 0 0;font-size:11.5px;color:var(--dim);line-height:1.5;}
+  .schedule-row{display:flex;align-items:center;gap:10px;}
+  .schedule-row input{flex:1;}
+  .schedule-countdown{
+    flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--violet);white-space:nowrap;
+    background:rgba(139,92,246,0.12);border:1px solid var(--violet-dim);border-radius:999px;
+    padding:6px 12px;display:none;
+  }
+  .schedule-countdown.show{display:inline-flex;}
+  .schedule-countdown.past{color:var(--signal);background:rgba(255,62,154,0.12);border-color:var(--signal);}
   .n-live-badge{
     display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:5px 12px;border-radius:999px;
     background:rgba(255,62,154,0.15);border:1px solid var(--signal);color:var(--signal);
@@ -369,7 +378,10 @@
 
     <div class="field">
       <label data-i18n="news.form.field.schedule">Schedule for later (optional)</label>
-      <input type="datetime-local" id="f-schedule">
+      <div class="schedule-row">
+        <input type="datetime-local" id="f-schedule">
+        <span class="schedule-countdown" id="schedule-countdown"></span>
+      </div>
       <p class="live-hint" data-i18n="news.form.field.schedule.hint">Leave blank to publish immediately. Set a future date/time to hold this post until then.</p>
     </div>
 
@@ -829,6 +841,47 @@ const fTitle = document.getElementById('f-title');
 const fBody = document.getElementById('f-body');
 const fLink = document.getElementById('f-link');
 const fSchedule = document.getElementById('f-schedule');
+const scheduleCountdownEl = document.getElementById('schedule-countdown');
+let scheduleCountdownTimer = null;
+
+function updateScheduleCountdown(){
+  if (!fSchedule.value) {
+    scheduleCountdownEl.classList.remove('show', 'past');
+    return;
+  }
+  const target = new Date(fSchedule.value).getTime();
+  const diffMs = target - Date.now();
+  scheduleCountdownEl.classList.add('show');
+
+  if (diffMs <= 0) {
+    scheduleCountdownEl.classList.add('past');
+    scheduleCountdownEl.textContent = '⚠ ' + t('news.schedule.past','This time has already passed');
+    return;
+  }
+  scheduleCountdownEl.classList.remove('past');
+
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+
+  const parts = [];
+  if (days) parts.push(days + t('news.schedule.days','d'));
+  if (hours) parts.push(hours + t('news.schedule.hours','h'));
+  if (days === 0) parts.push(minutes + t('news.schedule.minutes','m')); // only show minutes once we're under a day
+  scheduleCountdownEl.textContent = '⏳ ' + parts.join(' ') + ' ' + t('news.schedule.left','left');
+}
+
+function startScheduleCountdown(){
+  updateScheduleCountdown();
+  clearInterval(scheduleCountdownTimer);
+  scheduleCountdownTimer = setInterval(updateScheduleCountdown, 1000);
+}
+function stopScheduleCountdown(){
+  clearInterval(scheduleCountdownTimer);
+  scheduleCountdownTimer = null;
+}
+fSchedule.addEventListener('input', updateScheduleCountdown);
 
 function toDatetimeLocalValue(isoString){
   if (!isoString) return '';
@@ -883,6 +936,7 @@ function openCreate(){
   document.querySelector('[data-media-tab="image"]').click();
   postModalErr.classList.remove('show');
   postModal.classList.add('show');
+  startScheduleCountdown();
   fTitle.focus();
 }
 
@@ -905,11 +959,12 @@ window.openEdit = function(id){
   }
   postModalErr.classList.remove('show');
   postModal.classList.add('show');
+  startScheduleCountdown();
   fTitle.focus();
 };
 
 document.getElementById('create-btn').addEventListener('click', openCreate);
-document.getElementById('post-modal-cancel').addEventListener('click', () => postModal.classList.remove('show'));
+document.getElementById('post-modal-cancel').addEventListener('click', () => { postModal.classList.remove('show'); stopScheduleCountdown(); });
 
 document.getElementById('post-modal-save').addEventListener('click', async () => {
   const payload = {
@@ -950,6 +1005,7 @@ document.getElementById('post-modal-save').addEventListener('click', async () =>
       posts.unshift(saved);
     }
     postModal.classList.remove('show');
+    stopScheduleCountdown();
     renderFeed();
   } catch (e) {
     postModalErr.textContent = t('news.error.save','Could not save. Please try again.');
