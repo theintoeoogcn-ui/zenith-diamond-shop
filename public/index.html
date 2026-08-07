@@ -37,6 +37,12 @@
     min-height:100vh;
     overflow-x:hidden;
   }
+  [data-theme="light"] body{
+    background:
+      radial-gradient(1000px 560px at 85% -10%, rgba(139,92,246,0.14), transparent 60%),
+      radial-gradient(800px 460px at 8% 8%, rgba(79,224,232,0.10), transparent 55%),
+      var(--void);
+  }
   ::selection{background:var(--violet);color:#fff;}
   a{color:inherit;text-decoration:none;}
 
@@ -83,42 +89,28 @@
     position:relative;
     min-height:calc(100vh - 73px);
     overflow:hidden;
+    display:flex;align-items:center;
   }
   @media (max-width:980px){
-    .hero{min-height:auto;}
-  }
-
-  .hero-media{position:absolute;inset:0;z-index:0;background:var(--void);overflow:hidden;}
-  .hero-media video{
-    width:100%;height:100%;object-fit:cover;object-position:78% center;display:block;
-    filter:blur(45px) saturate(1.15) brightness(0.85);
-    transform:scale(1.15); /* avoid soft/transparent edges from the blur showing through */
-  }
-  .hero-scrim{
-    position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:
-      linear-gradient(100deg, rgba(6,4,14,0.90) 0%, rgba(6,4,14,0.62) 36%, rgba(6,4,14,0.18) 62%, rgba(6,4,14,0.34) 100%),
-      linear-gradient(180deg, rgba(6,4,14,0.05) 0%, rgba(6,4,14,0.12) 55%, rgba(6,4,14,0.68) 100%);
+    .hero{min-height:auto;flex-direction:column;}
   }
 
   .hero-text{
-    position:relative;z-index:2;min-height:calc(100vh - 73px);
-    display:flex;flex-direction:column;justify-content:center;
-    max-width:740px;padding:64px 48px;
+    position:relative;z-index:2;flex:1;
+    max-width:640px;padding:64px 48px;
   }
   @media (max-width:980px){
-    .hero-text{min-height:auto;padding:52px 20px 40px;}
+    .hero-text{padding:52px 20px 20px;max-width:none;}
   }
   .eyebrow{
     font-family:var(--font-main);font-weight:600;font-size:12px;letter-spacing:2px;
-    color:#8CF3EF;text-transform:uppercase;margin:0 0 16px;
+    color:var(--cyan);text-transform:uppercase;margin:0 0 16px;
   }
   h1{
     font-family:var(--font-main);font-weight:800;font-size:46px;line-height:1.4;
-    margin:0 0 18px;letter-spacing:0.5px;color:#fff;
-    text-shadow:0 4px 30px rgba(0,0,0,0.45);
+    margin:0 0 18px;letter-spacing:0.5px;color:var(--hi);
   }
-  .hero-text p{color:rgba(255,255,255,0.82);font-size:17px;max-width:480px;line-height:1.65;margin:0 0 30px;}
+  .hero-text p{color:var(--mid);font-size:17px;max-width:480px;line-height:1.65;margin:0 0 30px;}
 
   .hero-btns{display:flex;gap:14px;margin-bottom:44px;flex-wrap:wrap;}
   .hero-btn{
@@ -134,29 +126,72 @@
   }
   .hero-btn.primary:hover{box-shadow:0 10px 32px rgba(139,92,246,0.55);}
   .hero-btn.secondary{
-    background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.28);color:#fff;
-    backdrop-filter:blur(6px);
+    background:var(--panel);border:1px solid var(--line);color:var(--hi);
   }
-  .hero-btn.secondary:hover{border-color:#8CF3EF;box-shadow:0 0 18px rgba(79,224,232,0.25);}
+  .hero-btn.secondary:hover{border-color:var(--cyan);box-shadow:0 0 18px rgba(79,224,232,0.2);}
 
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:560px;}
   @media (max-width:640px){ .stats{grid-template-columns:repeat(2,1fr);} }
   .stat{
     position:relative;
     display:flex;flex-direction:column;gap:6px;
-    background:rgba(10,8,20,0.55);border:1px solid rgba(255,255,255,0.14);border-radius:12px;
-    padding:14px 12px;backdrop-filter:blur(6px);
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 12px;
   }
   .stat .icon{font-size:18px;}
-  .stat .num{font-family:var(--font-main);font-weight:700;font-size:18px;color:#fff;}
-  .stat .lbl{font-size:12px;color:rgba(255,255,255,0.65);}
+  .stat .num{font-family:var(--font-main);font-weight:700;font-size:18px;color:var(--hi);}
+  .stat .lbl{font-size:12px;color:var(--dim);}
   .stat-edit{
     display:none;position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:6px;
-    background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.25);color:#fff;
+    background:var(--panel-raised);border:1px solid var(--line);color:var(--mid);
     align-items:center;justify-content:center;cursor:pointer;font-size:10px;
   }
   .stat-edit.show{display:flex;}
-  .stat-edit:hover{background:rgba(255,255,255,0.25);}
+  .stat-edit:hover{background:var(--violet);color:#fff;border-color:transparent;}
+
+  /* ---------- hero gem visual ---------- */
+  .hero-visual{
+    position:relative;flex:1;min-height:420px;
+    display:flex;align-items:center;justify-content:center;
+    z-index:1;
+  }
+  @media (max-width:980px){ .hero-visual{min-height:280px;width:100%;padding:0 20px 40px;} }
+  .gem-ring{
+    position:absolute;width:420px;height:420px;border-radius:50%;
+    border:1px solid var(--line);opacity:0.6;
+  }
+  .gem-ring.r2{width:520px;height:520px;opacity:0.35;}
+  @media (max-width:980px){ .gem-ring{width:260px;height:260px;} .gem-ring.r2{width:320px;height:320px;} }
+  .gem-wrap{
+    position:relative;width:320px;z-index:2;
+    animation:gemFloat 5s ease-in-out infinite;
+    filter:drop-shadow(0 30px 40px rgba(139,92,246,0.25));
+  }
+  @media (max-width:980px){ .gem-wrap{width:220px;} }
+  .gem-wrap svg{width:100%;height:auto;display:block;}
+  .gem-shadow{
+    position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+    width:220px;height:36px;border-radius:50%;
+    background:radial-gradient(ellipse, rgba(139,92,246,0.35), transparent 70%);
+    filter:blur(6px);
+    animation:gemShadow 5s ease-in-out infinite;
+  }
+  @keyframes gemFloat{
+    0%,100%{transform:translateY(0) rotate(-2deg);}
+    50%{transform:translateY(-22px) rotate(2deg);}
+  }
+  @keyframes gemShadow{
+    0%,100%{opacity:0.6;transform:translateX(-50%) scaleX(1);}
+    50%{opacity:0.35;transform:translateX(-50%) scaleX(0.82);}
+  }
+  @media (prefers-reduced-motion:reduce){ .gem-wrap,.gem-shadow{animation:none;} }
+  .hero-index{
+    position:absolute;top:8%;right:4%;display:flex;flex-direction:column;gap:10px;
+    text-align:right;font-family:'JetBrains Mono',var(--font-main);
+  }
+  .hero-index span{font-size:12px;color:var(--dim);font-weight:600;}
+  .hero-index span b{color:var(--hi);font-weight:700;margin-right:6px;}
+  @media (max-width:1150px){ .hero-index{display:none;} }
 
   /* ---------- admin toggle pill in header ---------- */
   .admin-toggle{
@@ -241,13 +276,6 @@
 </header>
 
 <div class="hero">
-  <div class="hero-media">
-    <video autoplay muted loop playsinline poster="assets/miya-hero-poster.jpg">
-      <source src="assets/miya-hero-loop.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="hero-scrim"></div>
-
   <div class="hero-text">
     <p class="eyebrow reveal" data-i18n="home.eyebrow">Est. 2026 &nbsp;·&nbsp; Beyond the peak</p>
     <h1 class="reveal" data-i18n="home.h1">The Ultimate Hub for Esports Tournaments &amp; MLBB Top-Ups</h1>
@@ -263,6 +291,59 @@
       <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="icon">💎</span><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
       <div class="stat"><button type="button" class="stat-edit" data-key="players" title="Edit">✏️</button><span class="icon">👥</span><span class="num" id="stat-players">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
       <div class="stat"><button type="button" class="stat-edit" data-key="rating" title="Edit">✏️</button><span class="icon">⭐</span><span class="num" id="stat-rating">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-index">
+      <span><b>01</b><span data-i18n="home.index.one">Tournaments</span></span>
+      <span><b>02</b><span data-i18n="home.index.two">Diamond Top-ups</span></span>
+      <span><b>03</b><span data-i18n="home.index.three">Community</span></span>
+    </div>
+    <div class="gem-ring"></div>
+    <div class="gem-ring r2"></div>
+    <div class="gem-shadow"></div>
+    <div class="gem-wrap">
+      <svg viewBox="0 0 400 460" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gTable" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFFFFF"/>
+            <stop offset="100%" stop-color="#B9D9FF"/>
+          </linearGradient>
+          <linearGradient id="gC0" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#5B34C9"/></linearGradient>
+          <linearGradient id="gC1" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#4FE0E8"/><stop offset="100%" stop-color="#8B5CF6"/></linearGradient>
+          <linearGradient id="gC2" x1="1" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B9A3FF"/><stop offset="100%" stop-color="#4FE0E8"/></linearGradient>
+          <linearGradient id="gC3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6D3FE0"/><stop offset="100%" stop-color="#4FE0E8"/></linearGradient>
+          <linearGradient id="gC4" x1="1" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#C9B7F0"/></linearGradient>
+          <linearGradient id="gC5" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#4FE0E8"/><stop offset="100%" stop-color="#6D3FE0"/></linearGradient>
+          <linearGradient id="gP0" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5B34C9"/><stop offset="100%" stop-color="#2A1763"/></linearGradient>
+          <linearGradient id="gP1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FE0E8"/><stop offset="100%" stop-color="#1F6E86"/></linearGradient>
+          <linearGradient id="gP2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6D3FE0"/><stop offset="100%" stop-color="#2A1763"/></linearGradient>
+          <linearGradient id="gP3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#3B2380"/></linearGradient>
+          <linearGradient id="gP4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FE0E8"/><stop offset="100%" stop-color="#215B72"/></linearGradient>
+          <linearGradient id="gP5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6D3FE0"/><stop offset="100%" stop-color="#33206E"/></linearGradient>
+        </defs>
+
+        <!-- pavilion (lower) facets, drawn first so the crown sits on top -->
+        <polygon points="350,190 275,60.1 200,430" fill="url(#gP0)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="275,60.1 125,60.1 200,430" fill="url(#gP1)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="125,60.1 50,190 200,430" fill="url(#gP2)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="50,190 125,319.9 200,430" fill="url(#gP3)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="125,319.9 275,319.9 200,430" fill="url(#gP4)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="275,319.9 350,190 200,430" fill="url(#gP5)" stroke="#0A0713" stroke-width="1.5"/>
+
+        <!-- crown facets -->
+        <polygon points="255,190 227.5,142.4 275,60.1 350,190" fill="url(#gC0)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="227.5,142.4 172.5,142.4 125,60.1 275,60.1" fill="url(#gC1)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="172.5,142.4 145,190 50,190 125,60.1" fill="url(#gC2)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="145,190 172.5,237.6 125,319.9 50,190" fill="url(#gC3)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="172.5,237.6 227.5,237.6 275,319.9 125,319.9" fill="url(#gC4)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="227.5,237.6 255,190 350,190 275,319.9" fill="url(#gC5)" stroke="#0A0713" stroke-width="1.5"/>
+
+        <!-- table (top facet) -->
+        <polygon points="255,190 227.5,142.4 172.5,142.4 145,190 172.5,237.6 227.5,237.6" fill="url(#gTable)" stroke="#0A0713" stroke-width="1.5"/>
+        <polygon points="200,165 227.5,190 200,215 172.5,190" fill="#FFFFFF" opacity="0.55"/>
+      </svg>
     </div>
   </div>
 </div>
