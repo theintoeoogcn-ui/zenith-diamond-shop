@@ -127,8 +127,11 @@
   .team-status.open_qualifier{background:rgba(108,96,137,0.2);color:var(--dim);}
   .player-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12.5px;}
   .player-role{
-    width:20px;height:20px;border-radius:5px;background:var(--panel-raised);display:flex;align-items:center;
-    justify-content:center;font-size:11px;flex-shrink:0;
+    position:relative;width:20px;height:20px;border-radius:5px;background:var(--panel-raised);display:flex;align-items:center;
+    justify-content:center;font-size:11px;flex-shrink:0;overflow:hidden;
+  }
+  .player-role img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--panel-raised);
   }
   .player-photo{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;}
   .player-photo-fallback{
@@ -257,8 +260,22 @@
 
   .player-editor-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;background:var(--void);border:1px solid var(--line);border-radius:9px;padding:6px 8px;}
   .player-editor-row .p-photo{width:26px;height:26px;border-radius:50%;object-fit:cover;background:var(--panel-raised);flex-shrink:0;cursor:pointer;}
-  .player-editor-row input[type="text"]{flex:1;background:none;border:none;color:var(--hi);font-size:13px;font-weight:600;outline:none;padding:4px;}
-  .player-editor-row select{background:var(--panel-raised);border:1px solid var(--line);border-radius:6px;color:var(--mid);font-size:11px;padding:4px 6px;width:80px;}
+  .player-editor-row .p-name{
+    flex:1;min-width:90px;background:var(--panel-raised);border:1px solid var(--line);border-radius:6px;
+    color:var(--hi);font-size:13px;font-weight:600;outline:none;padding:6px 8px;
+  }
+  .player-editor-row .p-name:focus{border-color:var(--violet-dim);}
+  .player-editor-row .p-name::placeholder{color:var(--dim);font-weight:500;}
+  .player-editor-row .role-icon{
+    position:relative;width:26px;height:26px;border-radius:6px;background:var(--panel-raised);
+    display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;overflow:hidden;
+  }
+  .player-editor-row .role-icon img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--panel-raised);}
+  .player-editor-row select{background:var(--panel-raised);border:1px solid var(--line);border-radius:6px;color:var(--mid);font-size:11px;padding:5px 6px;width:86px;flex-shrink:0;}
+  @media (max-width:520px){
+    .player-editor-row{flex-wrap:wrap;}
+    .player-editor-row .p-name{flex:1 1 100%;order:3;}
+  }
   .player-editor-row .remove-player{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 4px;}
   .player-editor-row .remove-player:hover{color:var(--signal);}
   .add-player-btn{background:var(--panel-raised);border:1px dashed var(--line);color:var(--mid);border-radius:8px;padding:8px;width:100%;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;}
@@ -465,6 +482,26 @@ const tournamentId = params.get('id');
 const ADMIN_KEY = 'zenith-admin-passcode';
 const ROLES = ['Exp','Jungle','Mid','Gold','Roam','Coach','Manager','Sub'];
 const ROLE_ICONS = { Exp:'⚔️', Jungle:'🌲', Mid:'✨', Gold:'🏹', Roam:'🛡️', Coach:'📋', Manager:'💼', Sub:'🔄' };
+/* Role icon images — drop these files into the assets/roles/ folder.
+   If a file is missing the emoji above is shown instead (nothing breaks). */
+const ROLE_ICON_IMAGES = {
+  Exp:     'assets/roles/exp.png',
+  Jungle:  'assets/roles/jungle.png',
+  Mid:     'assets/roles/mid.png',
+  Gold:    'assets/roles/gold.png',
+  Roam:    'assets/roles/roam.png',
+  Coach:   'assets/roles/coach.png',
+  Manager: 'assets/roles/manager.png',
+  Sub:     'assets/roles/sub.png',
+};
+/* Emoji sits underneath as the fallback; the image covers it when it loads.
+   onerror hides a missing image so the emoji shows through. */
+function roleIconInner(role){
+  const emoji = ROLE_ICONS[role] || '🎮';
+  const src = ROLE_ICON_IMAGES[role];
+  return `<span class="role-emoji">${emoji}</span>` +
+    (src ? `<img src="${src}" alt="${escapeHtml(role || '')}" onerror="this.style.display='none'">` : '');
+}
 const BRACKET_SLOTS = ['ubsf1','ubsf2','lbr1','ubf','lbf','gf'];
 const BRACKET_META = {
   ubsf1: { col: 0, label: 'Upper Semifinal 1' },
@@ -657,7 +694,7 @@ function renderTeams(){
       <div class="team-status ${tm.status}">${t('tourdetail.teamstatus.' + tm.status, tm.status)}</div>
       ${(tm.players || []).map(p => `
         <div class="player-row">
-          <span class="player-role" title="${escapeHtml(p.role)}">${ROLE_ICONS[p.role] || '🎮'}</span>
+          <span class="player-role" title="${escapeHtml(p.role)}">${roleIconInner(p.role)}</span>
           ${p.photo ? `<img class="player-photo" src="${p.photo}" alt="">` : `<span class="player-photo-fallback">${escapeHtml((p.name||'?').slice(0,1).toUpperCase())}</span>`}
           <span class="player-name">${escapeHtml(p.name)}</span>
         </div>`).join('')}
@@ -844,13 +881,21 @@ function renderPlayerEditor(){
     <div class="player-editor-row">
       <img class="p-photo" src="${p.photo || ''}" onclick="document.getElementById('player-photo-input-${idx}').click()">
       <input type="file" accept="image/*" id="player-photo-input-${idx}" style="display:none;" onchange="setPlayerPhoto(${idx}, this.files[0])">
-      <input type="text" placeholder="Name" value="${escapeHtml(p.name)}" oninput="editingPlayers[${idx}].name = this.value">
-      <select onchange="editingPlayers[${idx}].role = this.value">
+      <input type="text" class="p-name" placeholder="${t('tourdetail.player_name','Player name')}" value="${escapeHtml(p.name || '')}" oninput="editingPlayers[${idx}].name = this.value">
+      <span class="role-icon" id="role-icon-${idx}" title="${escapeHtml(p.role || '')}">${roleIconInner(p.role)}</span>
+      <select onchange="setPlayerRole(${idx}, this.value)">
         ${ROLES.map(r => `<option value="${r}" ${p.role === r ? 'selected' : ''}>${r}</option>`).join('')}
       </select>
       <button type="button" class="remove-player" onclick="removePlayerRow(${idx})">✕</button>
     </div>`).join('');
 }
+/* Swap the icon in place (instead of re-rendering) so the name field
+   keeps whatever the user has typed and doesn't lose focus. */
+window.setPlayerRole = function(idx, role){
+  editingPlayers[idx].role = role;
+  const el = document.getElementById('role-icon-' + idx);
+  if (el) { el.innerHTML = roleIconInner(role); el.title = role; }
+};
 window.setPlayerPhoto = function(idx, file){
   readImageFile(file, 1.5 * 1024 * 1024, (dataUrl) => {
     editingPlayers[idx].photo = dataUrl;
