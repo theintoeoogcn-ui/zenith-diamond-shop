@@ -5,1226 +5,637 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zenith Esports — Diamond Plan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Noto+Sans+Myanmar:wght@500;600;700&family=Noto+Sans+Thai:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/theme.css">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --void:#0A0713;
-    --void-rgb:10,7,19;
-    --panel:#150C29;
-    --panel-raised:#1D1237;
-    --line:#2C1F4D;
+    --void:#0A0714;
+    --void-2:#140C28;
+    --card:#170F30;
+    --card-border:#2B1E52;
+    --amethyst:#5B21B6;
     --violet:#8B5CF6;
-    --violet-dim:#4C3592;
-    --cyan:#4FE0E8;
-    --signal:#FF3E9A;
-    --hi:#F4EEFF;
-    --mid:#B4A4DC;
-    --dim:#6C6089;
-    --radius:14px;
+    --cyan:#5CE1E6;
+    --gold:#F2B84F;
+    --paper:#F3F0FA;
+    --muted:#9E8FC4;
+    --muted-2:#6F638F;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
   body{
     background:
-      radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
-      radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
+      radial-gradient(ellipse 900px 500px at 15% 0%, rgba(139,92,246,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 85% 20%, rgba(92,225,230,0.08), transparent 55%),
       var(--void);
-    color:var(--hi);
-    font-family:var(--font-main);
-    font-weight:500;
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
     min-height:100vh;
   }
-  ::selection{background:var(--violet);color:#fff;}
 
   a{color:inherit;text-decoration:none;}
 
-  /* ---------- header ---------- */
+  ::selection{background:var(--violet);color:var(--void);}
+
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:4px;}
+
+  /* ---------- NAV ---------- */
   header{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:20px 48px;
-    border-bottom:1px solid var(--line);
-    position:sticky;top:0;z-index:30;
-    background:rgba(var(--void-rgb),0.85);
-    backdrop-filter:blur(10px);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 56px;
+    border-bottom:1px solid rgba(139,92,246,0.14);
+    position:sticky;
+    top:0;
+    z-index:50;
+    backdrop-filter:blur(14px);
+    background:rgba(10,7,20,0.72);
   }
-  .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-main);font-weight:700;font-size:17px;letter-spacing:0.3px;}
-  .brand .mark{
-    width:32px;height:32px;border-radius:8px;
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .brand-mark{
+    width:34px;height:34px;
+    background:linear-gradient(135deg,var(--violet),var(--cyan));
+    clip-path:polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    flex-shrink:0;
+  }
+
+  .brand-name{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:20px;
+    letter-spacing:0.06em;
+    color:var(--paper);
+  }
+
+  nav ul{
+    display:flex;
+    gap:38px;
+    list-style:none;
+  }
+
+  nav a{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.05em;
+    color:var(--muted);
+    text-transform:uppercase;
+    position:relative;
+    padding-bottom:4px;
+    transition:color .2s ease;
+  }
+
+  nav a:hover{color:var(--paper);}
+
+  nav a.active{color:var(--paper);}
+  nav a.active::after{
+    content:'';
+    position:absolute;
+    left:0;right:0;bottom:-2px;
+    height:2px;
+    background:linear-gradient(90deg,var(--violet),var(--cyan));
+  }
+
+  .header-right{
+    display:flex;
+    align-items:center;
+    gap:22px;
+  }
+
+  .icon-btn{
+    width:36px;height:36px;
     display:flex;align-items:center;justify-content:center;
-    overflow:hidden;background:#fff;
+    border-radius:50%;
+    color:var(--muted);
+    transition:color .2s ease, background .2s ease;
   }
-  .brand .mark img{width:100%;height:100%;object-fit:contain;display:block;}
-  nav{display:flex;gap:34px;font-weight:600;font-size:15px;color:var(--mid);}
-  nav a.active{color:var(--hi);position:relative;}
-  nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:2px;background:var(--violet);}
-  nav a:hover{color:var(--hi);}
-  .mobile-menu-btn{
-    display:none;background:none;border:1px solid var(--line);border-radius:8px;
-    color:var(--hi);font-size:18px;cursor:pointer;padding:6px 10px;line-height:1;
+  .icon-btn:hover{color:var(--paper);background:rgba(139,92,246,0.14);}
+
+  .cta-btn{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    letter-spacing:0.06em;
+    font-size:14px;
+    text-transform:uppercase;
+    padding:11px 26px;
+    background:linear-gradient(135deg,var(--violet),var(--amethyst));
+    color:#fff;
+    border:none;
+    clip-path:polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    cursor:pointer;
+    transition:filter .2s ease, transform .2s ease;
   }
+  .cta-btn:hover{filter:brightness(1.15);transform:translateY(-1px);}
+
   @media (max-width:900px){
-    header{padding:16px 20px;position:relative;}
-    nav{
-      display:none;position:absolute;top:100%;left:0;right:0;z-index:29;
-      flex-direction:column;gap:0;background:var(--panel);border-bottom:1px solid var(--line);
-      padding:8px 20px 14px;box-shadow:0 12px 24px rgba(0,0,0,0.35);
-    }
-    nav.mobile-open{display:flex;}
-    nav a{padding:13px 0;border-bottom:1px solid var(--line);}
-    nav a:last-child{border-bottom:none;}
-    nav a.active::after{display:none;}
-    .mobile-menu-btn{display:inline-flex;align-items:center;justify-content:center;}
+    nav{display:none;}
+    header{padding:18px 24px;}
   }
 
-  /* ---------- admin toggle pill in header ---------- */
-  .admin-toggle{
-    display:none;align-items:center;gap:6px;
-    background:var(--panel);border:1px solid var(--line);border-radius:999px;
-    padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
-    font-family:var(--font-main);
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:64px 56px 40px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:40px;
+    flex-wrap:wrap;
   }
-  .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
-  .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
 
-  /* ---------- admin controls on package cards ---------- */
-  .card{position:relative;}
-  .card-admin-actions{display:none;gap:4px;position:absolute;top:8px;right:8px;z-index:2;}
-  .card-admin-actions.show{display:flex;}
-  .card-admin-actions button{
-    width:20px;height:20px;border-radius:6px;border:1px solid var(--line);background:var(--panel-raised);
-    color:var(--mid);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;
+  .hero-text .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
   }
-  .card-admin-actions button:hover{border-color:var(--violet-dim);color:var(--hi);}
-  .card-admin-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
-  .add-card{
-    display:none;align-items:center;justify-content:center;flex-direction:column;gap:6px;
-    background:var(--panel);border:1.5px dashed var(--line);border-radius:var(--radius);
-    padding:18px 14px;text-align:center;cursor:pointer;color:var(--dim);font-weight:700;font-size:13px;
-  }
-  .add-card.show{display:flex;}
-  .add-card:hover{border-color:var(--violet-dim);color:var(--hi);}
-  .pass-edit{
-    display:none;width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:var(--panel-raised);
-    color:var(--mid);cursor:pointer;font-size:11px;align-items:center;justify-content:center;margin-left:auto;
-  }
-  .pass-edit.show{display:flex;}
-  .pass-edit:hover{border-color:var(--violet-dim);color:var(--hi);}
 
-  /* ---------- modal ---------- */
-  .modal-overlay{
-    display:none;position:fixed;inset:0;background:rgba(5,3,12,0.72);backdrop-filter:blur(4px);
-    z-index:100;align-items:center;justify-content:center;padding:20px;
+  .eyebrow::before{
+    content:'';
+    width:22px;height:1px;
+    background:var(--cyan);
   }
-  .modal-overlay.show{display:flex;}
-  .modal{
-    background:var(--panel);border:1px solid var(--line);border-radius:16px;
-    width:100%;max-width:380px;max-height:90vh;overflow-y:auto;padding:26px 24px;
-    animation:modalPop .2s ease;
-  }
-  @keyframes modalPop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
-  .modal h3{font-family:var(--font-main);font-weight:700;font-size:17px;margin:0 0 18px;}
-  .modal .field{margin-bottom:14px;}
-  .modal .field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:600;}
-  .modal .field input{
-    width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
-    padding:10px 12px;color:var(--hi);font-family:var(--font-main);font-size:14px;font-weight:600;outline:none;
-  }
-  .modal .field input:focus{border-color:var(--violet);}
-  .modal-err{color:var(--signal);font-size:12.5px;margin:-6px 0 12px;display:none;}
-  .modal-err.show{display:block;}
-  .modal-actions{display:flex;gap:10px;margin-top:6px;}
-  .modal-actions button{
-    flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;
-    font-family:var(--font-main);
-  }
-  .modal-actions .save{background:var(--violet);color:#fff;}
-  .modal-actions .save:hover{background:#7C4CED;}
-  .modal-actions .save:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
-  .modal-actions .cancel{background:var(--panel-raised);color:var(--mid);border:1px solid var(--line);}
-  .modal-actions .cancel:hover{color:var(--hi);}
 
-  /* ---------- hero ---------- */
-  .hero{padding:56px 48px 20px;}
-  .eyebrow{
-    font-family:var(--font-main);font-weight:600;font-size:12px;letter-spacing:2px;
-    color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
+  .hero-text h1{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:56px;
+    letter-spacing:0.02em;
+    line-height:1;
+    background:linear-gradient(135deg,#fff, #C9BAF2 60%, var(--cyan));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
   }
-  h1{
-    font-family:var(--font-main);font-weight:800;font-size:44px;line-height:1.4;
-    margin:0 0 12px;letter-spacing:0.5px;
-    background:linear-gradient(180deg, var(--hi), var(--mid));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+
+  .hero-text p{
+    margin-top:16px;
+    max-width:460px;
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.65;
   }
-  .hero p{color:var(--mid);font-size:17px;max-width:540px;line-height:1.6;margin:0;}
 
-  /* ---------- layout ---------- */
-  .layout{
-    display:grid;grid-template-columns:1fr 380px;gap:28px;
-    padding:12px 48px 64px;align-items:start;
+  .hero-gem{
+    width:150px;height:150px;
+    position:relative;
+    flex-shrink:0;
   }
-  @media (max-width:1050px){ .layout{grid-template-columns:1fr;} }
-  @media (max-width:900px){ .hero{padding:40px 20px 10px;} .layout{padding:12px 20px 48px;} h1{font-size:32px;} }
 
-  /* ---------- tabs ---------- */
-  .tabs{display:flex;gap:8px;margin-bottom:22px;}
-  .tab{
-    font-family:var(--font-main);font-weight:700;font-size:14px;letter-spacing:0.5px;
-    padding:10px 18px;border-radius:10px;color:var(--dim);cursor:pointer;
-    border:1px solid var(--line);background:var(--panel);
+  .hero-gem svg{
+    width:100%;height:100%;
+    filter:drop-shadow(0 0 40px rgba(92,225,230,0.35));
+    animation:float 5s ease-in-out infinite;
   }
-  .tab.active{color:var(--hi);border-color:var(--violet);background:var(--panel-raised);
-    box-shadow:0 0 0 1px var(--violet-dim) inset;}
 
-  .section{display:none;}
-  .section.active{display:block;animation:sectionFadeIn .35s ease;}
-  @keyframes sectionFadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-  @media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr);} }
-
-  .card{
-    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-    padding:18px 14px;text-align:center;cursor:pointer;position:relative;
-    transition:border-color .15s, transform .1s;
+  @keyframes float{
+    0%,100%{transform:translateY(0) rotate(0deg);}
+    50%{transform:translateY(-10px) rotate(3deg);}
   }
-  .card:hover{border-color:var(--violet-dim);transform:translateY(-2px);}
-  .card.selected{
+
+  @media (prefers-reduced-motion: reduce){
+    .hero-gem svg{animation:none;}
+  }
+
+  /* ---------- SECTIONS ---------- */
+  main{
+    padding:0 56px 80px;
+  }
+
+  .plans{
+    display:grid;
+    grid-template-columns:1.6fr 1fr;
+    gap:56px;
+    align-items:start;
+  }
+
+  @media (max-width:1100px){
+    .plans{grid-template-columns:1fr;}
+  }
+
+  .section-label{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:22px;
+  }
+
+  .section-label h2{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--paper);
+  }
+
+  .section-label span{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--muted-2);
+  }
+
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:16px;
+  }
+
+  @media (max-width:640px){
+    .card-grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+  .diamond-card{
+    position:relative;
+    background:linear-gradient(165deg, var(--card), var(--void-2));
+    border:1px solid var(--card-border);
+    clip-path:polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    padding:22px 16px 18px;
+    text-align:center;
+    cursor:pointer;
+    transition:transform .18s ease, border-color .18s ease, background .18s ease;
+  }
+
+  .diamond-card:hover, .diamond-card:focus-visible{
+    transform:translateY(-4px);
     border-color:var(--violet);
-    box-shadow:0 0 0 1px var(--violet), 0 0 22px rgba(139,92,246,0.35);
-    background:var(--panel-raised);
-    animation:cardPop .25s ease;
+    background:linear-gradient(165deg, #1E1440, var(--void-2));
   }
-  @keyframes cardPop{0%{transform:scale(.94);}100%{transform:scale(1);}}
-  .card .amt{font-family:var(--font-main);font-weight:800;font-size:21px;margin-bottom:10px;}
-  .card img.card-icon{width:30px;height:30px;margin-bottom:8px;}
-  .card .price{font-size:15px;color:var(--cyan);font-weight:700;}
-  .card .badge{
-    position:absolute;top:-9px;left:10px;background:var(--signal);color:#fff;
-    font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;
-    font-family:var(--font-main);font-weight:600;
+
+  .diamond-card .amount{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:20px;
+    color:var(--paper);
+    margin-bottom:10px;
+  }
+
+  .gem-icon{
+    width:34px;height:34px;
+    margin:0 auto 12px;
+  }
+
+  .diamond-card .price{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:14px;
+    color:var(--cyan);
+    letter-spacing:0.02em;
+  }
+
+  .diamond-card .price::after{
+    content:' Ks';
+    color:var(--muted-2);
+    font-weight:500;
+  }
+
+  .diamond-card.tier-bundle{
+    border-color:rgba(242,184,79,0.28);
+  }
+  .diamond-card.tier-bundle:hover{
+    border-color:var(--gold);
+  }
+
+  /* ---------- SIDE COLUMN ---------- */
+  .side-col{
+    display:flex;
+    flex-direction:column;
+    gap:44px;
+  }
+
+  .double-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
   }
 
   .pass-card{
-    display:flex;align-items:center;gap:14px;padding:16px;
-    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-    cursor:pointer;margin-top:14px;
+    position:relative;
+    background:linear-gradient(160deg, #241350, #150B2E);
+    border:1px solid rgba(242,184,79,0.35);
+    clip-path:polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+    padding:24px 22px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    cursor:pointer;
+    transition:transform .18s ease, border-color .18s ease;
   }
-  .pass-card.selected{border-color:var(--signal);box-shadow:0 0 22px rgba(255,62,154,0.3);}
-  .pass-card .icon{
-    width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--signal),var(--violet));
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  }
-  .pass-card .info{flex:1;}
-  .pass-card .name{font-weight:700;font-size:15px;}
-  .pass-card .price{color:var(--cyan);font-weight:700;font-size:14px;margin-top:2px;}
 
-  /* ---------- ticket (signature element) ---------- */
-  .ticket-wrap{position:sticky;top:96px;}
-  .ticket{
-    background:var(--panel);border:1px solid var(--line);border-radius:16px;
-    overflow:hidden;
+  .pass-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--gold);
   }
-  .tg-link{
-    display:inline-flex;align-items:center;gap:8px;margin-top:14px;
-    padding:9px 16px;border-radius:999px;background:rgba(79,224,232,0.12);
-    border:1px solid var(--line);color:var(--cyan);font-weight:700;font-size:13px;
-    transition:border-color .15s, transform .15s;
-  }
-  .tg-link:hover{border-color:var(--cyan);transform:translateY(-1px);}
-  .ticket-head{padding:20px 22px 16px;border-bottom:1px dashed var(--line);}
-  .ticket-head .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--font-main);font-weight:600;}
-  .ticket-head h3{margin:6px 0 0;font-family:var(--font-main);font-weight:700;font-size:16px;}
 
-  .field{padding:16px 22px 0;}
-  .field label{display:block;font-size:13px;color:var(--mid);margin-bottom:6px;font-weight:600;}
-  .field input,.field select{
-    width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
-    padding:11px 12px;color:var(--hi);font-family:var(--font-main);font-size:15px;font-weight:600;
-    outline:none;
+  .pass-badge{
+    position:absolute;
+    top:-10px; right:16px;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:11px;
+    color:var(--void);
+    background:linear-gradient(135deg,var(--gold), #F7D98A);
+    padding:4px 10px;
+    letter-spacing:0.03em;
+    clip-path:polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
   }
-  .field input:focus{border-color:var(--violet);}
-  .field-row{display:flex;gap:10px;padding:16px 22px 0;}
-  .field-row .field{padding:0;flex:1;}
 
-  .ign-row{
-    display:flex;align-items:center;gap:8px;margin:10px 22px 0;padding:9px 12px;
-    background:var(--void);border:1px solid var(--line);border-radius:9px;
-    font-size:13px;font-weight:600;color:var(--mid);
-  }
-  .ign-row .ign-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;}
-  .ign-row.loading .ign-dot{background:var(--cyan);animation:pulse 1.1s ease-in-out infinite;}
-  .ign-row.found{border-color:var(--violet-dim);color:var(--hi);}
-  .ign-row.found .ign-dot{background:var(--violet);}
-  .ign-row.error{border-color:rgba(255,62,154,0.4);color:var(--signal);}
-  .ign-row.error .ign-dot{background:var(--signal);}
+  .pass-icon{width:44px;height:44px;flex-shrink:0;}
 
-  .perforation{
-    position:relative;height:0;margin:18px 0;
+  .pass-info .label{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:19px;
+    color:var(--paper);
   }
-  .perforation::before{
-    content:"";position:absolute;left:0;right:0;top:0;
-    border-top:1.5px dashed var(--line);
-  }
-  .perforation .notch{
-    position:absolute;top:-9px;width:18px;height:18px;border-radius:50%;background:var(--void);
-  }
-  .perforation .notch.l{left:-9px;}
-  .perforation .notch.r{right:-9px;}
 
-  .summary-row{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:0 22px;font-size:14px;color:var(--mid);margin-bottom:10px;
+  .pass-info .price{
+    margin-top:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:15px;
+    color:var(--gold);
   }
-  .summary-row .val{color:var(--hi);font-weight:700;}
-  .summary-empty{padding:0 22px;font-size:13px;color:var(--dim);font-style:italic;}
+  .pass-info .price::after{content:' Ks';color:var(--muted-2);font-weight:500;}
 
-  .pay-options{display:flex;gap:8px;padding:0 22px;margin-top:6px;}
+  /* ---------- PAYMENT ---------- */
+  .payment-block{
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+
+  .payment-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+
   .pay-chip{
-    flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
-    padding:10px 4px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:11px;font-weight:700;color:var(--mid);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 18px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.04em;
+    color:var(--paper);
+    transition:border-color .2s ease, transform .2s ease;
   }
-  .pay-chip.selected{border-color:var(--cyan);color:var(--hi);box-shadow:0 0 0 1px var(--cyan) inset;}
-  .pay-chip .swatch{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
-  .pay-chip .swatch img{width:100%;height:100%;object-fit:contain;display:block;}
+  .pay-chip:hover{border-color:var(--violet);transform:translateY(-2px);}
 
-  .proof-panel{display:none;margin:16px 22px 0;padding:14px;background:var(--void);border:1px solid var(--line);border-radius:12px;}
-  .proof-panel.show{display:block;}
+  .pay-chip .dot{
+    width:20px;height:20px;
+    border-radius:5px;
+    flex-shrink:0;
+  }
+  .kbz .dot{background:#1D2C6B;}
+  .wave .dot{background:#FFC629;}
+  .aya .dot{background:#D71920;}
 
-  .transfer-info{
-    display:flex;align-items:center;gap:12px;
-    margin-bottom:14px;padding:12px 14px;border-radius:10px;
-    background:linear-gradient(135deg, rgba(139,92,246,0.14), rgba(79,224,232,0.08));
-    border:1px solid var(--violet-dim);
+  .telegram-cta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    padding:20px 24px;
+    background:linear-gradient(120deg, var(--amethyst), #3A1876);
+    clip-path:polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    cursor:pointer;
+    transition:filter .2s ease, transform .2s ease;
   }
-  .transfer-info.pop{animation:transferPop .45s cubic-bezier(.34,1.56,.64,1);}
-  @keyframes transferPop{
-    0%{opacity:0;transform:translateY(-6px) scale(.97);}
-    60%{opacity:1;transform:translateY(1px) scale(1.01);}
-    100%{opacity:1;transform:translateY(0) scale(1);}
-  }
-  .transfer-info .t-icon{
-    width:36px;height:36px;border-radius:9px;overflow:hidden;background:#fff;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .transfer-info .t-icon img{width:100%;height:100%;object-fit:contain;display:block;}
-  .transfer-info .t-body{flex:1;min-width:0;}
-  .transfer-info .t-name{font-family:var(--font-main);font-size:14.5px;font-weight:800;color:var(--hi);line-height:1.35;}
-  .transfer-info .t-num{font-family:var(--font-main);font-size:13px;font-weight:600;color:var(--mid);letter-spacing:0.2px;margin-top:1px;}
-  .transfer-info .t-copy{
-    flex-shrink:0;width:34px;height:34px;border-radius:9px;
-    background:var(--panel-raised);border:1px solid var(--line);color:var(--mid);
-    cursor:pointer;transition:transform .15s,background .15s,color .15s;
-    display:flex;align-items:center;justify-content:center;font-size:14px;
-  }
-  .transfer-info .t-copy:hover{transform:translateY(-1px);border-color:var(--violet-dim);color:var(--hi);}
-  .transfer-info .t-copy.copied{background:#2AA96C;border-color:transparent;color:#fff;}
-  @media (prefers-reduced-motion:reduce){ .transfer-info.pop{animation:none;} }
+  .telegram-cta:hover{filter:brightness(1.1);transform:translateY(-2px);}
 
-  .proof-recap{
-    display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:14px;padding:10px 12px;
-    background:var(--panel);border-radius:9px;font-size:12px;color:var(--dim);
+  .telegram-cta .txt{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    color:#fff;
+    line-height:1.4;
   }
-  .proof-recap b{color:var(--hi);font-weight:700;}
-
-  .proof-field{margin-bottom:12px;}
-  .proof-field label{display:block;font-size:13px;color:var(--mid);margin-bottom:6px;font-weight:600;}
-  .proof-field input[type="text"]{
-    width:100%;background:var(--panel);border:1px solid var(--line);border-radius:9px;
-    padding:11px 12px;color:var(--hi);font-family:var(--font-main);font-size:15px;font-weight:600;outline:none;
-  }
-  .proof-field input[type="text"]:focus{border-color:var(--violet);}
-
-  .upload-box{
-    display:flex;align-items:center;gap:12px;
-    border:1.5px dashed var(--line);border-radius:10px;padding:12px;cursor:pointer;
-    background:var(--panel);transition:border-color .15s;
-  }
-  .upload-box:hover{border-color:var(--violet-dim);}
-  .upload-box.has-file{border-style:solid;border-color:var(--violet);}
-  .upload-box .thumb{
-    width:44px;height:44px;border-radius:8px;background:var(--panel-raised);
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;font-size:18px;
-  }
-  .upload-box .thumb img{width:100%;height:100%;object-fit:cover;}
-  .upload-box .txt{font-size:13px;color:var(--mid);font-weight:600;}
-  .upload-box .txt small{display:block;color:var(--dim);font-weight:500;margin-top:2px;}
-
-  .total-row{
-    display:flex;align-items:baseline;justify-content:space-between;
-    padding:16px 22px;margin-top:12px;border-top:1px solid var(--line);
-  }
-  .total-row .t-label{font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;}
-  .total-row .t-val{font-family:var(--font-main);font-weight:700;font-size:22px;color:var(--cyan);}
-
-  .submit-btn{
-    display:block;width:calc(100% - 44px);margin:0 22px 22px;padding:14px;
-    background:var(--violet);color:#fff;border:none;border-radius:10px;
-    font-family:var(--font-main);font-weight:700;font-size:15px;letter-spacing:0.5px;cursor:pointer;
-  }
-  .submit-btn:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
-  .submit-btn:not(:disabled):hover{background:#7C4CED;}
-
-  /* ---------- status stepper ---------- */
-  .status{display:none;padding:6px 22px 22px;}
-  .status.show{display:block;}
-  .order-code{
-    font-family:var(--font-main);font-weight:700;font-size:13px;color:var(--cyan);
-    background:var(--void);border:1px solid var(--line);border-radius:8px;
-    padding:8px 10px;margin-bottom:16px;text-align:center;letter-spacing:1px;
-  }
-  .step{display:flex;gap:12px;position:relative;padding-bottom:22px;}
-  .step:last-child{padding-bottom:0;}
-  .step::before{
-    content:"";position:absolute;left:9px;top:22px;bottom:0;width:1.5px;background:var(--line);
-  }
-  .step:last-child::before{display:none;}
-  .step .dot{
-    width:20px;height:20px;border-radius:50%;flex-shrink:0;
-    background:var(--panel-raised);border:1.5px solid var(--line);
-    display:flex;align-items:center;justify-content:center;
-    z-index:1;
-  }
-  .step.done .dot{background:var(--violet);border-color:var(--violet);animation:dotPop .3s ease;}
-  @keyframes dotPop{0%{transform:scale(.5);}70%{transform:scale(1.2);}100%{transform:scale(1);}}
-  .step.active .dot{border-color:var(--signal);}
-  .step.active .dot::after{
-    content:"";width:8px;height:8px;border-radius:50%;background:var(--signal);
-    animation:pulse 1.1s ease-in-out infinite;
-  }
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
-  .step .text{padding-top:1px;}
-  .step .t-title{font-size:14px;font-weight:700;color:var(--hi);}
-  .step:not(.done):not(.active) .t-title{color:var(--dim);}
-  .step .t-sub{font-size:12px;color:var(--dim);margin-top:2px;}
-
-  .new-order{
-    display:block;text-align:center;font-size:13px;color:var(--mid);
-    padding:0 22px 20px;text-decoration:underline;cursor:pointer;
+  .telegram-cta .txt small{
+    display:block;
+    font-family:'Inter',sans-serif;
+    font-weight:400;
+    font-size:12px;
+    color:rgba(255,255,255,0.65);
+    margin-top:2px;
   }
 
+  .telegram-cta .arrow{
+    font-family:'JetBrains Mono',monospace;
+    color:#fff;
+    font-size:18px;
+    flex-shrink:0;
+  }
+
+  /* ---------- FOOTER ---------- */
   footer{
-    display:flex;justify-content:space-between;padding:26px 48px;
-    border-top:1px solid var(--line);color:var(--dim);font-size:13px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:26px 56px 34px;
+    border-top:1px solid rgba(139,92,246,0.14);
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.03em;
+    color:var(--muted-2);
   }
-  @media (max-width:640px){ footer{flex-direction:column;gap:8px;padding:22px 20px;} }
+
+  @media (max-width:640px){
+    header, .hero, main, footer{padding-left:22px;padding-right:22px;}
+    .hero-text h1{font-size:38px;}
+    .card-grid{grid-template-columns:repeat(2,1fr);}
+    footer{flex-direction:column;gap:8px;text-align:center;}
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <a class="brand" href="index.html" id="brand-link"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</a>
-  <nav>
-    <a href="index.html" data-i18n="nav.home">Home</a>
-    <a href="tournament.html" data-i18n="nav.tournament">Tournament</a>
-    <a href="diamond-plan.html" class="active" data-i18n="nav.diamond">Diamond</a>
-    <a href="news.html" data-i18n="nav.news">News</a>
-    <a href="customer-service.html" data-i18n="nav.service">Customer Service</a>
-  </nav>
-  <div class="hdr-controls">
-    <button type="button" class="admin-toggle" id="admin-toggle">
-      <span id="admin-toggle-label" data-i18n="tournament.admin.locked">Admin</span>
-    </button>
-    <div class="lang-switch" role="group" aria-label="Language">
-      <div class="pill"></div>
-      <button type="button" data-lang="mm">MM</button>
-      <button type="button" data-lang="en">EN</button>
-      <button type="button" data-lang="th">TH</button>
-    </div>
-    <button type="button" class="theme-toggle" aria-label="Toggle light / dark mode">
-      <span class="icon-wrap">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><g class="ray"><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 15.2A8.5 8.5 0 1 1 8.8 3.3a7 7 0 0 0 11.9 11.9Z"/></svg>
-      </span>
-    </button>
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-name">ZENITH ESPORTS</div>
   </div>
-  <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">☰</button>
+  <nav>
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Tournament</a></li>
+      <li><a href="#" class="active">Diamond</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">FAQ</a></li>
+    </ul>
+  </nav>
+  <div class="header-right">
+    <a class="icon-btn" href="#" aria-label="Facebook">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M14 9h3V6h-3c-1.66 0-3 1.34-3 3v2H9v3h2v7h3v-7h2.5l.5-3H14V9c0-.28.22-.5.5-.5H14V9z" fill="currentColor"/></svg>
+    </a>
+    <a class="icon-btn" href="#" aria-label="Telegram">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21 4L2.5 11.5l6 2 2 6.5 3-4 4.5 3.5L21 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </a>
+    <button class="cta-btn">Sign In</button>
+  </div>
 </header>
 
-<div class="hero reveal">
-  <p class="eyebrow" data-i18n="diamond.eyebrow">Top-up center</p>
-  <h1 data-i18n="diamond.title">Diamond Plan</h1>
-  <p data-i18n="diamond.desc">Pick a pack, enter your game ID, and pay. Our team confirms every order on Telegram before diamonds are sent — usually within minutes.</p>
-</div>
+<section class="hero">
+  <div class="hero-text">
+    <div class="eyebrow">Beyond The Peak</div>
+    <h1>DIAMOND PLAN</h1>
+    <p>Top up Mobile Legends diamonds instantly. Choose a pack, pay with KBZ&nbsp;Pay, Wave&nbsp;Pay, or AYA&nbsp;Pay, and your diamonds land in minutes.</p>
+  </div>
+  <div class="hero-gem">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8B5CF6"/>
+          <stop offset="100%" stop-color="#5CE1E6"/>
+        </linearGradient>
+      </defs>
+      <polygon points="50,4 90,32 74,96 26,96 10,32" fill="url(#gemGrad)" opacity="0.92"/>
+      <polygon points="50,4 90,32 50,40 10,32" fill="#ffffff" opacity="0.22"/>
+      <polygon points="26,96 50,40 74,96" fill="#000000" opacity="0.12"/>
+    </svg>
+  </div>
+</section>
 
-<div class="layout">
-
-  <div class="left">
-    <div class="tabs">
-      <div class="tab active" data-tab="diamond" data-i18n="diamond.tab.diamond">Diamond</div>
-      <div class="tab" data-tab="double" data-i18n="diamond.tab.double">Double diamond</div>
+<main>
+  <div class="plans">
+    <!-- DIAMOND -->
+    <div>
+      <div class="section-label">
+        <h2>Diamond</h2>
+        <span>12 packs</span>
+      </div>
+      <div class="card-grid" id="diamond-grid"></div>
     </div>
 
-    <div class="section active" id="section-diamond">
-      <div class="grid reveal-stagger" id="grid-diamond"></div>
-    </div>
+    <!-- SIDE: Double Diamond + Weekly Pass + Payment -->
+    <div class="side-col">
+      <div>
+        <div class="section-label">
+          <h2>Double Diamond</h2>
+          <span>2× bonus</span>
+        </div>
+        <div class="double-grid" id="double-grid"></div>
+      </div>
 
-    <div class="section" id="section-double">
-      <div class="grid reveal-stagger" id="grid-double"></div>
-      <div class="pass-card" id="pass-card">
-        <div class="icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 12l9 10 9-10-9-10Z" fill="#fff"/></svg>
+      <div>
+        <div class="section-label">
+          <h2>Weekly Pass</h2>
+          <span>best value</span>
         </div>
-        <div class="info">
-          <div class="name"><span data-i18n="diamond.passcard.name">Weekly pass</span> <span style="color:var(--signal);font-size:11px;font-family:var(--font-main);font-weight:700;">+445%</span></div>
-          <div class="price" id="pass-price">35,000 Ks</div>
+        <div class="pass-card">
+          <span class="pass-badge">+445% Value</span>
+          <div class="pass-icon">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect x="14" y="10" width="72" height="80" rx="10" fill="#241350" stroke="#F2B84F" stroke-width="2.5"/>
+              <polygon points="50,32 62,44 50,56 38,44" fill="#5CE1E6"/>
+              <rect x="26" y="66" width="48" height="6" rx="3" fill="#8B5CF6"/>
+            </svg>
+          </div>
+          <div class="pass-info">
+            <div class="label">Weekly Pass</div>
+            <div class="price">35,000</div>
+          </div>
         </div>
-        <button type="button" class="pass-edit" id="pass-edit-btn" title="Edit price">✏️</button>
+      </div>
+
+      <div class="payment-block">
+        <div class="section-label">
+          <h2>Payment System</h2>
+        </div>
+        <div class="payment-row">
+          <div class="pay-chip kbz"><span class="dot"></span>KBZ Pay</div>
+          <div class="pay-chip wave"><span class="dot"></span>Wave Pay</div>
+          <div class="pay-chip aya"><span class="dot"></span>AYA Pay</div>
+        </div>
+        <div class="telegram-cta">
+          <div class="txt">Order on Telegram
+            <small>Diamond top-up support, live confirmation</small>
+          </div>
+          <div class="arrow">→</div>
+        </div>
       </div>
     </div>
   </div>
-
-  <div class="ticket-wrap">
-    <div class="ticket">
-      <div class="ticket-head">
-        <div class="label" data-i18n="diamond.ticket.label">Order ticket</div>
-        <h3 data-i18n="diamond.ticket.title">Enter your account</h3>
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="game-id" data-i18n="diamond.field.gameid">Game ID</label>
-          <input id="game-id" type="text" placeholder="e.g. 812394021" inputmode="numeric">
-        </div>
-        <div class="field">
-          <label for="server-id" data-i18n="diamond.field.server">Server</label>
-          <input id="server-id" type="text" placeholder="e.g. 2891">
-        </div>
-      </div>
-
-      <div class="ign-row" id="ign-row" style="display:none;">
-        <span class="ign-dot"></span>
-        <span id="ign-text">Checking account…</span>
-      </div>
-
-      <div class="perforation"><div class="notch l"></div><div class="notch r"></div></div>
-
-      <div class="summary-row" id="summary-row" style="display:none;">
-        <span>Package</span><span class="val" id="summary-val">—</span>
-      </div>
-      <div class="summary-empty" id="summary-empty" data-i18n="diamond.summary.empty">No package selected yet — choose one on the left.</div>
-
-      <div class="field" style="margin-top:6px;">
-        <label data-i18n="diamond.field.payment">Payment method</label>
-      </div>
-      <div class="pay-options">
-        <div class="pay-chip" data-pay="KBZ Pay"><div class="swatch"><img src="assets/kbz-pay.png" alt="KBZ Pay"></div>KBZ Pay</div>
-        <div class="pay-chip" data-pay="Wave Pay"><div class="swatch"><img src="assets/wave-money.png" alt="Wave Pay"></div>Wave Pay</div>
-        <div class="pay-chip" data-pay="AYA Pay"><div class="swatch"><img src="assets/aya-pay.png" alt="AYA Pay"></div>AYA Pay</div>
-      </div>
-
-      <div class="proof-panel" id="proof-panel">
-        <div id="transfer-info"></div>
-
-        <div class="proof-recap" id="proof-recap"></div>
-
-        <div class="proof-field">
-          <label for="sender-number" data-i18n="diamond.field.sender">Phone number you sent from</label>
-          <input id="sender-number" type="text" placeholder="e.g. 09xxxxxxxxx" inputmode="tel">
-        </div>
-
-        <div class="proof-field">
-          <label for="sender-name" data-i18n="diamond.field.sender.name">Your name (as sent on the transfer)</label>
-          <input id="sender-name" type="text" placeholder="e.g. Aung Aung">
-        </div>
-
-        <div class="proof-field">
-          <label data-i18n="diamond.field.screenshot">Payment screenshot</label>
-          <label class="upload-box" id="upload-box" for="screenshot-input">
-            <div class="thumb" id="upload-thumb">📎</div>
-            <div class="txt" id="upload-text"><span data-i18n="diamond.field.screenshot.tap">Tap to add a screenshot</span><small data-i18n="diamond.field.screenshot.sub">Proof of your transfer</small></div>
-          </label>
-          <input type="file" id="screenshot-input" accept="image/*" style="display:none;">
-        </div>
-      </div>
-
-      <div class="total-row">
-        <span class="t-label" data-i18n="diamond.total">Total</span>
-        <span class="t-val" id="total-val">0 Ks</span>
-      </div>
-
-      <button class="submit-btn" id="submit-btn" disabled data-i18n="diamond.submit">Send for verification</button>
-
-      <div class="status" id="status">
-        <div class="order-code" id="order-code"></div>
-        <div class="step done">
-          <div class="dot"></div>
-          <div class="text"><div class="t-title" data-i18n="diamond.step.placed.title">Order placed</div><div class="t-sub" data-i18n="diamond.step.placed.sub">Your details were submitted</div></div>
-        </div>
-        <div class="step" id="step-telegram">
-          <div class="dot"></div>
-          <div class="text"><div class="t-title" data-i18n="diamond.step.telegram.title">Sent to Telegram</div><div class="t-sub" data-i18n="diamond.step.telegram.sub">Admin notified of your payment</div></div>
-        </div>
-        <div class="step" id="step-review">
-          <div class="dot"></div>
-          <div class="text"><div class="t-title" data-i18n="diamond.step.review.title">Awaiting confirmation</div><div class="t-sub" data-i18n="diamond.step.review.sub">Admin checks the transfer, then approves</div></div>
-        </div>
-        <div class="step" id="step-done">
-          <div class="dot"></div>
-          <div class="text"><div class="t-title" data-i18n="diamond.step.done.title">Diamonds delivered</div><div class="t-sub" data-i18n="diamond.step.done.sub">Sent straight to your account</div></div>
-        </div>
-      </div>
-      <div class="new-order" id="new-order" style="display:none;" data-i18n="diamond.neworder">Start a new order</div>
-    </div>
-  </div>
-
-</div>
+</main>
 
 <footer>
   <span>EST 2026</span>
-  <span>Beyond the peak — Zenith Esports</span>
+  <span>Beyond The Peak — Zenith Esports</span>
 </footer>
 
-<!-- ---------- admin passcode modal ---------- -->
-<div class="modal-overlay" id="admin-modal">
-  <div class="modal">
-    <h3 data-i18n="tournament.admin.prompt.title">Enter admin passcode</h3>
-    <div class="field">
-      <input type="password" id="admin-passcode-input" data-i18n-placeholder="tournament.admin.prompt.placeholder" placeholder="Passcode">
-    </div>
-    <div class="modal-err" id="admin-modal-err" data-i18n="tournament.admin.prompt.wrong">Incorrect passcode</div>
-    <div class="modal-actions">
-      <button class="cancel" id="admin-modal-cancel" data-i18n="tournament.admin.prompt.cancel">Cancel</button>
-      <button class="save" id="admin-modal-submit" data-i18n="tournament.admin.prompt.submit">Unlock</button>
-    </div>
-  </div>
-</div>
-
-<!-- ---------- add / edit package modal ---------- -->
-<div class="modal-overlay" id="pkg-modal">
-  <div class="modal">
-    <h3 id="pkg-modal-title" data-i18n="diamond.admin.add.title">Add package</h3>
-    <div class="field">
-      <label data-i18n="diamond.admin.field.amount">Diamonds</label>
-      <input type="text" id="pkg-amt" placeholder="e.g. 86 or 50 + 50">
-    </div>
-    <div class="field">
-      <label data-i18n="diamond.admin.field.price">Price (Ks)</label>
-      <input type="number" id="pkg-price" min="1" placeholder="e.g. 5500">
-    </div>
-    <div class="modal-err" id="pkg-modal-err">Error</div>
-    <div class="modal-actions">
-      <button class="cancel" id="pkg-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
-      <button class="save" id="pkg-modal-save" data-i18n="tournament.form.save">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- ---------- edit weekly pass price modal ---------- -->
-<div class="modal-overlay" id="pass-modal">
-  <div class="modal">
-    <h3 data-i18n="diamond.admin.editpass.title">Edit weekly pass price</h3>
-    <div class="field">
-      <label data-i18n="diamond.admin.field.price">Price (Ks)</label>
-      <input type="number" id="pass-price-input" min="1" placeholder="e.g. 35000">
-    </div>
-    <div class="modal-err" id="pass-modal-err">Error</div>
-    <div class="modal-actions">
-      <button class="cancel" id="pass-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
-      <button class="save" id="pass-modal-save" data-i18n="tournament.form.save">Save</button>
-    </div>
-  </div>
-</div>
-
-
-<script src="js/app-shared.js"></script>
 <script>
-function t(key, fallback){
-  const v = window.ZenithI18n && window.ZenithI18n.t(key);
-  return v || fallback || key;
-}
+  const gemSVG = (scale) => `
+    <svg class="gem-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style="transform:scale(${scale})">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8B5CF6"/>
+          <stop offset="100%" stop-color="#5CE1E6"/>
+        </linearGradient>
+      </defs>
+      <polygon points="20,2 36,13 29,38 11,38 4,13" fill="url(#g)"/>
+      <polygon points="20,2 36,13 20,16 4,13" fill="#fff" opacity="0.25"/>
+    </svg>`;
 
-// Extracts a sortable numeric value from a package's amt label — plain
-// "86" becomes 86, and "50 + 50" (double-diamond style labels) sums to
-// 100, so packages always sort smallest-to-largest regardless of format.
-function parseAmtValue(amt){
-  const nums = String(amt).match(/\d+(\.\d+)?/g);
-  if (!nums) return 0;
-  return nums.reduce((sum, n) => sum + parseFloat(n), 0);
-}
+  const chestSVG = `
+    <svg class="gem-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="16" width="32" height="20" rx="3" fill="#3A2668" stroke="#8B5CF6" stroke-width="1.5"/>
+      <rect x="4" y="10" width="32" height="10" rx="3" fill="#241350" stroke="#8B5CF6" stroke-width="1.5"/>
+      <circle cx="20" cy="20" r="3.2" fill="#5CE1E6"/>
+    </svg>`;
 
-let diamondPacks = [
-  {amt:'86',price:5500},{amt:'172',price:11000},{amt:'257',price:15500},
-  {amt:'343',price:20700},{amt:'429',price:25800},{amt:'514',price:31000},
-  {amt:'600',price:36000},{amt:'706',price:41200},{amt:'792',price:46350},
-  {amt:'878',price:51500},{amt:'963',price:56650},{amt:'1049',price:62000}
-];
-let doublePacks = [
-  {amt:'50 + 50',price:3500},{amt:'150 + 150',price:10500},
-  {amt:'250 + 250',price:17500},{amt:'500 + 500',price:35000}
-];
-let weeklyPassPrice = 35000;
+  const diamondTiers = [
+    [86, 5500, 1], [172, 11000, 1.15], [257, 15500, 1.3],
+    [343, 20700, 1.45], [429, 25800, 1.6], [514, 31000, 1.75],
+    [600, 36000, 'chest'], [706, 41200, 'chest'], [792, 46350, 'chest'],
+    [878, 51500, 'chest'], [963, 56650, 'chest'], [1049, 62000, 'chest']
+  ];
 
-const ADMIN_KEY = 'zenith-admin-passcode';
-let isAdmin = false;
-function getPasscode(){ return sessionStorage.getItem(ADMIN_KEY) || ''; }
-
-function renderGrid(el, packs, group){
-  const cards = packs.map((p,i)=>`
-    <div class="card" data-group="${group}" data-idx="${i}">
-      <div class="card-admin-actions${isAdmin ? ' show' : ''}">
-        <button class="edit" title="${t('tournament.card.edit','Edit')}" onclick="event.stopPropagation();openPkgEdit('${group}',${i})">✏️</button>
-        <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="event.stopPropagation();deletePkg('${group}',${i})">🗑</button>
-      </div>
-      <img class="card-icon" src="assets/diamond-icon.png" alt="diamond">
-      <div class="amt">${p.amt}</div>
-      <div class="price">${p.price.toLocaleString()} Ks</div>
-    </div>`).join('');
-  const addCard = `<div class="add-card${isAdmin ? ' show' : ''}" onclick="openPkgAdd('${group}')">+ <span data-i18n="diamond.admin.add.btn">${t('diamond.admin.add.btn','Add package')}</span></div>`;
-  el.innerHTML = cards + addCard;
-}
-
-function renderAllGrids(){
-  renderGrid(document.getElementById('grid-diamond'), diamondPacks, 'diamond');
-  renderGrid(document.getElementById('grid-double'), doublePacks, 'double');
-  document.getElementById('pass-price').textContent = weeklyPassPrice.toLocaleString() + ' Ks';
-  document.getElementById('pass-edit-btn').classList.toggle('show', isAdmin);
-}
-
-async function loadPricing(){
-  try {
-    const res = await fetch('/api/diamond-pricing');
-    const data = await res.json();
-    if (Array.isArray(data.diamondPacks) && data.diamondPacks.length) diamondPacks = data.diamondPacks;
-    if (Array.isArray(data.doublePacks) && data.doublePacks.length) doublePacks = data.doublePacks;
-    if (typeof data.weeklyPassPrice === 'number') weeklyPassPrice = data.weeklyPassPrice;
-  } catch (e) {
-    // keep the hardcoded fallback defaults above (e.g. backend unreachable)
-  }
-  diamondPacks.sort((a, b) => parseAmtValue(a.amt) - parseAmtValue(b.amt));
-  doublePacks.sort((a, b) => parseAmtValue(a.amt) - parseAmtValue(b.amt));
-  renderAllGrids();
-}
-loadPricing();
-
-async function savePricing(){
-  const res = await fetch('/api/diamond-pricing', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
-    body: JSON.stringify({ diamondPacks, doublePacks, weeklyPassPrice }),
+  const grid = document.getElementById('diamond-grid');
+  diamondTiers.forEach(([amt, price, scale]) => {
+    const el = document.createElement('button');
+    el.className = 'diamond-card' + (scale === 'chest' ? ' tier-bundle' : '');
+    el.innerHTML = `
+      <div class="amount">${amt}</div>
+      ${scale === 'chest' ? chestSVG : gemSVG(scale)}
+      <div class="price">${price.toLocaleString()}</div>
+    `;
+    grid.appendChild(el);
   });
-  if (!res.ok) throw new Error('save failed');
-  const saved = await res.json();
-  diamondPacks = saved.diamondPacks;
-  doublePacks = saved.doublePacks;
-  weeklyPassPrice = saved.weeklyPassPrice;
-  renderAllGrids();
-}
 
-let selected = null;
-let selectedPayment = null;
-let screenshotFile = null;
-
-const PAY_ICONS = {
-  'KBZ Pay': 'assets/kbz-pay.png',
-  'Wave Pay': 'assets/wave-money.png',
-  'AYA Pay': 'assets/aya-pay.png',
-};
-
-const PAY_TRANSFER = {
-  'KBZ Pay': { number: '09663105576', name: 'Wai Yan Htet' },
-  'Wave Pay': { number: '09989961930', name: 'Thandar Soe' },
-  'AYA Pay': { number: '09663105576', name: 'Wai Yan Htet' },
-};
-
-function renderTransferInfo(method){
-  const info = PAY_TRANSFER[method];
-  const el = document.getElementById('transfer-info');
-  if (!info) { el.innerHTML = ''; el.className = ''; return; }
-  el.innerHTML = `
-    <div class="t-icon"><img src="${PAY_ICONS[method]}" alt="${escapeHtmlDp(method)}"></div>
-    <div class="t-body">
-      <div class="t-name">${escapeHtmlDp(info.name)}</div>
-      <div class="t-num">${info.number} · ${escapeHtmlDp(method)}</div>
-    </div>
-    <button type="button" class="t-copy" id="transfer-copy-btn" title="${escapeHtmlDp(t('diamond.transfer.copy','Copy number'))}" aria-label="${escapeHtmlDp(t('diamond.transfer.copy','Copy number'))}">📋</button>`;
-  // restart the pop animation every time the payment method changes
-  el.className = 'transfer-info';
-  void el.offsetWidth;
-  el.classList.add('pop');
-  document.getElementById('transfer-copy-btn').addEventListener('click', (e) => {
-    navigator.clipboard.writeText(info.number).then(() => {
-      const btn = e.currentTarget;
-      const original = btn.textContent;
-      btn.textContent = '✅';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
-    });
+  const doubleTiers = [[50,50,3500],[150,150,10500],[250,250,17500],[500,500,35000]];
+  const dgrid = document.getElementById('double-grid');
+  doubleTiers.forEach(([a,b,price]) => {
+    const el = document.createElement('button');
+    el.className = 'diamond-card';
+    el.innerHTML = `
+      <div class="amount">${a} + ${b}</div>
+      ${gemSVG(1.2)}
+      <div class="price">${price.toLocaleString()}</div>
+    `;
+    dgrid.appendChild(el);
   });
-}
-function escapeHtmlDp(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
 
-document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    tab.classList.add('active');
-    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-    document.getElementById('section-'+tab.dataset.tab).classList.add('active');
-  });
-});
-
-function selectPack(node, data){
-  document.querySelectorAll('.card, .pass-card').forEach(c=>c.classList.remove('selected'));
-  node.classList.add('selected');
-  selected = data;
-  document.getElementById('summary-row').style.display = 'flex';
-  document.getElementById('summary-empty').style.display = 'none';
-  document.getElementById('summary-val').textContent = data.label + ' — ' + data.price.toLocaleString() + ' Ks';
-  updateTotal();
-}
-
-// Event delegation (not per-card listeners) since the grids re-render
-// whenever an admin adds/edits/deletes a package.
-document.getElementById('grid-diamond').addEventListener('click', handleGridClick);
-document.getElementById('grid-double').addEventListener('click', handleGridClick);
-function handleGridClick(e){
-  const card = e.target.closest('.card');
-  if (!card) return;
-  const group = card.dataset.group;
-  const packs = group === 'diamond' ? diamondPacks : doublePacks;
-  const p = packs[card.dataset.idx];
-  if (!p) return;
-  selectPack(card, {label: p.amt + ' diamonds', price: p.price});
-}
-
-document.getElementById('pass-card').addEventListener('click', function(){
-  selectPack(this, {label:'Weekly pass', price: weeklyPassPrice});
-});
-
-document.querySelectorAll('.pay-chip').forEach(chip=>{
-  chip.addEventListener('click', ()=>{
-    document.querySelectorAll('.pay-chip').forEach(c=>c.classList.remove('selected'));
-    chip.classList.add('selected');
-    selectedPayment = chip.dataset.pay;
-
-    document.getElementById('proof-panel').classList.add('show');
-    renderTransferInfo(selectedPayment);
-    updateProofRecap();
-
-    updateTotal();
-  });
-});
-
-function updateProofRecap(){
-  const gameId = document.getElementById('game-id').value.trim();
-  const serverId = document.getElementById('server-id').value.trim();
-  const recap = document.getElementById('proof-recap');
-  if (!gameId && !serverId) { recap.innerHTML = ''; return; }
-  recap.innerHTML =
-    `<span>${t('diamond.recap.gameid')} <b>${gameId || '—'}</b></span>` +
-    `<span>${t('diamond.recap.server')} <b>${serverId || '—'}</b></span>` +
-    `<span>${t('diamond.recap.ign')} <b>${confirmedIgn || t('diamond.recap.notverified')}</b></span>`;
-}
-
-function updateTotal(){
-  document.getElementById('total-val').textContent = (selected ? selected.price.toLocaleString() : 0) + ' Ks';
-  checkReady();
-}
-
-let confirmedIgn = null;
-let ignLookupToken = 0;
-let ignDebounce = null;
-
-function checkReady(){
-  const gameId = document.getElementById('game-id').value.trim();
-  const serverId = document.getElementById('server-id').value.trim();
-  const senderNumber = document.getElementById('sender-number').value.trim();
-  const senderName = document.getElementById('sender-name').value.trim();
-  const proofNeeded = document.getElementById('proof-panel').classList.contains('show');
-  const proofReady = !proofNeeded || (senderNumber && senderName && screenshotFile);
-  const ready = selected && selectedPayment && gameId && serverId && proofReady;
-  document.getElementById('submit-btn').disabled = !ready;
-}
-
-function setIgnRow(state, text){
-  const row = document.getElementById('ign-row');
-  row.style.display = 'flex';
-  row.className = 'ign-row' + (state ? ' ' + state : '');
-  document.getElementById('ign-text').textContent = text;
-}
-
-async function lookupIgn(){
-  const gameId = document.getElementById('game-id').value.trim();
-  const serverId = document.getElementById('server-id').value.trim();
-  confirmedIgn = null;
-
-  if (!gameId || !serverId) {
-    document.getElementById('ign-row').style.display = 'none';
-    return;
-  }
-
-  const myToken = ++ignLookupToken;
-  setIgnRow('loading', t('diamond.ign.checking'));
-
-  try {
-    const res = await fetch(`/api/ign?id=${encodeURIComponent(gameId)}&server=${encodeURIComponent(serverId)}`);
-    const data = await res.json();
-    if (myToken !== ignLookupToken) return; // a newer lookup superseded this one
-
-    if (data.success && data.name) {
-      confirmedIgn = data.name;
-      setIgnRow('found', data.name);
-    } else {
-      setIgnRow('error', t('diamond.ign.notfound'));
-    }
-    updateProofRecap();
-  } catch (err) {
-    if (myToken !== ignLookupToken) return;
-    setIgnRow('error', t('diamond.ign.unavailable'));
-  }
-}
-
-function onIdFieldChange(){
-  checkReady();
-  updateProofRecap();
-  clearTimeout(ignDebounce);
-  ignDebounce = setTimeout(lookupIgn, 500);
-}
-
-document.getElementById('game-id').addEventListener('input', onIdFieldChange);
-document.getElementById('server-id').addEventListener('input', onIdFieldChange);
-document.getElementById('sender-number').addEventListener('input', checkReady);
-document.getElementById('sender-name').addEventListener('input', checkReady);
-
-document.getElementById('screenshot-input').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  const box = document.getElementById('upload-box');
-  const thumb = document.getElementById('upload-thumb');
-  const text = document.getElementById('upload-text');
-
-  if (!file) {
-    screenshotFile = null;
-    box.classList.remove('has-file');
-    thumb.textContent = '📎';
-    text.innerHTML = `${t('diamond.field.screenshot.tap')}<small>${t('diamond.field.screenshot.sub')}</small>`;
-    checkReady();
-    return;
-  }
-
-  screenshotFile = file;
-  box.classList.add('has-file');
-  text.innerHTML = `${t('diamond.field.screenshot.attached')}<small>${file.name}</small>`;
-
-  const reader = new FileReader();
-  reader.onload = () => { thumb.innerHTML = `<img src="${reader.result}" alt="preview">`; };
-  reader.readAsDataURL(file);
-
-  checkReady();
-});
-
-let pollTimer = null;
-
-async function fileToBase64(file){
-  return new Promise((resolve, reject)=>{
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result; // "data:image/png;base64,AAAA..."
-      const [, mime, base64] = result.match(/^data:(.+);base64,(.*)$/) || [];
-      resolve({ mime, base64 });
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function submitOrder(){
-  const submitBtn = document.getElementById('submit-btn');
-  submitBtn.disabled = true;
-  submitBtn.textContent = t('diamond.submit.sending');
-
-  const payload = {
-    gameId: document.getElementById('game-id').value.trim(),
-    serverId: document.getElementById('server-id').value.trim(),
-    ignName: confirmedIgn || null,
-    packageLabel: selected.label,
-    amount: selected.price,
-    paymentMethod: selectedPayment,
-    senderNumber: document.getElementById('sender-number').value.trim(),
-    senderName: document.getElementById('sender-name').value.trim(),
-  };
-
-  try {
-    if (screenshotFile) {
-      const { mime, base64 } = await fileToBase64(screenshotFile);
-      payload.screenshotMime = mime;
-      payload.screenshotBase64 = base64;
-    }
-
-    const res = await fetch('/api/orders', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error((await res.json()).error || 'Could not submit order.');
-    const data = await res.json();
-
-    document.getElementById('order-code').textContent = data.code;
-    document.getElementById('status').classList.add('show');
-    submitBtn.style.display = 'none';
-    document.getElementById('new-order').style.display = 'block';
-    document.getElementById('step-telegram').classList.add('done');
-    document.getElementById('step-review').classList.add('active');
-
-    pollTimer = setInterval(()=>pollOrder(data.code), 2500);
-  } catch (err) {
-    submitBtn.disabled = false;
-    submitBtn.textContent = t('diamond.submit');
-    alert(err.message);
-  }
-}
-
-async function pollOrder(code){
-  try {
-    const res = await fetch('/api/orders/' + code);
-    if (!res.ok) return;
-    const order = await res.json();
-
-    if (order.status === 'confirmed') {
-      clearInterval(pollTimer);
-      document.getElementById('step-review').classList.remove('active');
-      document.getElementById('step-review').classList.add('done');
-      document.getElementById('step-done').classList.add('done');
-      document.querySelector('#step-done .t-title').textContent = t('diamond.confirmed.title');
-      document.querySelector('#step-done .t-sub').textContent = t('diamond.confirmed.sub');
-    } else if (order.status === 'rejected') {
-      clearInterval(pollTimer);
-      document.getElementById('step-review').classList.remove('active');
-      document.querySelector('#step-review .t-title').textContent = t('diamond.rejected.title');
-      document.querySelector('#step-review .t-title').style.color = 'var(--signal)';
-      document.querySelector('#step-review .t-sub').textContent = t('diamond.rejected.sub');
-    }
-  } catch (err) {
-  }
-}
-
-document.getElementById('submit-btn').addEventListener('click', submitOrder);
-
-document.getElementById('new-order').addEventListener('click', ()=>{
-  location.reload();
-});
-
-/* ================= admin: unlock, edit/add/delete packages, edit pass price ================= */
-
-const adminToggle = document.getElementById('admin-toggle');
-
-// Admin login is intentionally not advertised in the UI — tap the logo 5
-// times quickly to reveal the passcode prompt. A single click still
-// behaves as a normal link to Home (slightly delayed so we can tell it
-// apart from the start of a 5-click sequence).
-let brandClicks = 0, brandClickTimer = null;
-const brandLink = document.getElementById('brand-link');
-brandLink.addEventListener('click', (e) => {
-  e.preventDefault();
-  brandClicks++;
-  clearTimeout(brandClickTimer);
-  if (brandClicks >= 5) {
-    brandClicks = 0;
-    adminToggle.click();
-    return;
-  }
-  brandClickTimer = setTimeout(() => {
-    const count = brandClicks;
-    brandClicks = 0;
-    if (count < 5) window.location.href = brandLink.href;
-  }, 450);
-});
-
-document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-  document.querySelector('nav').classList.toggle('mobile-open');
-});
-const adminToggleLabel = document.getElementById('admin-toggle-label');
-const adminModal = document.getElementById('admin-modal');
-const adminInput = document.getElementById('admin-passcode-input');
-const adminErr = document.getElementById('admin-modal-err');
-
-async function verifyPasscode(pass){
-  try {
-    const res = await fetch('/api/tournaments/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': pass },
-      body: '{}',
-    });
-    const data = await res.json();
-    return !!data.ok;
-  } catch (e) {
-    return false;
-  }
-}
-
-function setAdminUI(){
-  adminToggle.classList.toggle('on', isAdmin);
-  adminToggleLabel.textContent = isAdmin ? t('tournament.admin.unlocked','Admin mode') : t('tournament.admin.locked','Admin');
-  adminToggleLabel.setAttribute('data-i18n', isAdmin ? 'tournament.admin.unlocked' : 'tournament.admin.locked');
-}
-
-adminToggle.addEventListener('click', async () => {
-  if (isAdmin) {
-    isAdmin = false;
-    sessionStorage.removeItem(ADMIN_KEY);
-    setAdminUI();
-    renderAllGrids();
-    return;
-  }
-  adminErr.classList.remove('show');
-  adminInput.value = '';
-  adminModal.classList.add('show');
-  adminInput.focus();
-});
-
-document.getElementById('admin-modal-cancel').addEventListener('click', () => {
-  adminModal.classList.remove('show');
-});
-
-document.getElementById('admin-modal-submit').addEventListener('click', async () => {
-  const pass = adminInput.value;
-  const ok = await verifyPasscode(pass);
-  if (!ok) {
-    adminErr.classList.add('show');
-    return;
-  }
-  sessionStorage.setItem(ADMIN_KEY, pass);
-  isAdmin = true;
-  adminModal.classList.remove('show');
-  setAdminUI();
-  renderAllGrids();
-});
-adminInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') document.getElementById('admin-modal-submit').click();
-});
-
-/* silently re-verify a stored passcode on load (e.g. unlocked on the Tournament page already) */
-(async () => {
-  const stored = getPasscode();
-  if (stored) {
-    const ok = await verifyPasscode(stored);
-    if (ok) { isAdmin = true; } else { sessionStorage.removeItem(ADMIN_KEY); }
-    setAdminUI();
-    renderAllGrids();
-  }
-})();
-
-/* ---- add / edit package modal ---- */
-const pkgModal = document.getElementById('pkg-modal');
-const pkgModalTitle = document.getElementById('pkg-modal-title');
-const pkgModalErr = document.getElementById('pkg-modal-err');
-const pkgAmt = document.getElementById('pkg-amt');
-const pkgPrice = document.getElementById('pkg-price');
-let pkgEditing = null; // { group, idx } or null when adding
-
-window.openPkgAdd = function(group){
-  pkgEditing = { group, idx: null };
-  pkgModalTitle.textContent = t('diamond.admin.add.title','Add package');
-  pkgAmt.value = ''; pkgPrice.value = '';
-  pkgModalErr.classList.remove('show');
-  pkgModal.classList.add('show');
-  pkgAmt.focus();
-};
-
-window.openPkgEdit = function(group, idx){
-  const packs = group === 'diamond' ? diamondPacks : doublePacks;
-  const p = packs[idx];
-  if (!p) return;
-  pkgEditing = { group, idx };
-  pkgModalTitle.textContent = t('diamond.admin.edit.title','Edit package');
-  pkgAmt.value = p.amt; pkgPrice.value = p.price;
-  pkgModalErr.classList.remove('show');
-  pkgModal.classList.add('show');
-  pkgAmt.focus();
-};
-
-window.deletePkg = async function(group, idx){
-  if (!confirm(t('diamond.admin.delete.confirm','Remove this package?'))) return;
-  const packs = group === 'diamond' ? diamondPacks : doublePacks;
-  packs.splice(idx, 1);
-  try {
-    await savePricing();
-  } catch (e) {
-    alert(t('diamond.admin.error.save','Could not save prices. Please try again.'));
-  }
-};
-
-document.getElementById('pkg-modal-cancel').addEventListener('click', () => pkgModal.classList.remove('show'));
-
-document.getElementById('pkg-modal-save').addEventListener('click', async () => {
-  const amt = pkgAmt.value.trim();
-  const price = Number(pkgPrice.value);
-  if (!amt || !Number.isFinite(price) || price <= 0) {
-    pkgModalErr.textContent = t('diamond.admin.error.save','Could not save prices. Please try again.');
-    pkgModalErr.classList.add('show');
-    return;
-  }
-  const saveBtn = document.getElementById('pkg-modal-save');
-  saveBtn.disabled = true;
-  saveBtn.textContent = t('tournament.form.saving','Saving…');
-
-  const packs = pkgEditing.group === 'diamond' ? diamondPacks : doublePacks;
-  if (pkgEditing.idx === null) {
-    packs.push({ amt, price });
-  } else {
-    packs[pkgEditing.idx] = { amt, price };
-  }
-  packs.sort((a, b) => parseAmtValue(a.amt) - parseAmtValue(b.amt));
-
-  try {
-    await savePricing();
-    pkgModal.classList.remove('show');
-  } catch (e) {
-    pkgModalErr.textContent = t('diamond.admin.error.save','Could not save prices. Please try again.');
-    pkgModalErr.classList.add('show');
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = t('tournament.form.save','Save');
-  }
-});
-
-/* ---- edit weekly pass price modal ---- */
-const passModal = document.getElementById('pass-modal');
-const passPriceInput = document.getElementById('pass-price-input');
-const passModalErr = document.getElementById('pass-modal-err');
-
-document.getElementById('pass-edit-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  passPriceInput.value = weeklyPassPrice;
-  passModalErr.classList.remove('show');
-  passModal.classList.add('show');
-  passPriceInput.focus();
-});
-document.getElementById('pass-modal-cancel').addEventListener('click', () => passModal.classList.remove('show'));
-
-document.getElementById('pass-modal-save').addEventListener('click', async () => {
-  const price = Number(passPriceInput.value);
-  if (!Number.isFinite(price) || price <= 0) {
-    passModalErr.textContent = t('diamond.admin.error.save','Could not save prices. Please try again.');
-    passModalErr.classList.add('show');
-    return;
-  }
-  const saveBtn = document.getElementById('pass-modal-save');
-  saveBtn.disabled = true;
-  saveBtn.textContent = t('tournament.form.saving','Saving…');
-  weeklyPassPrice = price;
-  try {
-    await savePricing();
-    passModal.classList.remove('show');
-  } catch (e) {
-    passModalErr.textContent = t('diamond.admin.error.save','Could not save prices. Please try again.');
-    passModalErr.classList.add('show');
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = t('tournament.form.save','Save');
-  }
-});
-
-// re-render admin-dependent bits when the language changes
-window.ZenithI18n = window.ZenithI18n || {};
-const prevOnLangChange = window.ZenithI18n.onLangChange;
-window.ZenithI18n.onLangChange = function(lang, dict){
-  if (prevOnLangChange) prevOnLangChange(lang, dict);
-  setAdminUI();
-  renderAllGrids();
-};
+  document.querySelectorAll('.diamond-card, .pass-card').forEach(c => c.setAttribute('tabindex','0'));
 </script>
 
 </body>
