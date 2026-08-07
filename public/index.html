@@ -95,6 +95,24 @@
     .hero{min-height:auto;flex-direction:column;}
   }
 
+  .hero-media{position:absolute;inset:0;z-index:0;background:var(--void);overflow:hidden;}
+  .hero-media video{
+    width:100%;height:100%;object-fit:cover;object-position:78% center;display:block;
+    filter:blur(45px) saturate(1.15) brightness(0.85);
+    transform:scale(1.15); /* avoid soft/transparent edges from the blur showing through */
+  }
+  .hero-scrim{
+    position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:
+      linear-gradient(100deg, rgba(6,4,14,0.82) 0%, rgba(6,4,14,0.55) 40%, rgba(6,4,14,0.28) 70%, rgba(6,4,14,0.42) 100%),
+      linear-gradient(180deg, rgba(6,4,14,0.05) 0%, rgba(6,4,14,0.15) 60%, rgba(6,4,14,0.55) 100%);
+  }
+  [data-theme="light"] .hero-scrim{
+    background:
+      linear-gradient(100deg, rgba(243,239,252,0.92) 0%, rgba(243,239,252,0.72) 40%, rgba(243,239,252,0.4) 70%, rgba(243,239,252,0.55) 100%),
+      linear-gradient(180deg, rgba(243,239,252,0.15) 0%, rgba(243,239,252,0.25) 60%, rgba(243,239,252,0.72) 100%);
+  }
+
   .hero-text{
     position:relative;z-index:2;flex:1;
     max-width:640px;padding:64px 48px;
@@ -153,7 +171,7 @@
   .hero-visual{
     position:relative;flex:1;min-height:420px;
     display:flex;align-items:center;justify-content:center;
-    z-index:1;
+    z-index:2;
   }
   @media (max-width:980px){ .hero-visual{min-height:280px;width:100%;padding:0 20px 40px;} }
   .gem-ring{
@@ -271,6 +289,13 @@
 </header>
 
 <div class="hero">
+  <div class="hero-media">
+    <video autoplay muted loop playsinline poster="assets/miya-hero-poster.jpg">
+      <source src="assets/miya-hero-loop.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-scrim"></div>
+
   <div class="hero-text">
     <p class="eyebrow reveal" data-i18n="home.eyebrow">Est. 2026 &nbsp;·&nbsp; Beyond the peak</p>
     <h1 class="reveal" data-i18n="home.h1">The Ultimate Hub for Esports Tournaments &amp; MLBB Top-Ups</h1>
