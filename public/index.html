@@ -163,28 +163,23 @@
   .gem-ring.r2{width:520px;height:520px;opacity:0.35;}
   @media (max-width:980px){ .gem-ring{width:260px;height:260px;} .gem-ring.r2{width:320px;height:320px;} }
   .gem-wrap{
-    position:relative;width:320px;z-index:2;
+    position:relative;width:340px;height:340px;z-index:2;
+  }
+  @media (max-width:980px){ .gem-wrap{width:240px;height:240px;} }
+  .gem-wrap svg{width:100%;height:auto;display:block;}
+  #diamond-stage{position:absolute;inset:0;}
+  #diamond-stage canvas{display:block;width:100%;height:100%;}
+  .gem-fallback{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     animation:gemFloat 5s ease-in-out infinite;
     filter:drop-shadow(0 30px 40px rgba(139,92,246,0.25));
   }
-  @media (max-width:980px){ .gem-wrap{width:220px;} }
-  .gem-wrap svg{width:100%;height:auto;display:block;}
-  .gem-shadow{
-    position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
-    width:220px;height:36px;border-radius:50%;
-    background:radial-gradient(ellipse, rgba(139,92,246,0.35), transparent 70%);
-    filter:blur(6px);
-    animation:gemShadow 5s ease-in-out infinite;
-  }
+  .gem-fallback svg{width:94%;height:auto;}
   @keyframes gemFloat{
     0%,100%{transform:translateY(0) rotate(-2deg);}
     50%{transform:translateY(-22px) rotate(2deg);}
   }
-  @keyframes gemShadow{
-    0%,100%{opacity:0.6;transform:translateX(-50%) scaleX(1);}
-    50%{opacity:0.35;transform:translateX(-50%) scaleX(0.82);}
-  }
-  @media (prefers-reduced-motion:reduce){ .gem-wrap,.gem-shadow{animation:none;} }
+  @media (prefers-reduced-motion:reduce){ .gem-fallback{animation:none;} }
   .hero-index{
     position:absolute;top:8%;right:4%;display:flex;flex-direction:column;gap:10px;
     text-align:right;font-family:'JetBrains Mono',var(--font-main);
@@ -302,8 +297,9 @@
     </div>
     <div class="gem-ring"></div>
     <div class="gem-ring r2"></div>
-    <div class="gem-shadow"></div>
     <div class="gem-wrap">
+      <div id="diamond-stage"></div>
+      <div class="gem-fallback" id="gem-fallback">
       <svg viewBox="0 0 400 460" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="gTable" x1="0" y1="0" x2="1" y2="1">
@@ -344,9 +340,144 @@
         <polygon points="255,190 227.5,142.4 172.5,142.4 145,190 172.5,237.6 227.5,237.6" fill="url(#gTable)" stroke="#0A0713" stroke-width="1.5"/>
         <polygon points="200,165 227.5,190 200,215 172.5,190" fill="#FFFFFF" opacity="0.55"/>
       </svg>
+      </div>
     </div>
   </div>
 </div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// Real 3D diamond (round brilliant cut) rendered with physically-based
+// glass (transmission + correct IOR), a procedural studio environment for
+// realistic facet reflections, an additive sparkle pass, and a soft
+// contact shadow — swaps in over the flat SVG fallback once it's ready.
+(function initDiamond3D(){
+  const stageEl = document.getElementById('diamond-stage');
+  const fallbackEl = document.getElementById('gem-fallback');
+  if (!stageEl) return;
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, premultipliedAlpha:false });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  const scene = new THREE.Scene();
+  scene.background = null;
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+  camera.position.set(0, 0.15, 4.2);
+
+  // Procedural studio softbox environment (brand-tinted violet/cyan
+  // instead of a generic HDRI) — this is what gives the facets their
+  // realistic, colour-graded reflections.
+  function studioEnv(){
+    const c = document.createElement('canvas');
+    c.width = 1024; c.height = 512;
+    const g = c.getContext('2d');
+    const bg = g.createLinearGradient(0, 0, 0, 512);
+    bg.addColorStop(0.00, '#ffffff');
+    bg.addColorStop(0.42, '#d8d2ee');
+    bg.addColorStop(0.58, '#584a86');
+    bg.addColorStop(1.00, '#120a24');
+    g.fillStyle = bg; g.fillRect(0, 0, 1024, 512);
+    const box = (x,y,w,h,col,blur) => { g.save(); g.filter = `blur(${blur}px)`; g.fillStyle = col; g.fillRect(x,y,w,h); g.restore(); };
+    box(90,  60, 260, 150, '#ffffff', 26);
+    box(560, 40, 210, 190, '#ffffff', 30);
+    box(300, 250, 420,  60, '#c9b3ff', 34);  // violet softbox
+    box(830, 150, 120, 220, '#9beef2', 30);  // cyan softbox
+    box(20,  300, 160, 120, '#b9a3ff', 40);
+    return new THREE.CanvasTexture(c);
+  }
+  const envTex = studioEnv();
+  envTex.mapping = THREE.EquirectangularReflectionMapping;
+  envTex.colorSpace = THREE.SRGBColorSpace;
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromEquirectangular(envTex).texture;
+
+  // Soft contact shadow
+  const sc = document.createElement('canvas'); sc.width = sc.height = 256;
+  const sg = sc.getContext('2d');
+  const rg = sg.createRadialGradient(128,128,8,128,128,126);
+  rg.addColorStop(0, 'rgba(20,14,36,0.5)');
+  rg.addColorStop(0.45, 'rgba(20,14,36,0.2)');
+  rg.addColorStop(1, 'rgba(20,14,36,0)');
+  sg.fillStyle = rg; sg.fillRect(0,0,256,256);
+  const shadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.6, 3.6),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent:true, depthWrite:false })
+  );
+  shadow.rotation.x = -Math.PI/2;
+  shadow.position.y = -1.25;
+  shadow.scale.set(1, 0.62, 1);
+  scene.add(shadow);
+
+  let diamond = null;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tilt = THREE.MathUtils.degToRad(-22);
+  const clock = new THREE.Clock();
+  let t = 0;
+
+  function resize(){
+    const w = stageEl.clientWidth, h = stageEl.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+
+  function frame(){
+    requestAnimationFrame(frame);
+    if (!reduce) t += clock.getDelta();
+    const spinSeconds = 14;
+    const p = (t % spinSeconds) / spinSeconds;
+    if (diamond) {
+      diamond.rotation.y = p * Math.PI * 2;
+      diamond.rotation.z = tilt;
+      diamond.rotation.x = Math.sin(p * Math.PI * 2) * 0.09;
+      diamond.position.y = 0.28 + Math.sin(p * Math.PI * 2) * 0.035;
+    }
+    renderer.render(scene, camera);
+  }
+
+  new GLTFLoader().load('assets/diamond.glb', (gltf) => {
+    diamond = gltf.scene;
+    // Add a subtle additive sparkle pass on top of every facet for extra glints
+    diamond.traverse((obj) => {
+      if (obj.isMesh) {
+        obj.material.envMapIntensity = 2.2;
+        const sparkleMat = new THREE.MeshBasicMaterial({
+          envMap: envTex, color: new THREE.Color(0xC9B3FF),
+          blending: THREE.AdditiveBlending, transparent:true, opacity:0.35,
+          depthWrite:false, side: THREE.DoubleSide,
+        });
+        const shine = new THREE.Mesh(obj.geometry, sparkleMat);
+        shine.scale.setScalar(0.998);
+        shine.renderOrder = 2;
+        obj.add(shine);
+      }
+    });
+    scene.add(diamond);
+    stageEl.appendChild(renderer.domElement);
+    resize();
+    frame();
+    // fade the flat fallback out once the real 3D gem is ready to show
+    if (fallbackEl) { fallbackEl.style.transition = 'opacity .4s ease'; fallbackEl.style.opacity = '0'; setTimeout(() => fallbackEl.remove(), 450); }
+  }, undefined, (err) => {
+    console.warn('3D diamond failed to load, keeping flat fallback:', err && err.message);
+  });
+})();
+</script>
+
 
 <footer>
   <span data-i18n="footer.est">EST 2026</span>
