@@ -455,11 +455,39 @@
     font-size:11.5px;font-weight:600;color:var(--mid);white-space:nowrap;
   }
   .cplayers span b{color:var(--hi);font-weight:700;}
-  @media (max-width:760px){
-    table.conf th:nth-child(4),table.conf td:nth-child(4){display:none;}
-    .conf-region-inline{display:inline-flex !important;}
-  }
   .conf-region-inline{display:none;margin-top:7px;}
+  table.conf td.no .code-chip{
+    display:inline-block;background:rgba(79,224,232,0.12);border:1px solid rgba(79,224,232,0.3);
+    border-radius:7px;padding:4px 9px;font-size:11.5px;font-weight:800;letter-spacing:0.5px;color:var(--cyan);
+  }
+  /* Every row lines up on the same columns rather than being sized by whichever
+     team happens to have the longest player names. */
+  table.conf{table-layout:fixed;}
+  table.conf col.cc-code{width:104px;}
+  table.conf col.cc-team{width:30%;}
+  table.conf col.cc-region{width:150px;}
+  table.conf td{vertical-align:top;}
+  table.conf td.c-team{padding-top:14px;}
+  .cplayers span{display:inline-flex;align-items:baseline;gap:5px;}
+  .cplayers span i{font-style:normal;color:var(--dim);font-size:10px;font-weight:800;text-transform:uppercase;}
+
+  /* Below this the four columns cannot fit side by side, so each team becomes
+     its own card — the row no longer runs off the right edge of the screen. */
+  @media (max-width:760px){
+    .conf-scroll{overflow-x:visible;}
+    table.conf,table.conf tbody,table.conf tr,table.conf td{display:block;width:auto;}
+    table.conf{table-layout:auto;}
+    table.conf thead,table.conf colgroup{display:none;}
+    table.conf td.c-region{display:none;}
+    table.conf tr{padding:15px 14px;border-bottom:1px solid var(--line);}
+    table.conf tr:last-child{border-bottom:none;}
+    table.conf td{border-bottom:none;padding:0;}
+    table.conf td.no{width:auto;text-align:left;margin-bottom:9px;}
+    table.conf td.c-team{padding-top:0;margin-bottom:10px;}
+    table.conf .cteam .nm{white-space:normal;overflow-wrap:anywhere;}
+    .conf-region-inline{display:inline-flex !important;}
+    .cplayers span{font-size:11px;padding:4px 8px;}
+  }
 
   /* ---------- bracket ---------- */
   .bracket-toolbar{
@@ -573,10 +601,26 @@
     background:linear-gradient(135deg,rgba(61,214,140,0.16),rgba(79,224,232,0.12));
     border:1px solid rgba(61,214,140,0.45);
   }
-  .bx-qual .lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ok);}
-  .bx-qual .q-row{display:flex;align-items:center;gap:7px;min-width:0;}
-  .bx-qual .q-row .nm{font-size:12px;font-weight:800;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bx-qual .lbl{
+    font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ok);
+    display:block;margin-bottom:2px;
+  }
+  .bx-qual .q-rows{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .bx-qual .q-row{
+    display:flex;align-items:center;gap:7px;min-width:0;
+    background:rgba(var(--void-rgb),0.32);border-radius:7px;padding:5px 7px;
+  }
+  .bx-qual .q-row .q-seed{
+    width:15px;height:15px;border-radius:4px;flex-shrink:0;background:rgba(61,214,140,0.22);
+    display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:800;color:var(--ok);
+  }
+  .bx-qual .q-row .nm{
+    flex:1;min-width:0;font-size:11.5px;font-weight:800;color:var(--hi);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
   .bx-qual .q-row .nm.tbd{color:var(--dim);font-style:italic;font-weight:600;}
+  .bx-qual .champ-mark .bx-logo,
+  .bx-qual .champ-mark .bx-seed{width:18px;height:18px;border-radius:5px;}
   .bx-row .bx-bye{color:var(--dim);font-style:italic;font-weight:700;}
   .reg-badge.team-code{background:rgba(61,214,140,0.16);color:var(--ok);}
 
@@ -975,7 +1019,7 @@ const QUALIFIER_SIZES = [4,8,16,32,64,128];
 // Below three confirmed teams there is nothing to play: they are through.
 const QUALIFIER_MIN_SIZE = 4;
 // Compact card metrics — a 128-team draw is 64 matches tall in round one.
-const QX = { W:180, H:60, COLGAP:46, VGAP:10, HEADH:30 };
+const QX = { W:180, H:60, COLGAP:46, VGAP:10, HEADH:30, QUALH:106 };
 
 /* Bracket layout metrics (pixels) */
 const BX = { W:206, H:88, COLGAP:66, VGAP:26, HEADH:32 };
@@ -1689,18 +1733,19 @@ function bxMatchHtml(slot, label, x, y, mx){
 
 /* The qualifier ends on a pair of finalists rather than a champion, so its
    last card lists both teams that came through the semifinals. */
-function bxQualifiedHtml(sourceSlots, x, y, mx){
-  const rows = sourceSlots.map((slot) => {
+function bxQualifiedHtml(sourceSlots, x, y, mx, h){
+  const rows = sourceSlots.map((slot, i) => {
     const tm = findAnyTeam(outcomeOf(slot).winner);
     return `<span class="q-row">
-      ${tm ? `<span class="champ-mark">${bxTeamMarkHtml(tm)}</span>` : ''}
+      <span class="q-seed">${i + 1}</span>
+      <span class="champ-mark">${tm ? bxTeamMarkHtml(tm) : '<span class="bx-seed">–</span>'}</span>
       <span class="nm ${tm ? '' : 'tbd'}">${tm ? escapeHtml(tm.name) : t('tourdetail.tbd','TBD')}</span>
     </span>`;
   }).join('');
   return `
-    <div class="bx-qual" style="left:${x}px;top:${y}px;width:${mx.W}px;height:${mx.H}px;">
+    <div class="bx-qual" style="left:${x}px;top:${y}px;width:${mx.W}px;height:${h || mx.H}px;">
       <span class="lbl">✅ ${escapeHtml(t('qualifier.qualified','Qualified'))}</span>
-      ${rows}
+      <span class="q-rows">${rows}</span>
     </div>`;
 }
 
@@ -1734,6 +1779,15 @@ function renderBracketSection(section, mx){
       pos[s.id] = { x, y: mx.HEADH + (bodyH * (i + 0.5)) / col.slots.length };
     });
   });
+  /* The Qualified card is fed by both semifinals rather than one match, so
+     centre it on the midpoint between them — otherwise it floats against the
+     middle of the whole column and its connectors arrive crooked. */
+  cols.forEach((col) => col.slots.forEach((sl) => {
+    if (!sl.qualified) return;
+    const ys = (section.conns || []).filter(cn => cn[1] === sl.id)
+      .map(cn => pos[cn[0]]).filter(Boolean).map(pt => pt.y);
+    if (ys.length) pos[sl.id].y = ys.reduce((a, b) => a + b, 0) / ys.length;
+  }));
 
   // Elbow connectors, drawn behind the cards. A connector lights up once its
   // source match has a decided winner, mirroring the reference bracket art.
@@ -1757,7 +1811,8 @@ function renderBracketSection(section, mx){
     const y = p.y - mx.H / 2;
     if (sl.qualified) {
       const srcs = (section.conns || []).filter(cn => cn[1] === sl.id).map(cn => cn[0]);
-      return bxQualifiedHtml(srcs, p.x, y, mx);
+      const h = mx.QUALH || mx.H;
+      return bxQualifiedHtml(srcs, p.x, p.y - h / 2, mx, h);
     }
     if (sl.champion) {
       const src = (section.conns.find(cn => cn[1] === '__champ') || [])[0] || '';
@@ -2001,6 +2056,7 @@ function renderConfirmed(){
   wrap.innerHTML = `
     <div class="conf-scroll">
       <table class="conf">
+        <colgroup><col class="cc-code"><col class="cc-team"><col><col class="cc-region"></colgroup>
         <thead><tr>
           <th class="no">${t('reg.col.code','Code')}</th>
           <th>${t('reg.col.team','Team')}</th>
@@ -2010,8 +2066,8 @@ function renderConfirmed(){
         <tbody>
           ${approvedTeams.map((tm, i) => `
             <tr>
-              <td class="no">${escapeHtml(tm.teamCode || String(i + 1))}</td>
-              <td>
+              <td class="no"><span class="code-chip">${escapeHtml(tm.teamCode || String(i + 1))}</span></td>
+              <td class="c-team">
                 <span class="cteam">
                   ${tm.teamLogo
                     ? `<img src="${tm.teamLogo}" alt="">`
@@ -2021,12 +2077,12 @@ function renderConfirmed(){
                 </span>
                 <span class="reg-badge region conf-region-inline">${escapeHtml(regionLabel(tm.region))}</span>
               </td>
-              <td>
+              <td class="c-players">
                 <div class="cplayers">
-                  ${(tm.players || []).map((p) => `<span>${escapeHtml(p.role)} <b>${escapeHtml(p.name)}</b></span>`).join('')}
+                  ${(tm.players || []).map((p) => `<span><i>${escapeHtml(p.role)}</i><b>${escapeHtml(p.name)}</b></span>`).join('')}
                 </div>
               </td>
-              <td><span class="reg-badge region">${escapeHtml(regionLabel(tm.region))}</span></td>
+              <td class="c-region"><span class="reg-badge region">${escapeHtml(regionLabel(tm.region))}</span></td>
             </tr>`).join('')}
         </tbody>
       </table>
@@ -2228,7 +2284,7 @@ async function autoDrawQualifier(){
   if (!isAdmin || autoDrawRunning || !detailLoaded || !registrationsLoaded) return;
   let changed = false;
   QUALIFIER_REGIONS.forEach((region) => {
-    if (qualifierPool(region).length < 3) return;   // nothing to play yet
+    if (qualifierPool(region).length < 3) return;   // no draw needed; see below
     const snapshot = () => JSON.stringify([
       qualifierSize(region),
       matches.filter(m => String(m.bracketSlot || '').startsWith(qualifierPrefix(region))),
@@ -2237,10 +2293,53 @@ async function autoDrawQualifier(){
     if (drawQualifierRegion(region, false) === 'too_many') return;
     if (before !== snapshot()) changed = true;
   });
+  if (syncQualifiedToLineup()) changed = true;
   if (!changed) return;
   autoDrawRunning = true;
   await saveDetail();
   autoDrawRunning = false;
+}
+
+/* The two teams that come through a region's semifinals have earned their
+   place in the main event, so they are added to Team Lineup as soon as both
+   results are in. The lineup entry reuses the bracket's team id, so a team
+   is never listed twice and the bracket keeps resolving it. */
+function qualifiedTeamIds(region){
+  const size = qualifierSize(region);
+  const rounds = Math.round(Math.log2(size)) - 1;
+  if (rounds < 1) return [];
+  const pre = qualifierPrefix(region);
+  return [0, 1]
+    .map(i => outcomeOf(`${pre}-r${rounds - 1}-m${i}`).winner)
+    .filter(Boolean);
+}
+
+function syncQualifiedToLineup(){
+  let changed = false;
+  QUALIFIER_REGIONS.forEach((region) => {
+    const pool = qualifierPool(region);
+    // Fewer than three confirmed teams means no qualifier was played and the
+    // whole (one- or two-team) pool goes straight through.
+    const ids = pool.length < 3
+      ? pool.map(p => qualifierTeamOf(p).id)
+      : qualifiedTeamIds(region);
+    ids.forEach((id) => {
+      if (teams.some(x => x.id === id)) return;
+      const reg = approvedTeams.find(r => 'T-q-' + r.id === id);
+      if (!reg) return;
+      teams.push({
+        id,
+        name: reg.teamName,
+        tag: reg.teamTag,
+        logo: reg.teamLogo || '',
+        status: 'qualified',
+        group: '',
+        players: (reg.players || []).map(p => ({ name: p.name, role: p.role })),
+      });
+      changed = true;
+    });
+  });
+  return changed;
 }
 
 function renderQualifier(){
@@ -2581,7 +2680,7 @@ document.getElementById('bracket-modal-save').addEventListener('click', async ()
   }
   const ok = await saveDetail();
   btn.disabled = false; btn.textContent = t('tournament.form.save','Save');
-  if (ok) bracketModal.classList.remove('show');
+  if (ok) { bracketModal.classList.remove('show'); autoDrawQualifier(); }
   else { bracketModalErr.textContent = t('tourdetail.error_save','Could not save. Please try again.'); bracketModalErr.classList.add('show'); }
 });
 

@@ -197,11 +197,31 @@ function deleteRegistration(tournamentId, id) {
   return true;
 }
 
-const ready = hydrate(SHEET_KEY, DB_FILE);
+/* Teams that registered before entry numbers existed have no code, which left
+   the confirmed list showing a mix of "1", "2" and "S3-0001". This gives every
+   one of them a number, in the order they entered, so the column is uniform.
+   Runs once on boot and is a no-op from then on. */
+function backfillTeamCodes() {
+  const map = readAll();
+  let touched = false;
+  Object.keys(map).forEach((tid) => {
+    const list = (map[tid] || []).slice()
+      .sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+    list.forEach((r) => {
+      if (r.teamCode) return;
+      r.teamCode = nextTeamCode(list);
+      touched = true;
+    });
+  });
+  if (touched) writeAll(map);
+  return touched;
+}
+
+const ready = hydrate(SHEET_KEY, DB_FILE).then(() => { backfillTeamCodes(); });
 
 module.exports = {
   listRegistrations, listApproved, createRegistration, updateRegistration, deleteRegistration,
-  validate, isCodeUsed, countTeams, isFull,
+  validate, isCodeUsed, countTeams, isFull, backfillTeamCodes,
   ROSTER_SLOTS, ROLE_OPTIONS, CONTACT_TYPES, REGIONS, MAX_TEAMS,
   TEAM_CODE_PREFIX, MIN_REGISTER_DIAMONDS, ready,
 };
