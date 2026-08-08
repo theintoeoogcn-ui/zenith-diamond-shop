@@ -208,19 +208,30 @@
   .match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
   .match-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;}
   .match-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-  .match-status{font-size:10px;font-weight:800;text-transform:uppercase;padding:3px 9px;border-radius:999px;}
+  .match-status{
+    display:inline-flex;align-items:center;height:21px;padding:0 9px;
+    font-size:10px;font-weight:800;text-transform:uppercase;border-radius:999px;white-space:nowrap;
+  }
   .match-status.upcoming{background:rgba(139,92,246,0.15);color:var(--violet);}
   .match-status.live{background:rgba(255,62,154,0.15);color:var(--signal);}
   .match-status.completed{background:rgba(108,96,137,0.2);color:var(--dim);}
   .match-time{font-size:11px;color:var(--dim);}
-  .match-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-6px 0 12px;}
-  .bo-badge{
-    display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:0.4px;
-    padding:3px 8px;border-radius:999px;background:rgba(79,224,232,0.14);color:var(--cyan);
-  }
+  .match-meta-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-6px 0 12px;}
+  /* All three chips share one size so they sit on a single, level line and
+     every match card's meta row lines up with the next. */
+  .bo-badge,
   .when-badge{
-    display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;
-    padding:3px 8px;border-radius:999px;background:var(--panel-raised);color:var(--mid);
+    display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 9px;
+    font-size:10.5px;font-weight:700;letter-spacing:0.2px;border-radius:999px;
+    white-space:nowrap;flex-shrink:0;
+  }
+  .bo-badge{background:rgba(79,224,232,0.14);color:var(--cyan);font-weight:800;letter-spacing:0.4px;}
+  .when-badge{background:var(--panel-raised);color:var(--mid);}
+  /* Below this the three chips no longer fit side by side, so the time chip
+     is allowed to take the next line as a whole rather than mid-word. */
+  @media (max-width:400px){
+    .match-meta-row{gap:5px;}
+    .bo-badge,.when-badge{font-size:10px;padding:0 8px;}
   }
   .match-teams-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
   .match-team{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0;}
@@ -257,13 +268,56 @@
   @media (max-width:760px){ .standings-grid{grid-template-columns:1fr;} }
   .standings-grid h3{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px;}
   .playoff-hint{font-size:10.5px;font-weight:600;color:var(--gold);display:flex;align-items:center;gap:4px;}
-  table.standings{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
-  table.standings th{text-align:left;font-size:10.5px;color:var(--dim);text-transform:uppercase;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
-  table.standings td{padding:10px 12px;font-size:12.5px;border-bottom:1px solid var(--line);}
+  /* Narrow screens scroll the table sideways rather than squeezing columns
+     until the numbers wrap onto two lines and the rows go ragged. */
+  .standings-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line);background:var(--panel);}
+  table.standings{width:100%;min-width:340px;border-collapse:collapse;table-layout:fixed;}
+  table.standings th{text-align:left;font-size:10.5px;color:var(--dim);text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  table.standings td{padding:9px 10px;font-size:12.5px;border-bottom:1px solid var(--line);vertical-align:middle;}
   table.standings tr:last-child td{border-bottom:none;}
-  table.standings td.num{text-align:center;color:var(--mid);}
-  table.standings td.pts{text-align:center;color:var(--cyan);font-weight:700;}
+  /* Every numeric column stays on one line so all rows keep the same height. */
+  table.standings td.num,
+  table.standings td.pts{text-align:center;white-space:nowrap;}
+  table.standings td.num{color:var(--mid);}
+  table.standings td.pts{color:var(--cyan);font-weight:700;}
   table.standings tr.qualifies{background:rgba(244,197,66,0.08);}
+  /* Fixed column widths — the team column takes whatever is left. */
+  table.standings col.c-rank{width:64px;}
+  table.standings col.c-pts{width:46px;}
+  table.standings col.c-wl{width:56px;}
+  table.standings col.c-ngw{width:52px;}
+  table.standings col.c-games{width:60px;}
+  /* On phones, NGW and Games give up their space so the team name is readable.
+     Both are tiebreakers rather than headline numbers, and the full detail is
+     still there on a wider screen. */
+  @media (max-width:560px){
+    .standings-scroll{overflow-x:visible;}
+    table.standings{min-width:0;}
+    table.standings .col-extra{display:none;}
+    /* Hiding the cells isn't enough under table-layout:fixed — the <col>
+       elements keep reserving their width, leaving a dead strip that the row
+       highlight stops short of. Zero them so the team column absorbs it. */
+    table.standings col.c-ngw,
+    table.standings col.c-games{width:0;}
+    table.standings col.c-rank{width:52px;}
+    table.standings col.c-pts{width:40px;}
+    table.standings col.c-wl{width:52px;}
+    table.standings th,
+    table.standings td{padding:9px 7px;}
+  }
+  .st-team{display:flex;align-items:center;gap:8px;min-width:0;}
+  .st-team .st-logo{
+    width:22px;height:22px;border-radius:6px;object-fit:contain;flex-shrink:0;padding:2px;
+    background:var(--logo-plate);box-shadow:0 0 0 1px var(--logo-plate-line) inset;
+  }
+  .st-team .st-logo-fallback{
+    width:22px;height:22px;border-radius:6px;flex-shrink:0;background:var(--panel-raised);
+    display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:800;color:var(--violet);
+  }
+  /* Truncate instead of wrapping — a long club name must not make one row
+     taller than its neighbours. The full name stays in the tooltip. */
+  .st-team .st-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .st-team .st-tag{color:var(--cyan);font-weight:800;margin-right:5px;}
   .playoff-arrow{
     display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 7px;border-radius:999px;
     background:rgba(244,197,66,0.18);color:var(--gold);font-size:9.5px;font-weight:800;
@@ -271,7 +325,10 @@
   }
   @keyframes arrowBounce{0%,100%{transform:translateX(0);}50%{transform:translateX(3px);}}
   @media (prefers-reduced-motion:reduce){ .playoff-arrow{animation:none;} }
-  .rank-cell{display:flex;align-items:center;}
+  /* NB: this must stay on an inner span, never on the <td> itself — a
+     display:flex table cell drops out of the table's row layout, which knocks
+     its bottom border out of line with the rest of the row. */
+  .rank-cell{display:flex;align-items:center;gap:2px;}
 
   /* ---------- bracket ---------- */
   .bracket-toolbar{
@@ -499,11 +556,23 @@
   <div class="standings-grid">
     <div>
       <h3>Group A <span class="playoff-hint">▲ Top 2 advance</span></h3>
-      <table class="standings"><thead><tr><th>#</th><th>Team</th><th class="num">Pts</th><th class="num">W-L</th><th class="num">NGW</th><th class="num">Games</th></tr></thead><tbody id="standings-a"></tbody></table>
+      <div class="standings-scroll">
+        <table class="standings">
+          <colgroup><col class="c-rank"><col><col class="c-pts"><col class="c-wl"><col class="c-ngw"><col class="c-games"></colgroup>
+          <thead><tr><th>#</th><th>Team</th><th class="num">Pts</th><th class="num">W-L</th><th class="num col-extra">NGW</th><th class="num col-extra">Games</th></tr></thead>
+          <tbody id="standings-a"></tbody>
+        </table>
+      </div>
     </div>
     <div>
       <h3>Group B <span class="playoff-hint">▲ Top 2 advance</span></h3>
-      <table class="standings"><thead><tr><th>#</th><th>Team</th><th class="num">Pts</th><th class="num">W-L</th><th class="num">NGW</th><th class="num">Games</th></tr></thead><tbody id="standings-b"></tbody></table>
+      <div class="standings-scroll">
+        <table class="standings">
+          <colgroup><col class="c-rank"><col><col class="c-pts"><col class="c-wl"><col class="c-ngw"><col class="c-games"></colgroup>
+          <thead><tr><th>#</th><th>Team</th><th class="num">Pts</th><th class="num">W-L</th><th class="num col-extra">NGW</th><th class="num col-extra">Games</th></tr></thead>
+          <tbody id="standings-b"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -1069,6 +1138,14 @@ window.castVote = async function(matchId, side){
 };
 
 /* ---- standings ---- */
+// Standings rows carry a snapshot of the team, which may predate a logo
+// upload — so look the live team up by id first and fall back to the snapshot.
+function standingsLogoHtml(team){
+  const live = findTeam(team.id) || team;
+  if (live.logo) return `<img class="st-logo" src="${live.logo}" alt="">`;
+  return `<span class="st-logo-fallback">${escapeHtml((live.tag || live.name || '?').slice(0, 2).toUpperCase())}</span>`;
+}
+
 function renderStandingsTable(rows, elId){
   const el = document.getElementById(elId);
   if (!rows.length) {
@@ -1077,12 +1154,17 @@ function renderStandingsTable(rows, elId){
   }
   el.innerHTML = rows.map((r, i) => `
     <tr class="${i < 2 ? 'qualifies' : ''}">
-      <td class="rank-cell">${i + 1}${i < 2 ? `<span class="playoff-arrow">▲</span>` : ''}</td>
-      <td>${r.team.tag ? `<b style="color:var(--cyan);">${escapeHtml(r.team.tag)}</b> ` : ''}${escapeHtml(r.team.name)}</td>
+      <td><span class="rank-cell">${i + 1}${i < 2 ? `<span class="playoff-arrow">▲</span>` : ''}</span></td>
+      <td>
+        <span class="st-team" title="${escapeHtml(r.team.name)}">
+          ${standingsLogoHtml(r.team)}
+          <span class="st-name">${r.team.tag ? `<span class="st-tag">${escapeHtml(r.team.tag)}</span>` : ''}${escapeHtml(r.team.name)}</span>
+        </span>
+      </td>
       <td class="pts">${r.matchPoints}</td>
       <td class="num">${r.matchWins}-${r.matchLosses}</td>
-      <td class="num">${r.netGameWin > 0 ? '+' : ''}${r.netGameWin}</td>
-      <td class="num">${r.gameWins}-${r.gameLosses}</td>
+      <td class="num col-extra">${r.netGameWin > 0 ? '+' : ''}${r.netGameWin}</td>
+      <td class="num col-extra">${r.gameWins}-${r.gameLosses}</td>
     </tr>`).join('');
 }
 function renderStandings(){

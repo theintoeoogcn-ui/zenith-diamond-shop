@@ -23,6 +23,21 @@
     --mid:#B4A4DC;
     --dim:#6C6089;
     --radius:14px;
+    /* Package card light. Dark mode gets a bright cyan/violet arc on a dark
+       panel; light mode needs deeper, more saturated colours and a stronger
+       rim to stay visible against white. */
+    --rim-a:rgba(79,224,232,0.95);
+    --rim-b:rgba(139,92,246,0.95);
+    --glow-c:rgba(139,92,246,0.30);
+    --rim-strength:0.75;
+    --glow-strength:0.55;
+  }
+  :root[data-theme="light"]{
+    --rim-a:rgba(14,154,163,1);
+    --rim-b:rgba(124,76,237,1);
+    --glow-c:rgba(124,76,237,0.20);
+    --rim-strength:0.9;
+    --glow-strength:0.7;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -184,18 +199,64 @@
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
   @media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr);} }
 
+  /* Animated angle for the rotating rim light. Declaring it with @property is
+     what makes a conic-gradient angle animatable at all; where that isn't
+     supported the gradient simply sits still and everything else is unchanged. */
+  @property --rim{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
+
   .card{
     background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-    padding:18px 14px;text-align:center;cursor:pointer;position:relative;
+    padding:18px 14px;text-align:center;cursor:pointer;position:relative;isolation:isolate;
     transition:border-color .15s, transform .1s;
   }
+  /* Rim light — a bright arc travelling continuously around the border. The
+     two masks cut out the middle so only the 1px edge lights up. */
+  .card::before{
+    content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+    background:conic-gradient(from var(--rim),
+      transparent 0deg, transparent 200deg,
+      var(--rim-a) 285deg, var(--rim-b) 330deg, transparent 360deg);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite:exclude;
+    animation:rimSpin 5s linear infinite;
+    opacity:var(--rim-strength);pointer-events:none;z-index:1;
+  }
+  /* Soft glow drifting behind the contents. Uses transform only, so it
+     animates on the compositor and stays smooth on phones. */
+  .card::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;overflow:hidden;
+    background:radial-gradient(70px 70px at 50% 50%, var(--glow-c), transparent 70%);
+    animation:glowDrift 7s ease-in-out infinite;
+    opacity:var(--glow-strength);pointer-events:none;z-index:0;
+  }
+  .card > *{position:relative;z-index:2;}
+  .card:nth-child(3n+2)::before{animation-delay:-1.6s;}
+  .card:nth-child(3n+3)::before{animation-delay:-3.2s;}
+  .card:nth-child(3n+2)::after{animation-delay:-2.3s;}
+  .card:nth-child(3n+3)::after{animation-delay:-4.6s;}
+  @keyframes rimSpin{to{--rim:360deg;}}
+  @keyframes glowDrift{
+    0%,100%{transform:translate(-26%,-18%) scale(1);}
+    33%{transform:translate(28%,10%) scale(1.25);}
+    66%{transform:translate(-6%,24%) scale(0.95);}
+  }
   .card:hover{border-color:var(--violet-dim);transform:translateY(-2px);}
+  .card:hover::before{opacity:1;animation-duration:2.2s;}
+  .card:hover::after{opacity:calc(var(--glow-strength) * 1.9);}
+  /* Respect a reduced-motion preference: keep the light, drop the movement. */
+  @media (prefers-reduced-motion:reduce){
+    .card::before,.card::after{animation:none;}
+  }
   .card.selected{
     border-color:var(--violet);
     box-shadow:0 0 0 1px var(--violet), 0 0 22px rgba(139,92,246,0.35);
     background:var(--panel-raised);
     animation:cardPop .25s ease;
   }
+  .card.selected::before{opacity:1;animation-duration:2.6s;}
+  .card.selected::after{opacity:calc(var(--glow-strength) * 2.2);}
   @keyframes cardPop{0%{transform:scale(.94);}100%{transform:scale(1);}}
   .card .amt{font-family:var(--font-main);font-weight:800;font-size:21px;margin-bottom:10px;}
   .card img.card-icon{width:30px;height:30px;margin-bottom:8px;}

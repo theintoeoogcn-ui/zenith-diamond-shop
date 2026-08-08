@@ -145,27 +145,22 @@
     overflow:hidden;border-radius:10px;background:var(--void);border:1px solid var(--line);
   }
   .n-media iframe{width:100%;height:100%;border:0;display:block;}
-  /* Portrait 4:5 frame sized for 1080x1350 uploads. `contain` means nothing
-     is ever cropped — a 1080x1350 image fills the frame exactly, and any other
-     ratio is letterboxed against the backdrop rather than having its edges cut
-     off (the old rule was `cover` with a 480px cap, which chopped tall posts). */
+  /* The frame takes the image's OWN aspect ratio, so a post image is never
+     cropped and never letterboxed — whatever was uploaded is shown whole.
+     A 1080x1350 upload renders at 540x675; a 16:9 banner renders 540x304.
+     (The old rule was `cover` under a 480px height cap, which cut the top and
+     bottom off any tall post.) */
   .n-media-photo{
-    position:relative;display:block;width:100%;max-width:540px;aspect-ratio:4/5;
+    position:relative;display:block;width:100%;max-width:540px;
     margin:0 0 16px;border-radius:10px;overflow:hidden;
     border:1px solid var(--line);background:var(--photo-backdrop);
+    line-height:0;
   }
   .n-media-photo .n-media-img{
-    position:absolute;inset:0;width:100%;height:100%;
-    object-fit:contain;display:block;
-  }
-  /* A blurred, zoomed copy fills the letterbox bars so off-ratio images still
-     look deliberate instead of sitting on empty slabs. */
-  .n-media-photo .n-media-blur{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    filter:blur(26px) saturate(1.3);transform:scale(1.15);opacity:0.5;
+    width:100%;height:auto;display:block;
   }
   .n-media-photo .n-media-zoom{
-    position:absolute;right:8px;bottom:8px;z-index:2;
+    position:absolute;right:8px;bottom:8px;z-index:2;line-height:1;
     display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;
     background:rgba(10,7,19,0.72);color:#F4EEFF;font-size:11px;font-weight:700;
     opacity:0;transition:opacity .15s;backdrop-filter:blur(4px);
@@ -503,7 +498,6 @@ function renderMedia(item){
   }
   return `
     <a class="n-media-photo" href="${item.media}" target="_blank" rel="noopener" title="${escapeHtml(t('news.image.open','Open full image'))}">
-      <img class="n-media-blur" src="${item.media}" alt="" aria-hidden="true">
       <img class="n-media-img" src="${item.media}" alt="">
       <span class="n-media-zoom">⤢ ${escapeHtml(t('news.image.open','Open full image'))}</span>
     </a>`;
