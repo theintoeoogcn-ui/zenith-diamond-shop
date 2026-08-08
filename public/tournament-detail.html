@@ -957,6 +957,29 @@ async function loadTournamentInfo(){
   renderHero();
 }
 
+/* Text that lives directly in the markup rather than being drawn by a render
+   function. Routed through t() so it switches with the rest of the page; the
+   English wording is the fallback when a key has no translation yet. */
+function applyStaticLabels(){
+  const set = (sel, key, fallback) => {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = t(key, fallback);
+  };
+  set('.back-link', 'tourdetail.back', '\u2190 Back to Tournaments');
+  set('.tab[data-tab="lineup"]', 'tourdetail.tab.lineup', 'Team Lineup');
+  set('.tab[data-tab="schedule"]', 'tourdetail.tab.schedule', 'Match Schedule');
+  set('.tab[data-tab="standings"]', 'tourdetail.tab.standings', 'Standings');
+  set('.tab[data-tab="bracket"]', 'tourdetail.tab.bracket', 'Bracket');
+  set('#tabs-manage-btn', 'tourdetail.manage_tabs', '\u2699 Manage tabs');
+  set('#add-team-btn', 'tourdetail.add_team', '+ Add Team');
+  set('#add-match-btn', 'tourdetail.add_match', '+ Add Match');
+  document.querySelectorAll('.playoff-hint').forEach((el) => {
+    el.textContent = '\u25B2 ' + t('tourdetail.top2', 'Top 2 advance');
+  });
+  // Re-applying the tab labels wipes the hidden-section marker, so restore it.
+  applyTabVisibility();
+}
+
 function renderHero(){
   if (!tournamentInfo) {
     document.getElementById('hero-title').textContent = t('tourdetail.not_found','Tournament not found');
@@ -1832,9 +1855,22 @@ document.getElementById('bracket-modal-save').addEventListener('click', async ()
   else { bracketModalErr.textContent = t('tourdetail.error_save','Could not save. Please try again.'); bracketModalErr.classList.add('show'); }
 });
 
+/* Almost everything on this page is drawn by JS, so swapping the language has
+   to redraw it — applyLang() in app-shared only rewrites static [data-i18n]
+   nodes, which is why the new language previously appeared only after a
+   reload. The other pages already register this hook; this one didn't. */
+const prevOnLangChange = window.ZenithI18n.onLangChange;
+window.ZenithI18n.onLangChange = function(lang, dict){
+  if (prevOnLangChange) prevOnLangChange(lang, dict);
+  applyStaticLabels();
+  renderHero();
+  renderAll();
+};
+
 if (!tournamentId) {
   document.getElementById('hero-title').textContent = t('tourdetail.not_found','Tournament not found');
 } else {
+  applyStaticLabels();
   loadTournamentInfo();
   loadDetail();
 }
