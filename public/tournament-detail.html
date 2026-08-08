@@ -205,33 +205,41 @@
     color:var(--mid);font-weight:700;font-size:12.5px;cursor:pointer;
   }
   .day-tab.active{background:var(--violet);border-color:transparent;color:#fff;}
-  .match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  /* Wide enough for status + best-of + group + time to sit on one line. */
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
   .match-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;}
-  .match-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-  .match-status{
-    display:inline-flex;align-items:center;height:21px;padding:0 9px;
-    font-size:10px;font-weight:800;text-transform:uppercase;border-radius:999px;white-space:nowrap;
+  /* Status, best-of, group and kick-off time all share one centred row.
+     The right padding keeps the last chip clear of the admin edit/delete
+     buttons, which are absolutely positioned in the card's top-right. */
+  .match-meta-row{
+    display:flex;align-items:center;justify-content:center;
+    gap:6px;flex-wrap:wrap;margin:0 0 14px;min-height:21px;
   }
+  /* In admin mode the edit/delete buttons get their own band across the top of
+     the card, rather than eating width from the chip row — reserving inline
+     space was enough to push the time chip onto a second line on phones. */
+  .match-card.is-admin{padding-top:44px;}
   .match-status.upcoming{background:rgba(139,92,246,0.15);color:var(--violet);}
   .match-status.live{background:rgba(255,62,154,0.15);color:var(--signal);}
   .match-status.completed{background:rgba(108,96,137,0.2);color:var(--dim);}
   .match-time{font-size:11px;color:var(--dim);}
-  .match-meta-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-6px 0 12px;}
-  /* All three chips share one size so they sit on a single, level line and
+  /* All four chips share one size so they sit on a single, level line and
      every match card's meta row lines up with the next. */
+  .match-status,
   .bo-badge,
   .when-badge{
-    display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 9px;
-    font-size:10.5px;font-weight:700;letter-spacing:0.2px;border-radius:999px;
-    white-space:nowrap;flex-shrink:0;
+    display:inline-flex;align-items:center;gap:4px;height:21px;padding:0 8px;
+    font-size:10px;font-weight:700;letter-spacing:0.2px;border-radius:999px;
+    white-space:nowrap;flex-shrink:0;line-height:1;
   }
+  /* Declared after the shared rule above so these win on source order. */
+  .match-status{font-weight:800;text-transform:uppercase;letter-spacing:0.4px;}
   .bo-badge{background:rgba(79,224,232,0.14);color:var(--cyan);font-weight:800;letter-spacing:0.4px;}
   .when-badge{background:var(--panel-raised);color:var(--mid);}
-  /* Below this the three chips no longer fit side by side, so the time chip
-     is allowed to take the next line as a whole rather than mid-word. */
+  /* Tighter chips on the narrowest phones so all four still fit one line. */
   @media (max-width:400px){
     .match-meta-row{gap:5px;}
-    .bo-badge,.when-badge{font-size:10px;padding:0 8px;}
+    .match-status,.bo-badge,.when-badge{font-size:9.5px;padding:0 7px;}
   }
   .match-teams-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
   .match-team{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0;}
@@ -1094,15 +1102,13 @@ function renderMatchCard(m){
   }
 
   return `
-    <div class="match-card">
+    <div class="match-card ${isAdmin ? 'is-admin' : ''}">
       <div class="card-admin-actions ${isAdmin ? 'show' : ''}">
         <button onclick="openMatchEdit('${m.id}')">✏️</button>
         <button class="del" onclick="deleteMatch('${m.id}')">🗑</button>
       </div>
-      <div class="match-card-top">
-        <span class="match-status ${m.status}">${t('tourdetail.status.' + m.status, m.status)}</span>
-      </div>
       <div class="match-meta-row">
+        <span class="match-status ${m.status}">${t('tourdetail.status.' + m.status, m.status)}</span>
         <span class="bo-badge">${boLabel(m.bestOf)}</span>
         <span class="when-badge">${t('tourdetail.group','Group')} ${escapeHtml(m.group || 'A')}</span>
         ${m.scheduledAt ? `<span class="when-badge">🕒 ${escapeHtml(formatWhen(m.scheduledAt))}</span>` : ''}
@@ -1185,7 +1191,7 @@ function formatWhen(iso){
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  return d.toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
 }
 
 /* ---- bracket structure ---- */
