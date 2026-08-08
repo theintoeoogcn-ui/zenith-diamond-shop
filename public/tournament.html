@@ -130,6 +130,8 @@
     transition:transform .12s, border-color .12s;
   }
   .t-link-btn:hover{transform:translateY(-1px);}
+  .t-link-btn .link-icon{width:15px;height:15px;object-fit:contain;display:block;flex-shrink:0;}
+  .t-link-btn .link-icon-emoji{font-size:13px;line-height:1;}
   .t-link-btn.youtube{background:rgba(255,0,0,0.12);border-color:rgba(255,0,0,0.35);color:#FF4B4B;}
   .t-link-btn.facebook{background:rgba(24,119,242,0.12);border-color:rgba(24,119,242,0.35);color:#4E9BFF;}
   .t-link-btn.generic{background:var(--panel-raised);}
@@ -447,13 +449,17 @@ function renderCard(item){
     </div>`;
 }
 
+/* The real YouTube mark, embedded as a data URI so there's no asset file to
+   deploy and it can't 404. Other platforms keep their emoji for now. */
+const YT_ICON = 'data:image/png;base64,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';
+
 // Auto-detects the platform from a watch-link URL so the right icon/label
 // shows on the card without the admin having to pick one manually.
 function detectLinkPlatform(url){
   const u = String(url).toLowerCase();
-  if (/youtube\.com|youtu\.be/.test(u)) return { cls: 'youtube', icon: '▶️', label: t('tournament.card.watch.youtube','Watch on YouTube') };
-  if (/facebook\.com|fb\.watch|fb\.com/.test(u)) return { cls: 'facebook', icon: '📘', label: t('tournament.card.watch.facebook','Watch on Facebook') };
-  return { cls: 'generic', icon: '🔗', label: t('tournament.card.watch.generic','Watch') };
+  if (/youtube\.com|youtu\.be/.test(u)) return { cls: 'youtube', icon: `<img class="link-icon" src="${YT_ICON}" alt="">`, label: t('tournament.card.watch.youtube','Watch on YouTube') };
+  if (/facebook\.com|fb\.watch|fb\.com/.test(u)) return { cls: 'facebook', icon: '<span class="link-icon-emoji">📘</span>', label: t('tournament.card.watch.facebook','Watch on Facebook') };
+  return { cls: 'generic', icon: '<span class="link-icon-emoji">🔗</span>', label: t('tournament.card.watch.generic','Watch') };
 }
 
 function escapeHtml(s){

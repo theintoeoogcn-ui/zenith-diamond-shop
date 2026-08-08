@@ -161,9 +161,14 @@
   }
   .team-head .name{font-weight:700;font-size:15px;}
   .team-head .tag{font-size:11px;color:var(--dim);}
+  .team-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0 12px;}
   .team-status{
     display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;
-    padding:3px 9px;border-radius:999px;margin:10px 0 12px;
+    padding:3px 9px;border-radius:999px;
+  }
+  .group-badge{
+    display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;
+    padding:3px 9px;border-radius:999px;background:rgba(139,92,246,0.16);color:var(--violet);
   }
   .team-status.invited{background:rgba(139,92,246,0.15);color:var(--violet);}
   .team-status.qualified{background:rgba(79,224,232,0.15);color:var(--cyan);}
@@ -243,6 +248,11 @@
   .match-card .card-admin-actions{top:14px;right:14px;}
 
   /* ---------- standings ---------- */
+  .standings-note{
+    font-size:12px;color:var(--mid);background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin:0 0 20px;line-height:1.6;
+  }
+  .standings-note b{color:var(--cyan);}
   .standings-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
   @media (max-width:760px){ .standings-grid{grid-template-columns:1fr;} }
   .standings-grid h3{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px;}
@@ -276,6 +286,13 @@
   .bracket-toolbar select:focus{border-color:var(--violet);}
   .bracket-toolbar .bt-check{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--mid);cursor:pointer;}
   .bracket-toolbar .bt-check input{accent-color:var(--violet);width:15px;height:15px;cursor:pointer;}
+  .seed-btn{
+    margin-left:auto;background:rgba(79,224,232,0.12);border:1px solid rgba(79,224,232,0.4);
+    color:var(--cyan);border-radius:999px;font-family:var(--font-main);font-size:12px;
+    font-weight:800;padding:8px 14px;cursor:pointer;white-space:nowrap;
+  }
+  .seed-btn:hover{background:rgba(79,224,232,0.2);}
+  .seed-btn:disabled{opacity:0.45;cursor:not-allowed;}
   .bracket-format-pill{
     display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:999px;
     background:rgba(139,92,246,0.14);color:var(--violet);font-size:12px;font-weight:800;
@@ -478,6 +495,7 @@
 </div>
 
 <div class="tab-panel" id="panel-standings">
+  <p class="standings-note">Points: a 2-0 win is worth <b>3</b>; a 2-1 win is worth <b>2</b> to the winner and <b>1</b> to the loser. Teams are placed by assigning a group in Team Lineup, and results come from Match Schedule.</p>
   <div class="standings-grid">
     <div>
       <h3>Group A <span class="playoff-hint">▲ Top 2 advance</span></h3>
@@ -502,6 +520,7 @@
     <label class="bt-check" id="third-place-wrap-label">
       <input type="checkbox" id="f-third-place"> Third Place Match
     </label>
+    <button type="button" class="seed-btn" id="seed-bracket-btn" title="Fill the first round from the group standings">⇅ Seed from Standings</button>
   </div>
   <div class="bracket-format-pill" id="bracket-format-pill"></div>
   <div class="bracket-scroll" id="bracket-scroll"></div>
@@ -555,13 +574,23 @@
       <div class="field"><label>Team name</label><input type="text" id="f-team-name"></div>
       <div class="field"><label>Tag</label><input type="text" id="f-team-tag" maxlength="10" placeholder="e.g. TS"></div>
     </div>
-    <div class="field">
-      <label>Status</label>
-      <select id="f-team-status">
-        <option value="invited">Invited</option>
-        <option value="qualified">Qualified</option>
-        <option value="open_qualifier">Open Qualifier</option>
-      </select>
+    <div class="field-row">
+      <div class="field">
+        <label>Status</label>
+        <select id="f-team-status">
+          <option value="invited">Invited</option>
+          <option value="qualified">Qualified</option>
+          <option value="open_qualifier">Open Qualifier</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Group</label>
+        <select id="f-team-group">
+          <option value="">Not assigned</option>
+          <option value="A">Group A</option>
+          <option value="B">Group B</option>
+        </select>
+      </div>
     </div>
     <div class="field">
       <label>Players</label>
@@ -931,7 +960,10 @@ function renderTeams(){
           ${tm.tag ? `<div class="tag">${escapeHtml(tm.tag)}</div>` : ''}
         </div>
       </div>
-      <div class="team-status ${tm.status}">${t('tourdetail.teamstatus.' + tm.status, tm.status)}</div>
+      <div class="team-badges">
+        <span class="team-status ${tm.status}">${t('tourdetail.teamstatus.' + tm.status, tm.status)}</span>
+        ${tm.group ? `<span class="group-badge">${t('tourdetail.group','Group')} ${escapeHtml(tm.group)}</span>` : ''}
+      </div>
       ${(tm.players || []).map(p => `
         <div class="player-row">
           <span class="player-role" title="${escapeHtml(p.role)}">${roleIconInner(p.role)}</span>
@@ -1040,7 +1072,7 @@ window.castVote = async function(matchId, side){
 function renderStandingsTable(rows, elId){
   const el = document.getElementById(elId);
   if (!rows.length) {
-    el.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:20px;">${t('tourdetail.no_standings','No completed matches yet.')}</td></tr>`;
+    el.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:20px;">${t('tourdetail.no_standings','Assign teams to this group in Team Lineup.')}</td></tr>`;
     return;
   }
   el.innerHTML = rows.map((r, i) => `
@@ -1179,6 +1211,24 @@ function outcomeOf(slot){
 
 /* Suggests the two teams that should meet in a slot, based on results already
    entered upstream — the admin can always override the dropdowns. */
+/* Cross-group seeding for the first upper-bracket round: the winner of one
+   group is drawn against the runner-up of the other, so the two group leaders
+   can only meet later. With 4 teams that's exactly:
+     Match 1  Group A #1  vs  Group B #2
+     Match 2  Group B #1  vs  Group A #2
+   Larger draws extend the same idea (A#1 v B#last, B#1 v A#last, ...). */
+function seededPairs(){
+  const A = standings.A || [], B = standings.B || [];
+  const perGroup = settings.bracketSize / 2;   // teams taken from each group
+  const pairs = [];
+  for (let i = 0; i < perGroup / 2; i++) {
+    const j = perGroup - 1 - i;               // mirrored rank from the other group
+    pairs.push([ (A[i] || {}).team, (B[j] || {}).team ]);
+    pairs.push([ (B[i] || {}).team, (A[j] || {}).team ]);
+  }
+  return pairs.slice(0, settings.bracketSize / 2).map(([x, y]) => [x ? x.id : '', y ? y.id : '']);
+}
+
 function prefillFor(slot){
   const b = currentBracket();
   const single = settings.bracketType === 'single';
@@ -1193,7 +1243,7 @@ function prefillFor(slot){
   const mWb = slot.match(/^d-wb(\d+)-m(\d+)$/);
   if (mWb) {
     const r = Number(mWb[1]), i = Number(mWb[2]);
-    if (r === 0) return ['', ''];
+    if (r === 0) return seededPairs()[i] || ['', ''];
     return [outcomeOf(`d-wb${r - 1}-m${i * 2}`).winner, outcomeOf(`d-wb${r - 1}-m${i * 2 + 1}`).winner];
   }
   const mLb = slot.match(/^d-lb(\d+)-m(\d+)$/);
@@ -1358,6 +1408,13 @@ function renderBracket(){
   document.getElementById('f-bracket-type').value = settings.bracketType;
   document.getElementById('f-third-place').checked = !!settings.thirdPlace;
   document.getElementById('third-place-wrap-label').style.display = settings.bracketType === 'single' ? 'flex' : 'none';
+  // Spell out the pairing so the admin can see what pressing it will do.
+  const seedBtn = document.getElementById('seed-bracket-btn');
+  const hasStandings = (standings.A || []).length && (standings.B || []).length;
+  seedBtn.disabled = !hasStandings;
+  seedBtn.title = hasStandings
+    ? 'Fills round 1: Group A #1 vs Group B #2, Group B #1 vs Group A #2'
+    : 'Assign teams to Group A and B in Team Lineup first';
 }
 
 async function saveBracketSettings(next){
@@ -1377,12 +1434,48 @@ document.getElementById('f-third-place').addEventListener('change', (e) => {
   saveBracketSettings({ thirdPlace: e.target.checked });
 });
 
+/* Fills every first-round upper-bracket match from the current standings.
+   Only empty slots are touched, so a manually corrected matchup survives
+   a re-seed after later group results come in. */
+document.getElementById('seed-bracket-btn').addEventListener('click', async () => {
+  const pairs = seededPairs();
+  if (!pairs.some(([a, b]) => a || b)) {
+    alert(t('tourdetail.seed_empty','No standings yet — assign teams to Group A and B and record some group results first.'));
+    return;
+  }
+  const firstRound = settings.bracketType === 'double' ? 'd-wb0' : 's-r0';
+  let filled = 0, skipped = 0;
+  pairs.forEach(([a, b], i) => {
+    const slot = `${firstRound}-m${i}`;
+    const existing = bracketMatch(slot);
+    if (existing && (existing.teamAId || existing.teamBId)) { skipped++; return; }
+    if (!a && !b) return;
+    if (existing) { existing.teamAId = a; existing.teamBId = b; }
+    else {
+      matches.push({
+        id: 'M' + Date.now().toString(36) + i, stage: 'bracket', bracketSlot: slot,
+        teamAId: a, teamBId: b, scoreA: null, scoreB: null,
+        status: 'upcoming', bestOf: 3, scheduledAt: '', votes: { a: 0, b: 0 },
+      });
+    }
+    filled++;
+  });
+  if (!filled) { alert(t('tourdetail.seed_none','Every first-round slot already has teams. Clear one to re-seed it.')); return; }
+  const btn = document.getElementById('seed-bracket-btn');
+  btn.disabled = true;
+  const ok = await saveDetail();
+  btn.disabled = false;
+  if (ok) { renderAll(); if (skipped) alert(t('tourdetail.seed_partial','Seeded the empty slots. ') + skipped + ' already had teams and were left alone.'); }
+  else alert(t('tourdetail.error_save','Could not save. Please try again.'));
+});
+
 /* ---------------- team modal ---------------- */
 const teamModal = document.getElementById('team-modal');
 const teamModalErr = document.getElementById('team-modal-err');
 const fTeamName = document.getElementById('f-team-name');
 const fTeamTag = document.getElementById('f-team-tag');
 const fTeamStatus = document.getElementById('f-team-status');
+const fTeamGroup = document.getElementById('f-team-group');
 const teamLogoPreview = document.getElementById('team-logo-preview');
 const fTeamLogoInput = document.getElementById('f-team-logo');
 let editingTeamId = null;
@@ -1434,7 +1527,7 @@ document.getElementById('add-player-row-btn').addEventListener('click', () => {
 document.getElementById('add-team-btn').addEventListener('click', () => {
   editingTeamId = null;
   document.getElementById('team-modal-title').textContent = t('tourdetail.add_team','Add team');
-  fTeamName.value = ''; fTeamTag.value = ''; fTeamStatus.value = 'invited';
+  fTeamName.value = ''; fTeamTag.value = ''; fTeamStatus.value = 'invited'; fTeamGroup.value = '';
   teamLogoData = ''; teamLogoPreview.src = '';
   editingPlayers = [];
   renderPlayerEditor();
@@ -1448,6 +1541,7 @@ window.openTeamEdit = function(id){
   editingTeamId = id;
   document.getElementById('team-modal-title').textContent = t('tourdetail.edit_team','Edit team');
   fTeamName.value = tm.name || ''; fTeamTag.value = tm.tag || ''; fTeamStatus.value = tm.status || 'invited';
+  fTeamGroup.value = tm.group || '';
   teamLogoData = tm.logo || ''; teamLogoPreview.src = teamLogoData;
   editingPlayers = (tm.players || []).map(p => ({ ...p }));
   renderPlayerEditor();
@@ -1469,6 +1563,7 @@ document.getElementById('team-modal-save').addEventListener('click', async () =>
   btn.disabled = true; btn.textContent = t('tournament.form.saving','Saving…');
   const data = {
     id: editingTeamId || undefined, name, tag: fTeamTag.value.trim(), status: fTeamStatus.value,
+    group: fTeamGroup.value,
     logo: teamLogoData, players: editingPlayers.filter(p => p.name.trim()),
   };
   if (editingTeamId) {
