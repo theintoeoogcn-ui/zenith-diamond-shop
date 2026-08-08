@@ -205,15 +205,24 @@
     color:var(--mid);font-weight:700;font-size:12.5px;cursor:pointer;
   }
   .day-tab.active{background:var(--violet);border-color:transparent;color:#fff;}
-  /* Wide enough for status + best-of + group + time to sit on one line. */
-  .match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
-  .match-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;}
+  /* auto-fit (not auto-fill) collapses empty tracks, so four matches sit on
+     one row instead of wrapping a lone card onto a second. The chip row is
+     kept on one line at these narrower widths by the container query below. */
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,248px),1fr));gap:14px;}
+  .match-card{
+    position:relative;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:16px;
+    container-type:inline-size;container-name:matchcard;
+  }
   /* Status, best-of, group and kick-off time all share one centred row.
      The right padding keeps the last chip clear of the admin edit/delete
      buttons, which are absolutely positioned in the card's top-right. */
+  /* nowrap guarantees a single line at every width. The time chip is the one
+     allowed to shrink, so if a card ever gets too narrow the date ellipsises
+     instead of the whole row breaking onto a second line. */
   .match-meta-row{
     display:flex;align-items:center;justify-content:center;
-    gap:6px;flex-wrap:wrap;margin:0 0 14px;min-height:21px;
+    gap:6px;flex-wrap:nowrap;margin:0 0 14px;min-height:21px;
   }
   /* In admin mode the edit/delete buttons get their own band across the top of
      the card, rather than eating width from the chip row — reserving inline
@@ -236,6 +245,33 @@
   .match-status{font-weight:800;text-transform:uppercase;letter-spacing:0.4px;}
   .bo-badge{background:rgba(79,224,232,0.14);color:var(--cyan);font-weight:800;letter-spacing:0.4px;}
   .when-badge{background:var(--panel-raised);color:var(--mid);}
+  /* Only the time chip may shrink; the status/best-of/group chips keep their
+     full text so they never end up half-readable. */
+  .time-badge{flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis;}
+  .chip-date{margin-right:4px;}
+  /* Sized against the CARD, not the viewport: the same card is full-width on
+     a phone but ~260px in a four-across desktop grid, so a viewport media
+     query measures the wrong thing. Declared after the base chip rule above
+     so it wins on source order. */
+  @container matchcard (max-width:300px){
+    .match-meta-row{gap:5px;}
+    .match-status,.bo-badge,.when-badge{font-size:9.5px;padding:0 7px;}
+  }
+  @container matchcard (max-width:270px){
+    .match-meta-row{gap:4px;}
+    .match-status,.bo-badge,.when-badge{font-size:9px;padding:0 6px;height:19px;gap:3px;letter-spacing:0;}
+    .chip-ico{display:none;}
+  }
+  /* Tightest tier: drop the date and keep the kick-off time. The day is
+     already established by the Day tab above, so the date is the redundant
+     part — far better than ellipsising "Jul 28, 1:30 PM" to "Jul 2…". */
+  @container matchcard (max-width:240px){
+    .chip-date{display:none;}
+  }
+  @container matchcard (max-width:212px){
+    .match-status,.bo-badge,.when-badge{font-size:8.5px;padding:0 5px;}
+  }
+
   /* Tighter chips on the narrowest phones so all four still fit one line. */
   @media (max-width:400px){
     .match-meta-row{gap:5px;}
@@ -1134,7 +1170,7 @@ function renderMatchCard(m){
         <span class="match-status ${m.status}">${t('tourdetail.status.' + m.status, m.status)}</span>
         <span class="bo-badge">${boLabel(m.bestOf)}</span>
         <span class="when-badge">${t('tourdetail.group','Group')} ${escapeHtml(m.group || 'A')}</span>
-        ${m.scheduledAt ? `<span class="when-badge">🕒 ${escapeHtml(formatWhen(m.scheduledAt))}</span>` : ''}
+        ${m.scheduledAt ? `<span class="when-badge time-badge"><span class="chip-ico">🕒</span><span class="chip-date">${escapeHtml(formatWhenDate(m.scheduledAt))}</span>${escapeHtml(formatWhenTime(m.scheduledAt))}</span>` : ''}
       </div>
       <div class="match-teams-row">
         <div class="match-team">${teamLogoHtml(teamA)}<span class="tname">${escapeHtml(teamA ? teamA.name : '?')}</span></div>
@@ -1214,7 +1250,20 @@ function formatWhen(iso){
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+  // Built from parts rather than toLocaleString: that inserts a connector
+  // ("Jul 28 at 8:00 PM") whose wording and width vary by locale, and the
+  // extra characters are what pushed the chip row onto a second line.
+  return `${formatWhenDate(iso)} ${formatWhenTime(iso)}`.trim();
+}
+function formatWhenDate(iso){
+  const d = new Date(iso);
+  if (!iso || isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(undefined, { month:'short', day:'numeric' }) + ',';
+}
+function formatWhenTime(iso){
+  const d = new Date(iso);
+  if (!iso || isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
 }
 
 /* ---- bracket structure ---- */
