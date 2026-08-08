@@ -20,6 +20,8 @@ const ROSTER_SLOTS = [
 ];
 const ROLE_OPTIONS = ['Exp', 'Jungle', 'Mid', 'Gold', 'Roam', 'Sub', 'Coach'];
 const CONTACT_TYPES = ['telegram', 'viber'];
+// Hard cap on how many teams a single tournament will take.
+const MAX_TEAMS = 128;
 // Which regional bracket the team plays in.
 const REGIONS = [
   { value: 'MM', label: 'Myanmar Region' },
@@ -50,15 +52,15 @@ function genId() {
 
 const str = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
 
+/* Players carry an in-game name only. The phone number and Telegram/Viber
+   handle are held once at team level — we contact the leader, not each
+   player individually. */
 function cleanPlayer(p, slot) {
   p = p || {};
   return {
     slot: slot.key,
     role: ROLE_OPTIONS.includes(p.role) ? p.role : slot.label.replace(/ \d$/, ''),
     name: str(p.name, 60),
-    phone: str(p.phone, 30),
-    contactType: CONTACT_TYPES.includes(p.contactType) ? p.contactType : 'telegram',
-    contact: str(p.contact, 80),
   };
 }
 
@@ -72,20 +74,27 @@ function validate(payload) {
   if (!str(payload.teamTag, 10)) errors.push('Team tag is required.');
   if (!str(payload.leaderName, 60)) errors.push('Leader or manager name is required.');
   if (!REGION_VALUES.includes(payload.region)) errors.push('Region is required.');
+  if (!str(payload.teamPhone, 30)) errors.push('Team phone number is required.');
+  if (!str(payload.teamContact, 80)) errors.push('Team Telegram or Viber account is required.');
   if (!str(payload.orderCode, 20)) errors.push('Order code is required.');
 
   const players = Array.isArray(payload.players) ? payload.players : [];
   ROSTER_SLOTS.forEach((slot, i) => {
     const p = players[i] || {};
-    const filled = str(p.name, 60) || str(p.phone, 30) || str(p.contact, 80);
-    // Optional slots are all-or-nothing: leave one blank, or complete it.
-    if (!slot.required && !filled) return;
-    const who = slot.label;
-    if (!str(p.name, 60)) errors.push(`${who}: player name is required.`);
-    if (!str(p.phone, 30)) errors.push(`${who}: phone number is required.`);
-    if (!str(p.contact, 80)) errors.push(`${who}: Telegram or Viber is required.`);
+    // Optional slots may simply be left empty; a starter needs a name.
+    if (!slot.required) return;
+    if (!str(p.name, 60)) errors.push(`${slot.label}: player name is required.`);
   });
   return errors;
+}
+
+// How many slots this tournament has left. Rejected entries free their slot
+// back up; pending and approved ones both hold one.
+function countTeams(tournamentId) {
+  return listRegistrations(tournamentId).filter((r) => r.status !== 'rejected').length;
+}
+function isFull(tournamentId) {
+  return countTeams(tournamentId) >= MAX_TEAMS;
 }
 
 function listRegistrations(tournamentId) {
@@ -112,6 +121,10 @@ function createRegistration(tournamentId, payload) {
     teamTag: str(payload.teamTag, 10),
     leaderName: str(payload.leaderName, 60),
     region: REGION_VALUES.includes(payload.region) ? payload.region : 'MM',
+    // One contact for the whole team, reachable via the leader.
+    teamPhone: str(payload.teamPhone, 30),
+    teamContactType: CONTACT_TYPES.includes(payload.teamContactType) ? payload.teamContactType : 'telegram',
+    teamContact: str(payload.teamContact, 80),
     orderCode: str(payload.orderCode, 20).toUpperCase(),
     players: ROSTER_SLOTS.map((slot, i) => cleanPlayer((payload.players || [])[i], slot))
       .filter((p, i) => ROSTER_SLOTS[i].required || p.name),
@@ -166,6 +179,6 @@ const ready = hydrate(SHEET_KEY, DB_FILE);
 
 module.exports = {
   listRegistrations, listApproved, createRegistration, updateRegistration, deleteRegistration,
-  validate, isCodeUsed,
-  ROSTER_SLOTS, ROLE_OPTIONS, CONTACT_TYPES, REGIONS, ready,
+  validate, isCodeUsed, countTeams, isFull,
+  ROSTER_SLOTS, ROLE_OPTIONS, CONTACT_TYPES, REGIONS, MAX_TEAMS, ready,
 };

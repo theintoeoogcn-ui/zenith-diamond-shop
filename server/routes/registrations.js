@@ -43,6 +43,7 @@ router.get('/schema', (req, res) => {
     roles: regDb.ROLE_OPTIONS,
     contactTypes: regDb.CONTACT_TYPES,
     regions: regDb.REGIONS,
+    maxTeams: regDb.MAX_TEAMS,
   });
 });
 
@@ -63,12 +64,26 @@ router.get('/:tournamentId/approved', (req, res) => {
 // the roster and phone numbers of other teams aren't exposed.
 router.get('/:tournamentId/count', (req, res) => {
   const list = regDb.listRegistrations(req.params.tournamentId);
-  res.json({ total: list.length, approved: list.filter((r) => r.status === 'approved').length });
+  const taken = regDb.countTeams(req.params.tournamentId);
+  res.json({
+    total: list.length,
+    approved: list.filter((r) => r.status === 'approved').length,
+    taken,
+    maxTeams: regDb.MAX_TEAMS,
+    slotsLeft: Math.max(0, regDb.MAX_TEAMS - taken),
+    full: taken >= regDb.MAX_TEAMS,
+  });
 });
 
 // Public — submit a team.
 router.post('/:tournamentId', (req, res) => {
   const payload = req.body || {};
+
+  // The field is capped at 128 teams. Checked before anything else so a full
+  // tournament can't be squeezed past by a crafted request.
+  if (regDb.isFull(req.params.tournamentId)) {
+    return res.status(400).json({ error: `All ${regDb.MAX_TEAMS} team slots are taken, so registration is now closed.` });
+  }
 
   const errors = regDb.validate(payload);
   if (errors.length) return res.status(400).json({ error: errors[0], errors });

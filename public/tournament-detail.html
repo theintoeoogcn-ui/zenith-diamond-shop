@@ -557,6 +557,28 @@
   .bx-champ .nm.tbd{color:var(--dim);font-style:italic;font-weight:600;}
   .third-place-wrap{margin-top:6px;}
 
+  /* ---------- qualifier bracket ---------- */
+  .q-note{font-size:12.5px;color:var(--mid);line-height:1.7;margin:0 0 14px;max-width:760px;}
+  .q-pool{font-size:12px;color:var(--dim);font-weight:700;margin:0 0 18px;}
+  .q-pool b{color:var(--cyan);}
+  /* Admin-only controls in the qualifier toolbar. */
+  .admin-field{display:none;}
+  .admin-on .admin-field{display:inline-flex;}
+  .admin-on select.admin-field{display:inline-block;}
+  /* The 128-team draw is very tall, so the stage scrolls in both directions. */
+  .bracket-scroll.tall{max-height:78vh;overflow-y:auto;}
+  .bx-qual{
+    position:absolute;border-radius:11px;display:flex;flex-direction:column;
+    justify-content:center;gap:5px;padding:9px 11px;
+    background:linear-gradient(135deg,rgba(61,214,140,0.16),rgba(79,224,232,0.12));
+    border:1px solid rgba(61,214,140,0.45);
+  }
+  .bx-qual .lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ok);}
+  .bx-qual .q-row{display:flex;align-items:center;gap:7px;min-width:0;}
+  .bx-qual .q-row .nm{font-size:12px;font-weight:800;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bx-qual .q-row .nm.tbd{color:var(--dim);font-style:italic;font-weight:600;}
+  .bx-row .bx-bye{color:var(--dim);font-style:italic;font-weight:700;}
+
   /* ---------- modal ---------- */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,3,12,0.72);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:20px;}
   .modal-overlay.show{display:flex;}
@@ -664,16 +686,17 @@
 </div>
 
 <div class="tabs-bar">
-  <button class="tab active" data-tab="lineup">Team Lineup</button>
+  <button class="tab" data-tab="regteams">Register Team List</button>
+  <button class="tab active" data-tab="confirmed">Qualifier Confirm Team</button>
+  <button class="tab" data-tab="qualifier">Qualifier Bracket</button>
+  <button class="tab" data-tab="lineup">Team Lineup</button>
   <button class="tab" data-tab="schedule">Match Schedule</button>
   <button class="tab" data-tab="standings">Standings</button>
   <button class="tab" data-tab="bracket">Bracket</button>
-  <button class="tab" data-tab="regteams">Register Team</button>
-  <button class="tab" data-tab="confirmed">Confirmed Teams</button>
   <button type="button" class="tabs-manage" id="tabs-manage-btn">⚙ Manage tabs</button>
 </div>
 
-<div class="tab-panel active" id="panel-lineup">
+<div class="tab-panel" id="panel-lineup">
   <div class="panel-toolbar"><button class="create-btn" id="add-team-btn">+ Add Team</button></div>
   <div class="team-grid" id="team-grid"></div>
 </div>
@@ -715,8 +738,27 @@
   <div id="regteams-list"></div>
 </div>
 
-<div class="tab-panel" id="panel-confirmed">
+<div class="tab-panel active" id="panel-confirmed">
   <div id="confirmed-wrap"></div>
+</div>
+
+<!-- ---------- qualifier bracket ---------- -->
+<div class="tab-panel" id="panel-qualifier">
+  <div class="bracket-toolbar" id="qualifier-toolbar">
+    <span class="bt-label" id="q-label-region">Region</span>
+    <select id="f-qualifier-region">
+      <option value="MM">Myanmar Region</option>
+      <option value="TH">Thailand Region</option>
+    </select>
+    <span class="bt-label admin-field" id="q-label-size">Bracket size</span>
+    <select id="f-qualifier-size" class="admin-field"></select>
+    <button type="button" class="seed-btn admin-field" id="qualifier-draw-btn">🎲 Random Draw</button>
+    <button type="button" class="seed-btn admin-field" id="qualifier-clear-btn" style="margin-left:0;">Clear draw</button>
+  </div>
+  <div class="bracket-format-pill" id="qualifier-format-pill"></div>
+  <p class="q-note" id="qualifier-note">The two teams that reach the Final from each region qualify. There is no champion in the qualifier.</p>
+  <div class="q-pool" id="qualifier-pool"></div>
+  <div class="bracket-scroll" id="qualifier-scroll"></div>
 </div>
 
 <div class="tab-panel" id="panel-bracket">
@@ -912,16 +954,26 @@ function roleIconInner(role){
   return `<span class="role-emoji">${emoji}</span>` +
     (src ? `<img src="${src}" alt="${escapeHtml(role || '')}" onerror="this.style.display='none'">` : '');
 }
-const TAB_KEYS = ['lineup','schedule','standings','bracket','regteams','confirmed'];
+/* Order here is the order the tabs appear in, and the order the first visible
+   tab is picked from — the two registration lists sit ahead of Team Lineup. */
+const TAB_KEYS = ['regteams','confirmed','qualifier','lineup','schedule','standings','bracket'];
 const TAB_LABELS = {
+  regteams:'Register Team List', confirmed:'Qualifier Confirm Team', qualifier:'Qualifier Bracket',
   lineup:'Team Lineup', schedule:'Match Schedule', standings:'Standings', bracket:'Bracket',
-  regteams:'Register Team', confirmed:'Confirmed Teams',
 };
 // "Register Team" holds phone numbers and contact handles, so it is admin-only
 // no matter what the visibility settings say.
 const ADMIN_ONLY_TABS = ['regteams'];
 const REGION_LABELS = { MM:'Myanmar Region', TH:'Thailand Region' };
 const BO_OPTIONS = [1,3,5,7];
+
+/* ---- qualifier bracket ---- */
+// Each region runs its own single-elimination BO1 draw. There is no champion:
+// the two teams that reach a region's Final are the ones that qualify.
+const QUALIFIER_REGIONS = ['MM','TH'];
+const QUALIFIER_SIZES = [32,64,128];
+// Compact card metrics — a 128-team draw is 64 matches tall in round one.
+const QX = { W:180, H:60, COLGAP:46, VGAP:10, HEADH:30 };
 
 /* Bracket layout metrics (pixels) */
 const BX = { W:206, H:88, COLGAP:66, VGAP:26, HEADH:32 };
@@ -932,26 +984,44 @@ let matches = [];
 let standings = { A: [], B: [] };
 let tournamentInfo = null;
 let activeDayTab = null;
-let settings = { hiddenTabs: [], bracketType: 'single', bracketSize: 8, thirdPlace: true };
+let settings = defaultSettings();
+let qualifierRegion = 'MM';   // which region's draw is on screen
 
-function defaultSettings(){ return { hiddenTabs: [], bracketType: 'single', bracketSize: 8, thirdPlace: true }; }
+function defaultSettings(){
+  return {
+    hiddenTabs: [], bracketType: 'single', bracketSize: 8, thirdPlace: true,
+    qualifierSize: { MM:32, TH:32 },
+  };
+}
 function normalizeSettings(s){
   const d = defaultSettings();
   if (!s || typeof s !== 'object') return d;
   const type = s.bracketType === 'double' ? 'double' : 'single';
   const allowed = type === 'double' ? [4,8] : [4,8,16];
   const size = allowed.includes(Number(s.bracketSize)) ? Number(s.bracketSize) : (type === 'double' ? 8 : 8);
+  const qs = (s.qualifierSize && typeof s.qualifierSize === 'object') ? s.qualifierSize : {};
+  const qualifierSize = {};
+  QUALIFIER_REGIONS.forEach(r => {
+    const n = Number(qs[r]);
+    qualifierSize[r] = QUALIFIER_SIZES.includes(n) ? n : 32;
+  });
   return {
     hiddenTabs: Array.isArray(s.hiddenTabs) ? s.hiddenTabs.filter(k => TAB_KEYS.includes(k)) : [],
     bracketType: type,
     bracketSize: size,
     thirdPlace: s.thirdPlace !== false,
+    qualifierSize,
   };
 }
 
 function getPasscode(){ return sessionStorage.getItem(ADMIN_KEY) || ''; }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function findTeam(id){ return teams.find(x => x.id === id) || null; }
+/* Qualifier entrants come from the approved registrations rather than the
+   Team Lineup, so they are resolved through their own index. Keeping them out
+   of `teams` also keeps the saved payload small — 128 logos would not fit. */
+let qualifierTeamsById = {};
+function findAnyTeam(id){ return findTeam(id) || qualifierTeamsById[id] || null; }
 function teamName(id){ const tm = findTeam(id); return tm ? tm.name : t('tourdetail.unknown_team','Unknown team'); }
 function teamLogoHtml(tm, size){
   size = size || 38;
@@ -1025,13 +1095,15 @@ brandLink.addEventListener('click', (e) => {
 })();
 
 /* ---------------- tabs ---------------- */
-let activeTab = 'lineup';
+let activeTab = 'confirmed';
+let tabsInitialised = false;
 
 function selectTab(key){
   activeTab = key;
   document.querySelectorAll('.tabs-bar .tab').forEach(x => x.classList.toggle('active', x.dataset.tab === key));
   document.querySelectorAll('.tab-panel').forEach(x => x.classList.toggle('active', x.id === 'panel-' + key));
   if (key === 'bracket') requestAnimationFrame(renderBracket);
+  if (key === 'qualifier') requestAnimationFrame(renderQualifier);
 }
 document.querySelectorAll('.tabs-bar .tab').forEach(tab => {
   tab.addEventListener('click', () => selectTab(tab.dataset.tab));
@@ -1057,6 +1129,11 @@ function applyTabVisibility(){
   const visible = TAB_KEYS.filter(k => (isAdmin || !hidden.includes(k)) && (isAdmin || !ADMIN_ONLY_TABS.includes(k)));
   if (!visible.length) {
     document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+    return;
+  }
+  if (!tabsInitialised) {
+    tabsInitialised = true;
+    selectTab(visible.includes('confirmed') ? 'confirmed' : visible[0]);
     return;
   }
   if (!visible.includes(activeTab)) selectTab(visible[0]);
@@ -1113,8 +1190,20 @@ function applyStaticLabels(){
   set('.tab[data-tab="schedule"]', 'tourdetail.tab.schedule', 'Match Schedule');
   set('.tab[data-tab="standings"]', 'tourdetail.tab.standings', 'Standings');
   set('.tab[data-tab="bracket"]', 'tourdetail.tab.bracket', 'Bracket');
-  set('.tab[data-tab="regteams"]', 'tourdetail.tab.regteams', 'Register Team');
-  set('.tab[data-tab="confirmed"]', 'tourdetail.tab.confirmed', 'Confirmed Teams');
+  set('.tab[data-tab="regteams"]', 'tourdetail.tab.regteams', 'Register Team List');
+  set('.tab[data-tab="confirmed"]', 'tourdetail.tab.confirmed', 'Qualifier Confirm Team');
+  set('.tab[data-tab="qualifier"]', 'tourdetail.tab.qualifier', 'Qualifier Bracket');
+  set('#q-label-region', 'qualifier.region', 'Region');
+  set('#q-label-size', 'qualifier.size', 'Bracket size');
+  set('#qualifier-draw-btn', 'qualifier.draw', '🎲 Random Draw');
+  set('#qualifier-clear-btn', 'qualifier.clear', 'Clear draw');
+  set('#qualifier-note', 'qualifier.qualified_note', 'The two teams that reach the Final from each region qualify. There is no champion in the qualifier.');
+  const qRegionSel = document.getElementById('f-qualifier-region');
+  if (qRegionSel) {
+    qRegionSel.innerHTML = QUALIFIER_REGIONS
+      .map(r => `<option value="${r}">${escapeHtml(regionLabel(r))}</option>`).join('');
+    qRegionSel.value = qualifierRegion;
+  }
   set('#regteams-note', 'reg.admin_note', 'Submitted entries, including contact details. Visible to admins only.');
   set('#tabs-manage-btn', 'tourdetail.manage_tabs', '\u2699 Manage tabs');
   set('#add-team-btn', 'tourdetail.add_team', '+ Add Team');
@@ -1159,7 +1248,9 @@ async function loadDetail(){
     standings = data.standings || { A: [], B: [] };
     settings = normalizeSettings(data.settings);
   } catch (e) { teams = []; matches = []; standings = { A: [], B: [] }; settings = defaultSettings(); }
+  detailLoaded = true;
   renderAll();
+  autoDrawQualifier();
 }
 
 async function saveDetail(){
@@ -1186,6 +1277,7 @@ function renderAll(){
   renderSchedule();
   renderStandings();
   renderBracket();
+  renderQualifier();
 }
 
 /* ---- team lineup ---- */
@@ -1530,6 +1622,12 @@ function prefillFor(slot){
     if (r === 2) return [outcomeOf('d-lb1-m0').winner, outcomeOf('d-lb1-m1').winner];
     return [outcomeOf('d-lb2-m0').winner, outcomeOf('d-wb2-m0').loser];
   }
+  const mQ = slot.match(/^q-(mm|th)-r(\d+)-m(\d+)$/);
+  if (mQ) {
+    const reg = mQ[1], r = Number(mQ[2]), i = Number(mQ[3]);
+    if (r === 0) return ['', ''];
+    return [outcomeOf(`q-${reg}-r${r - 1}-m${i * 2}`).winner, outcomeOf(`q-${reg}-r${r - 1}-m${i * 2 + 1}`).winner];
+  }
   const mS = slot.match(/^s-r(\d+)-m(\d+)$/);
   if (mS) {
     const r = Number(mS[1]), i = Number(mS[2]);
@@ -1548,9 +1646,11 @@ function bxTeamMarkHtml(tm){
   return `<span class="bx-seed">${escapeHtml((tm.tag || tm.name || '?').slice(0, 2).toUpperCase())}</span>`;
 }
 
-function bxRowHtml(teamId, score, isWin, isLose){
-  const tm = findTeam(teamId);
-  const name = tm ? escapeHtml(tm.name) : `<span class="bx-tbd">${t('tourdetail.tbd','TBD')}</span>`;
+function bxRowHtml(teamId, score, isWin, isLose, isBye){
+  const tm = findAnyTeam(teamId);
+  const name = tm ? escapeHtml(tm.name)
+    : (isBye ? `<span class="bx-bye">${t('qualifier.bye','BYE')}</span>`
+             : `<span class="bx-tbd">${t('tourdetail.tbd','TBD')}</span>`);
   return `
     <div class="bx-row ${isWin ? 'win' : ''} ${isLose ? 'lose' : ''}">
       ${bxTeamMarkHtml(tm)}
@@ -1559,12 +1659,16 @@ function bxRowHtml(teamId, score, isWin, isLose){
     </div>`;
 }
 
-function bxMatchHtml(slot, label, x, y){
+function bxMatchHtml(slot, label, x, y, mx){
+  mx = mx || BX;
   const m = bracketMatch(slot);
   const hasScore = hasScores(m);
   const aWins = hasScore && m.scoreA > m.scoreB;
   const bWins = hasScore && m.scoreB > m.scoreA;
-  const style = `left:${x}px;top:${y}px;width:${BX.W}px;height:${BX.H}px;`;
+  // A decided match with only one team in it is a bye, not a missing pick.
+  const byeA = hasScore && !!m.teamBId && !m.teamAId;
+  const byeB = hasScore && !!m.teamAId && !m.teamBId;
+  const style = `left:${x}px;top:${y}px;width:${mx.W}px;height:${mx.H}px;`;
   const cls = ['bx-match'];
   if (hasScore) cls.push('decided');
   if (m && m.status === 'live') cls.push('live');
@@ -1572,8 +1676,8 @@ function bxMatchHtml(slot, label, x, y){
   return `
     <div class="${cls.join(' ')}" style="${style}" title="${escapeHtml(label)}">
       <button class="bx-edit ${isAdmin ? 'show' : ''}" onclick="openBracketEdit('${slot}')">✏️</button>
-      ${bxRowHtml(m ? m.teamAId : '', m ? m.scoreA : null, aWins, bWins)}
-      ${bxRowHtml(m ? m.teamBId : '', m ? m.scoreB : null, bWins, aWins)}
+      ${bxRowHtml(m ? m.teamAId : '', m ? m.scoreA : null, aWins, bWins, byeA)}
+      ${bxRowHtml(m ? m.teamBId : '', m ? m.scoreB : null, bWins, aWins, byeB)}
       <div class="bx-foot">
         <span class="bx-bo">${boLabel(m ? m.bestOf : 3)}</span>
         <span class="bx-when">${when ? '🕒 ' + escapeHtml(when) : escapeHtml(label)}</span>
@@ -1581,11 +1685,29 @@ function bxMatchHtml(slot, label, x, y){
     </div>`;
 }
 
-function bxChampionHtml(sourceSlot, x, y){
-  const winnerId = outcomeOf(sourceSlot).winner;
-  const tm = findTeam(winnerId);
+/* The qualifier ends on a pair of finalists rather than a champion, so its
+   last card lists both teams that came through the semifinals. */
+function bxQualifiedHtml(sourceSlots, x, y, mx){
+  const rows = sourceSlots.map((slot) => {
+    const tm = findAnyTeam(outcomeOf(slot).winner);
+    return `<span class="q-row">
+      ${tm ? `<span class="champ-mark">${bxTeamMarkHtml(tm)}</span>` : ''}
+      <span class="nm ${tm ? '' : 'tbd'}">${tm ? escapeHtml(tm.name) : t('tourdetail.tbd','TBD')}</span>
+    </span>`;
+  }).join('');
   return `
-    <div class="bx-champ" style="left:${x}px;top:${y}px;width:${BX.W}px;height:${BX.H}px;">
+    <div class="bx-qual" style="left:${x}px;top:${y}px;width:${mx.W}px;height:${mx.H}px;">
+      <span class="lbl">✅ ${escapeHtml(t('qualifier.qualified','Qualified'))}</span>
+      ${rows}
+    </div>`;
+}
+
+function bxChampionHtml(sourceSlot, x, y, mx){
+  mx = mx || BX;
+  const winnerId = outcomeOf(sourceSlot).winner;
+  const tm = findAnyTeam(winnerId);
+  return `
+    <div class="bx-champ" style="left:${x}px;top:${y}px;width:${mx.W}px;height:${mx.H}px;">
       <span class="lbl">🏆 Champion</span>
       <span class="nm-row">
         ${tm ? `<span class="champ-mark">${bxTeamMarkHtml(tm)}</span>` : ''}
@@ -1594,19 +1716,20 @@ function bxChampionHtml(sourceSlot, x, y){
     </div>`;
 }
 
-function renderBracketSection(section){
+function renderBracketSection(section, mx){
+  mx = mx || BX;
   const cols = section.cols;
   const maxCount = Math.max(...cols.map(c => c.slots.length), 1);
-  const unit = BX.H + BX.VGAP;
+  const unit = mx.H + mx.VGAP;
   const bodyH = Math.max(maxCount, 2) * unit;
-  const totalW = cols.length * BX.W + (cols.length - 1) * BX.COLGAP;
-  const totalH = BX.HEADH + bodyH;
+  const totalW = cols.length * mx.W + (cols.length - 1) * mx.COLGAP;
+  const totalH = mx.HEADH + bodyH;
 
   const pos = {}; // slotId -> {x, yCenter}
   cols.forEach((col, c) => {
-    const x = c * (BX.W + BX.COLGAP);
+    const x = c * (mx.W + mx.COLGAP);
     col.slots.forEach((s, i) => {
-      pos[s.id] = { x, y: BX.HEADH + (bodyH * (i + 0.5)) / col.slots.length };
+      pos[s.id] = { x, y: mx.HEADH + (bodyH * (i + 0.5)) / col.slots.length };
     });
   });
 
@@ -1615,26 +1738,30 @@ function renderBracketSection(section){
   const paths = (section.conns || []).map(([from, to]) => {
     const a = pos[from], b = pos[to];
     if (!a || !b) return '';
-    const x1 = a.x + BX.W, y1 = a.y, x2 = b.x, y2 = b.y;
-    const mx = x1 + BX.COLGAP / 2;
+    const x1 = a.x + mx.W, y1 = a.y, x2 = b.x, y2 = b.y;
+    const midX = x1 + mx.COLGAP / 2;
     const decided = from === '__champ' ? false : !!outcomeOf(from).winner;
-    const d = `M ${x1} ${y1} H ${mx} V ${y2} H ${x2}`;
+    const d = `M ${x1} ${y1} H ${midX} V ${y2} H ${x2}`;
     return `<path d="${d}" fill="none" stroke="${decided ? 'var(--cyan)' : 'var(--line)'}" stroke-width="${decided ? 2.5 : 2}" stroke-linecap="round" stroke-linejoin="round" ${decided ? 'opacity="0.95"' : 'opacity="0.75"'}></path>`;
   }).join('');
 
   const heads = cols.map((col, c) => {
-    const x = c * (BX.W + BX.COLGAP);
-    return `<div class="bx-col-head" style="left:${x}px;top:0;width:${BX.W}px;">${escapeHtml(col.title)}</div>`;
+    const x = c * (mx.W + mx.COLGAP);
+    return `<div class="bx-col-head" style="left:${x}px;top:0;width:${mx.W}px;">${escapeHtml(col.title)}</div>`;
   }).join('');
 
-  const cards = cols.map((col) => col.slots.map((s) => {
-    const p = pos[s.id];
-    const y = p.y - BX.H / 2;
-    if (s.champion) {
-      const src = (section.conns.find(cn => cn[1] === '__champ') || [])[0] || '';
-      return bxChampionHtml(src, p.x, y);
+  const cards = cols.map((col) => col.slots.map((sl) => {
+    const p = pos[sl.id];
+    const y = p.y - mx.H / 2;
+    if (sl.qualified) {
+      const srcs = (section.conns || []).filter(cn => cn[1] === sl.id).map(cn => cn[0]);
+      return bxQualifiedHtml(srcs, p.x, y, mx);
     }
-    return bxMatchHtml(s.id, s.label, p.x, y);
+    if (sl.champion) {
+      const src = (section.conns.find(cn => cn[1] === '__champ') || [])[0] || '';
+      return bxChampionHtml(src, p.x, y, mx);
+    }
+    return bxMatchHtml(sl.id, sl.label, p.x, y, mx);
   }).join('')).join('');
 
   return `
@@ -1745,8 +1872,24 @@ document.getElementById('seed-bracket-btn').addEventListener('click', async () =
 /* ---------------- registrations ---------------- */
 let registrations = [];      // admin view, full detail
 let approvedTeams = [];      // public view, contact details stripped
+let registrationsLoaded = false;
+let detailLoaded = false;
 
-function regionLabel(code){ return REGION_LABELS[code] || REGION_LABELS.MM; }
+function regionLabel(code){ return t('reg.region.' + code, REGION_LABELS[code] || REGION_LABELS.MM); }
+
+/* The phone number and Telegram/Viber handle are now held once per team.
+   Older entries stored them on the first player, so fall back to that. */
+function teamPhoneOf(r){
+  if (r.teamPhone) return r.teamPhone;
+  const first = (r.players || []).find(p => p.phone);
+  return first ? first.phone : '—';
+}
+function teamContactOf(r){
+  const type = r.teamContact ? (r.teamContactType || 'telegram') : null;
+  if (r.teamContact) return `${type === 'viber' ? 'Viber' : 'Telegram'} ${r.teamContact}`;
+  const first = (r.players || []).find(p => p.contact);
+  return first ? `${first.contactType === 'viber' ? 'Viber' : 'Telegram'} ${first.contact}` : '—';
+}
 
 async function loadRegistrations(){
   // The public list needs no auth; the detailed one is admin-only, so only ask
@@ -1768,8 +1911,12 @@ async function loadRegistrations(){
   } else {
     registrations = [];
   }
+  registrationsLoaded = true;
+  reindexQualifierTeams();
   renderRegTeams();
   renderConfirmed();
+  renderQualifier();
+  autoDrawQualifier();
 }
 
 function renderRegTeams(){
@@ -1793,6 +1940,7 @@ function renderRegTeams(){
         <div class="who">
           <div class="nm">${escapeHtml(r.teamName)} <span style="color:var(--cyan);font-size:12px;">${escapeHtml(r.teamTag)}</span></div>
           <div class="sub">${t('reg.leader','Leader')}: ${escapeHtml(r.leaderName)} · ${new Date(r.createdAt).toLocaleString()}</div>
+          <div class="sub">${t('reg.col.contact','Contact')}: ${escapeHtml(teamPhoneOf(r))} · ${escapeHtml(teamContactOf(r))}</div>
         </div>
         <div class="reg-meta">
           <span class="reg-badge region">${escapeHtml(regionLabel(r.region))}</span>
@@ -1806,7 +1954,6 @@ function renderRegTeams(){
             <span class="r">${escapeHtml(p.role)}</span>
             <span class="who2">
               <span class="n">${escapeHtml(p.name)}</span>
-              <span class="c" title="${escapeHtml(p.phone + ' · ' + p.contact)}">${escapeHtml(p.phone)} · ${escapeHtml(p.contact)}</span>
             </span>
           </div>`).join('')}
       </div>
@@ -1882,6 +2029,255 @@ function renderConfirmed(){
       </table>
     </div>`;
 }
+
+/* ================= qualifier bracket =================
+   One single-elimination BO1 draw per region, seeded at random from the teams
+   confirmed in "Qualifier Confirm Team". There is no champion: the draw stops
+   at the semifinals, and the two teams that come through them — the region's
+   two finalists — are the ones that qualify. */
+
+function qualifierSize(region){
+  const n = Number((settings.qualifierSize || {})[region]);
+  return QUALIFIER_SIZES.includes(n) ? n : 32;
+}
+function isQualifierSlot(slot){ return /^q-(mm|th)-/.test(String(slot || '')); }
+function qualifierPrefix(region){ return 'q-' + String(region).toLowerCase(); }
+
+/* Approved teams for one region. This is the public /approved list, so it
+   carries no phone numbers or contact handles. */
+function qualifierPool(region){
+  return approvedTeams.filter(x => (x.region || 'MM') === region);
+}
+// Bracket matches store a team id, so each registration gets a stable one.
+function qualifierTeamOf(reg){
+  return { id: 'T-q-' + reg.id, name: reg.teamName, tag: reg.teamTag, logo: reg.teamLogo || '' };
+}
+function reindexQualifierTeams(){
+  qualifierTeamsById = {};
+  approvedTeams.forEach(reg => {
+    const tm = qualifierTeamOf(reg);
+    qualifierTeamsById[tm.id] = tm;
+  });
+}
+
+/* Structure: rounds run until two teams are left, then a "Qualified" card
+   fed by both semifinals instead of a championship card. */
+function buildQualifierBracket(region, size){
+  const pre = qualifierPrefix(region);
+  const rounds = Math.round(Math.log2(size)) - 1;
+  const cols = [], conns = [];
+  for (let r = 0; r < rounds; r++) {
+    const n = size / Math.pow(2, r + 1);
+    const title = roundTitleFor(n * 2);
+    const slots = [];
+    for (let i = 0; i < n; i++) {
+      slots.push({ id: `${pre}-r${r}-m${i}`, label: n > 1 ? `${title} ${i + 1}` : title });
+      if (r > 0) {
+        conns.push([`${pre}-r${r - 1}-m${i * 2}`, `${pre}-r${r}-m${i}`]);
+        conns.push([`${pre}-r${r - 1}-m${i * 2 + 1}`, `${pre}-r${r}-m${i}`]);
+      }
+    }
+    cols.push({ title, slots });
+  }
+  const qualId = `${pre}-q`;
+  cols.push({ title: t('qualifier.qualified','Qualified'), slots: [{ id: qualId, label: 'Qualified', qualified: true }] });
+  conns.push([`${pre}-r${rounds - 1}-m0`, qualId]);
+  conns.push([`${pre}-r${rounds - 1}-m1`, qualId]);
+  return { sections: [{ title: '', cols, conns }], rounds, prefix: pre, size };
+}
+
+function qualifierFirstRoundSlots(region, size){
+  const pre = qualifierPrefix(region);
+  const out = [];
+  for (let i = 0; i < size / 2; i++) out.push(`${pre}-r0-m${i}`);
+  return out;
+}
+
+function ensureQualifierMatch(slot){
+  let m = matches.find(x => x.stage === 'bracket' && x.bracketSlot === slot);
+  if (!m) {
+    m = {
+      id: 'M-q-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 100000),
+      stage: 'bracket', bracketSlot: slot, teamAId: '', teamBId: '',
+      scoreA: null, scoreB: null, status: 'upcoming', bestOf: 1,
+      scheduledAt: '', votes: { a: 0, b: 0 },
+    };
+    matches.push(m);
+  }
+  return m;
+}
+
+function shuffle(list){
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+/* Seats every confirmed team that isn't already placed into a random empty
+   first-round seat. With `reshuffle` the whole round is cleared first, so the
+   draw starts over. Returns true when anything actually changed. */
+function drawQualifierRegion(region, reshuffle){
+  const size = qualifierSize(region);
+  const pool = qualifierPool(region);
+  const slots = qualifierFirstRoundSlots(region, size);
+  if (pool.length > size) return 'too_many';
+
+  if (reshuffle) {
+    // Wipe the region's whole bracket, not just round one — later rounds were
+    // derived from a draw that no longer applies.
+    const pre = qualifierPrefix(region);
+    matches = matches.filter(m => !(m.stage === 'bracket' && String(m.bracketSlot || '').startsWith(pre)));
+  }
+
+  const placed = new Set();
+  const empty = [], half = [], spare = [];
+  slots.forEach((slot) => {
+    const m = matches.find(x => x.stage === 'bracket' && x.bracketSlot === slot);
+    const a = m ? m.teamAId : '', bId = m ? m.teamBId : '';
+    if (a) placed.add(a);
+    if (bId) placed.add(bId);
+    if (a && bId) return;                              // full, nothing free here
+    if (!a && !bId) {
+      // Take one seat now and hold the other back, so no match is left empty
+      // while another is doubled up.
+      empty.push({ slot, side: 'A' });
+      spare.push({ slot, side: 'B' });
+    } else {
+      half.push({ slot, side: a ? 'B' : 'A' });
+    }
+  });
+
+  const waiting = pool.map(qualifierTeamOf).filter(tm => !placed.has(tm.id));
+  if (!waiting.length) { applyQualifierByes(region, size); return true; }
+
+  // Half-filled matches are completed before an empty one is doubled up, so as
+  // many teams as possible get a real opponent rather than a walkover.
+  const free = shuffle(empty).concat(shuffle(half), shuffle(spare));
+  if (waiting.length > free.length) return 'too_many';
+
+  shuffle(waiting).forEach((tm, i) => {
+    const seat = free[i];
+    const m = ensureQualifierMatch(seat.slot);
+    // A walkover recorded while this match held one team is void now that it
+    // has two, so clear the score before seating the opponent.
+    if (!m.teamAId !== !m.teamBId && m.scoreA !== null) {
+      m.scoreA = null; m.scoreB = null; m.status = 'upcoming';
+    }
+    m['team' + seat.side + 'Id'] = tm.id;
+    m.bestOf = 1;
+  });
+
+  applyQualifierByes(region, size);
+  return true;
+}
+
+/* A first-round match holding a single team is a walkover — record it as a
+   1-0 win so the bracket can carry that team forward instead of stalling. */
+function applyQualifierByes(region, size){
+  let changed = false;
+  qualifierFirstRoundSlots(region, size).forEach((slot) => {
+    const m = matches.find(x => x.stage === 'bracket' && x.bracketSlot === slot);
+    if (!m) return;
+    const only = (!!m.teamAId) !== (!!m.teamBId);
+    if (only && m.scoreA === null && m.scoreB === null) {
+      if (m.teamAId) { m.scoreA = 1; m.scoreB = 0; } else { m.scoreA = 0; m.scoreB = 1; }
+      m.status = 'completed';
+      m.bestOf = 1;
+      changed = true;
+    }
+  });
+  return changed;
+}
+
+/* Confirming a team drops it straight into its region's draw. Runs for admins
+   only, since only they can persist the result. */
+let autoDrawRunning = false;
+async function autoDrawQualifier(){
+  if (!isAdmin || autoDrawRunning || !detailLoaded || !registrationsLoaded) return;
+  let changed = false;
+  QUALIFIER_REGIONS.forEach((region) => {
+    const before = JSON.stringify(matches.filter(m => String(m.bracketSlot || '').startsWith(qualifierPrefix(region))));
+    const res = drawQualifierRegion(region, false);
+    if (res === 'too_many') return;
+    const after = JSON.stringify(matches.filter(m => String(m.bracketSlot || '').startsWith(qualifierPrefix(region))));
+    if (before !== after) changed = true;
+  });
+  if (!changed) return;
+  autoDrawRunning = true;
+  await saveDetail();
+  autoDrawRunning = false;
+}
+
+function renderQualifier(){
+  reindexQualifierTeams();
+  const region = qualifierRegion;
+  const size = qualifierSize(region);
+  const pool = qualifierPool(region);
+
+  const toolbar = document.getElementById('qualifier-toolbar');
+  if (!toolbar) return;
+  toolbar.classList.toggle('admin-on', isAdmin);
+
+  const sizeSel = document.getElementById('f-qualifier-size');
+  sizeSel.innerHTML = QUALIFIER_SIZES
+    .map(n => `<option value="${n}">${escapeHtml(t('qualifier.size.n','{n} Teams').replace('{n}', n))}</option>`).join('');
+  sizeSel.value = String(size);
+  document.getElementById('f-qualifier-region').value = region;
+
+  document.getElementById('qualifier-format-pill').textContent =
+    `${t('qualifier.format','Single Elimination · BO1')} · ${t('qualifier.size.n','{n} Teams').replace('{n}', size)}`;
+
+  document.getElementById('qualifier-pool').innerHTML =
+    `${escapeHtml(t('qualifier.pool','Confirmed teams in this region'))}: <b>${pool.length}</b> / ${size}`;
+
+  const scroll = document.getElementById('qualifier-scroll');
+  scroll.classList.toggle('tall', size > 32);
+  if (!pool.length) {
+    scroll.innerHTML = `<div class="empty-state"><div class="icon">🎲</div><p>${escapeHtml(t('qualifier.empty','No confirmed teams in this region yet. Approve teams in Register Team List and they are drawn in automatically.'))}</p></div>`;
+    return;
+  }
+  const b = buildQualifierBracket(region, size);
+  scroll.innerHTML = b.sections.map(sec => renderBracketSection(sec, QX)).join('');
+}
+
+document.getElementById('f-qualifier-region').addEventListener('change', (e) => {
+  qualifierRegion = QUALIFIER_REGIONS.includes(e.target.value) ? e.target.value : 'MM';
+  renderQualifier();
+});
+document.getElementById('f-qualifier-size').addEventListener('change', async (e) => {
+  const next = Number(e.target.value);
+  const prev = settings;
+  settings = normalizeSettings({
+    ...settings,
+    qualifierSize: { ...(settings.qualifierSize || {}), [qualifierRegion]: next },
+  });
+  renderQualifier();
+  const ok = await saveDetail();
+  if (!ok) { settings = prev; renderQualifier(); alert(t('tourdetail.error_save','Could not save. Please try again.')); }
+});
+document.getElementById('qualifier-draw-btn').addEventListener('click', async () => {
+  if (!isAdmin) { alert(t('qualifier.admin_only','Only admins can draw or edit the qualifier bracket.')); return; }
+  if (!qualifierPool(qualifierRegion).length) { alert(t('qualifier.empty','No confirmed teams in this region yet.')); return; }
+  if (!confirm(t('qualifier.redraw_confirm','Re-draw the whole bracket for this region? Teams already placed will be shuffled again.'))) return;
+  const res = drawQualifierRegion(qualifierRegion, true);
+  if (res === 'too_many') { alert(t('qualifier.too_many','There are more confirmed teams than slots. Pick a larger bracket size.')); return; }
+  const btn = document.getElementById('qualifier-draw-btn');
+  btn.disabled = true;
+  const ok = await saveDetail();
+  btn.disabled = false;
+  if (!ok) alert(t('tourdetail.error_save','Could not save. Please try again.'));
+});
+document.getElementById('qualifier-clear-btn').addEventListener('click', async () => {
+  if (!isAdmin) { alert(t('qualifier.admin_only','Only admins can draw or edit the qualifier bracket.')); return; }
+  if (!confirm(t('qualifier.clear_confirm',"Clear every match in this region's qualifier bracket?"))) return;
+  const pre = qualifierPrefix(qualifierRegion);
+  matches = matches.filter(m => !(m.stage === 'bracket' && String(m.bracketSlot || '').startsWith(pre)));
+  const ok = await saveDetail();
+  if (!ok) alert(t('tourdetail.error_save','Could not save. Please try again.'));
+});
 
 /* ---------------- team modal ---------------- */
 const teamModal = document.getElementById('team-modal');
@@ -2005,8 +2401,9 @@ const fMatchWhen = document.getElementById('f-match-when');
 const fMatchBo = document.getElementById('f-match-bo');
 let editingMatchId = null;
 
-function populateTeamSelects(selA, selB){
-  const opts = teams.map(tm => `<option value="${tm.id}">${escapeHtml(tm.name)}</option>`).join('');
+function populateTeamSelects(selA, selB, extra){
+  const list = teams.concat(extra || []);
+  const opts = list.map(tm => `<option value="${tm.id}">${escapeHtml(tm.name)}</option>`).join('');
   selA.innerHTML = opts; selB.innerHTML = opts;
 }
 function populateDaySuggestions(){
@@ -2097,7 +2494,9 @@ let editingSlot = null;
 
 function slotLabel(slot){
   if (slot === 's-3rd') return 'Third Place Match';
-  const b = currentBracket();
+  const b = isQualifierSlot(slot)
+    ? buildQualifierBracket(slot.slice(2, 4).toUpperCase(), qualifierSize(slot.slice(2, 4).toUpperCase()))
+    : currentBracket();
   for (const sec of b.sections) {
     for (const col of sec.cols) {
       const found = col.slots.find(s => s.id === slot);
@@ -2107,10 +2506,12 @@ function slotLabel(slot){
   return 'Edit slot';
 }
 window.openBracketEdit = function(slot){
-  if (!teams.length) { alert(t('tourdetail.need_teams_first','Add at least one team first.')); return; }
+  const qual = isQualifierSlot(slot);
+  const extra = qual ? qualifierPool(slot.slice(2, 4).toUpperCase()).map(qualifierTeamOf) : [];
+  if (!teams.length && !extra.length) { alert(t('tourdetail.need_teams_first','Add at least one team first.')); return; }
   editingSlot = slot;
   document.getElementById('bracket-modal-title').textContent = slotLabel(slot);
-  populateTeamSelects(fBracketTeamA, fBracketTeamB);
+  populateTeamSelects(fBracketTeamA, fBracketTeamB, extra);
   const existing = bracketMatch(slot);
   if (existing) {
     fBracketTeamA.value = existing.teamAId || ''; fBracketTeamB.value = existing.teamBId || '';
@@ -2123,7 +2524,8 @@ window.openBracketEdit = function(slot){
     const [prefillA, prefillB] = prefillFor(slot);
     fBracketTeamA.value = prefillA || ''; fBracketTeamB.value = prefillB || '';
     fBracketScoreA.value = ''; fBracketScoreB.value = ''; fBracketStatus.value = 'upcoming';
-    fBracketBo.value = '3'; fBracketWhen.value = '';
+    // The qualifier is played BO1 throughout.
+    fBracketBo.value = qual ? '1' : '3'; fBracketWhen.value = '';
   }
   bracketModalErr.classList.remove('show');
   bracketModal.classList.add('show');

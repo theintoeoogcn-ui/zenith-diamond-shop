@@ -17,7 +17,10 @@ const TEAM_GROUPS = ['', 'A', 'B'];
 // (e.g. "s-r0-m3", "d-lb1-m0", "d-gf", "s-3rd"), so they are validated by
 // shape rather than against a fixed list.
 const BRACKET_SLOT_RE = /^[a-z0-9-]{1,24}$/;
-const TAB_KEYS = ['lineup', 'schedule', 'standings', 'bracket'];
+const TAB_KEYS = ['regteams', 'confirmed', 'qualifier', 'lineup', 'schedule', 'standings', 'bracket'];
+// The qualifier is a single-elimination BO1 draw run separately per region.
+const QUALIFIER_REGIONS = ['MM', 'TH'];
+const QUALIFIER_SIZES = [32, 64, 128];
 const BO_OPTIONS = [1, 3, 5, 7];
 
 function ensureFile() {
@@ -44,8 +47,15 @@ function writeAll(map) {
   sync(SHEET_KEY, map);
 }
 
+function defaultQualifier() {
+  return { MM: 32, TH: 32 };
+}
+
 function defaultSettings() {
-  return { hiddenTabs: [], bracketType: 'single', bracketSize: 8, thirdPlace: true };
+  return {
+    hiddenTabs: [], bracketType: 'single', bracketSize: 8, thirdPlace: true,
+    qualifierSize: defaultQualifier(),
+  };
 }
 
 // Admin-controlled display settings: which detail sections the public can see,
@@ -55,6 +65,13 @@ function cleanSettings(s) {
   const bracketType = s.bracketType === 'double' ? 'double' : 'single';
   const allowedSizes = bracketType === 'double' ? [4, 8] : [4, 8, 16];
   const size = Number(s.bracketSize);
+  // Per-region qualifier bracket size (32 / 64 / 128).
+  const qs = (s.qualifierSize && typeof s.qualifierSize === 'object') ? s.qualifierSize : {};
+  const qualifierSize = {};
+  QUALIFIER_REGIONS.forEach((r) => {
+    const n = Number(qs[r]);
+    qualifierSize[r] = QUALIFIER_SIZES.includes(n) ? n : 32;
+  });
   return {
     hiddenTabs: Array.isArray(s.hiddenTabs)
       ? [...new Set(s.hiddenTabs.filter((k) => TAB_KEYS.includes(k)))]
@@ -62,6 +79,7 @@ function cleanSettings(s) {
     bracketType,
     bracketSize: allowedSizes.includes(size) ? size : 8,
     thirdPlace: s.thirdPlace !== false,
+    qualifierSize,
   };
 }
 
@@ -285,5 +303,6 @@ module.exports = {
   getDetail, saveDetail, deleteDetail, computeStandings, vote, getBracketOutcome,
   cleanSettings, defaultSettings,
   pointsFor,
-  ROLES, TEAM_STATUSES, TEAM_GROUPS, TAB_KEYS, BO_OPTIONS, ready,
+  ROLES, TEAM_STATUSES, TEAM_GROUPS, TAB_KEYS, BO_OPTIONS,
+  QUALIFIER_REGIONS, QUALIFIER_SIZES, ready,
 };

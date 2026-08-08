@@ -134,6 +134,8 @@
   .slot .field input,.slot .field select{padding:9px 10px;font-size:12.5px;}
   .slot .field label{font-size:10.5px;margin-bottom:4px;}
   .contact-row{display:grid;grid-template-columns:88px 1fr;gap:8px;}
+  .team-contact-row{grid-template-columns:104px 1fr;}
+  .team-contact-row select{width:100%;}
 
   /* ---- order code ---- */
   .code-card{border-color:var(--violet-dim);background:linear-gradient(135deg,rgba(139,92,246,0.10),transparent 60%),var(--panel);}
@@ -234,6 +236,7 @@
     <span class="t-chip" id="t-chip" style="display:none;"></span>
     <h1 id="page-title">Team Registration</h1>
     <p class="sub" id="page-sub">Fill in your roster and confirm with the order code from your diamond purchase.</p>
+    <p class="sub" id="slots-left" style="display:none;color:var(--cyan);font-weight:700;"></p>
   </div>
 
   <div class="closed-note" id="closed-note"></div>
@@ -280,20 +283,39 @@
           </select>
         </div>
       </div>
+
+      <!-- One contact for the whole team, rather than one per player. -->
+      <div class="field-row">
+        <div class="field">
+          <label id="l-tphone">Phone number<span class="req">*</span></label>
+          <input type="tel" id="f-team-phone" maxlength="30" placeholder="09xxxxxxxxx">
+        </div>
+        <div class="field">
+          <label id="l-tcontact">Telegram or Viber<span class="req">*</span></label>
+          <div class="contact-row team-contact-row">
+            <select id="f-team-contact-type">
+              <option value="telegram">Telegram</option>
+              <option value="viber">Viber</option>
+            </select>
+            <input type="text" id="f-team-contact" maxlength="80" placeholder="@username">
+          </div>
+        </div>
+      </div>
+      <p class="pick-note" id="contact-note">One phone number and one Telegram or Viber account for the whole team — we contact the leader here.</p>
     </div>
 
     <!-- ---------- roster ---------- -->
     <div class="card">
       <h2 id="h-roster">Roster</h2>
+      <p class="pick-note" id="roster-note" style="margin:-8px 0 14px;">Only in-game names are needed for each player.</p>
       <div class="roster" id="roster"></div>
     </div>
 
     <!-- ---------- order code ---------- -->
     <div class="card code-card">
       <h2 id="h-code">Order code</h2>
-      <p class="code-hint" id="code-hint">
-        Registration is confirmed with the order code from a diamond purchase. You'll find it on your
-        order confirmation. Haven't bought yet? <a href="diamond-plan.html">Go to the Diamond store</a>.
+      <p class="code-hint"><span id="code-hint">Registration is confirmed with the order code from a diamond purchase. You'll find it on your order confirmation.</span>
+        <a href="diamond-plan.html" id="code-store-link">Go to the Diamond store</a>.
       </p>
       <div class="code-row">
         <input type="text" id="f-code" maxlength="20" placeholder="ZE-1234">
@@ -357,6 +379,8 @@ const FALLBACK_ROLES = ['Exp','Jungle','Mid','Gold','Roam','Sub','Coach'];
 let slots = FALLBACK_SLOTS;
 let roles = FALLBACK_ROLES;
 let regions = [{ value:'MM', label:'Myanmar Region' }, { value:'TH', label:'Thailand Region' }];
+let maxTeams = 128;
+let slotsLeft = null;
 let teamLogoData = '';
 let codeVerified = false;
 let tournament = null;
@@ -392,20 +416,6 @@ function renderRoster(){
         <label>${t('reg.player','Player name')}${slot.required ? '<span class="req">*</span>' : ''}</label>
         <input type="text" maxlength="60" data-idx="${i}" data-f="name" placeholder="${t('reg.ign','In-game name')}">
       </div>
-      <div class="field">
-        <label>${t('reg.phone','Phone number')}${slot.required ? '<span class="req">*</span>' : ''}</label>
-        <input type="tel" maxlength="30" data-idx="${i}" data-f="phone" placeholder="09xxxxxxxxx">
-      </div>
-      <div class="field">
-        <label>${t('reg.contact','Telegram or Viber')}${slot.required ? '<span class="req">*</span>' : ''}</label>
-        <div class="contact-row">
-          <select data-idx="${i}" data-f="contactType">
-            <option value="telegram">Telegram</option>
-            <option value="viber">Viber</option>
-          </select>
-          <input type="text" maxlength="80" data-idx="${i}" data-f="contact" placeholder="@username">
-        </div>
-      </div>
     </div>`;
   }).join('');
 }
@@ -416,8 +426,7 @@ function collectPlayers(){
       const el = document.querySelector(`[data-idx="${i}"][data-f="${f}"]`);
       return el ? el.value.trim() : '';
     };
-    return { role: get('role'), name: get('name'), phone: get('phone'),
-             contactType: get('contactType'), contact: get('contact') };
+    return { role: get('role'), name: get('name') };
   });
 }
 
@@ -486,20 +495,20 @@ function validateForm(){
   const region = document.getElementById('f-region');
   if (!region.value) { problems.push(t('reg.err.region','Region is required.')); markBad(region); }
 
+  // One phone number and one Telegram/Viber handle for the whole team.
+  const tPhone = document.getElementById('f-team-phone');
+  const tContact = document.getElementById('f-team-contact');
+  if (!tPhone.value.trim()) { problems.push(t('reg.err.phone','Team phone number is required.')); markBad(tPhone); }
+  if (!tContact.value.trim()) { problems.push(t('reg.err.contact','Team Telegram or Viber account is required.')); markBad(tContact); }
+
   const players = collectPlayers();
   slots.forEach((slot, i) => {
-    const p = players[i];
-    const touched = p.name || p.phone || p.contact;
-    // Optional slots may be left entirely empty, but a half-filled one is an
-    // error — otherwise a sub could be saved with no way to reach them.
-    if (!slot.required && !touched) return;
-    ['name','phone','contact'].forEach((f) => {
-      if (!p[f]) {
-        markBad(document.querySelector(`[data-idx="${i}"][data-f="${f}"]`));
-        const labels = { name: t('reg.player','Player name'), phone: t('reg.phone','Phone number'), contact: t('reg.contact','Telegram or Viber') };
-        problems.push(`${slot.label} — ${labels[f]} ${t('reg.err.missing','is required.')}`);
-      }
-    });
+    // Optional slots may simply be left empty; a starter needs a name.
+    if (!slot.required) return;
+    if (!players[i].name) {
+      markBad(document.querySelector(`[data-idx="${i}"][data-f="name"]`));
+      problems.push(`${slot.label} — ${t('reg.player','Player name')} ${t('reg.err.missing','is required.')}`);
+    }
   });
 
   if (!fCode.value.trim()) { problems.push(t('reg.err.code','Order code is required.')); markBad(fCode); }
@@ -536,6 +545,9 @@ formEl.addEventListener('submit', async (e) => {
         teamTag: document.getElementById('f-team-tag').value.trim(),
         leaderName: document.getElementById('f-leader').value.trim(),
         region: document.getElementById('f-region').value,
+        teamPhone: document.getElementById('f-team-phone').value.trim(),
+        teamContactType: document.getElementById('f-team-contact-type').value,
+        teamContact: document.getElementById('f-team-contact').value.trim(),
         orderCode: fCode.value.trim().toUpperCase(),
         players: collectPlayers(),
       }),
@@ -560,16 +572,33 @@ async function loadSchema(){
     const data = await res.json();
     if (Array.isArray(data.slots) && data.slots.length) slots = data.slots;
     if (Array.isArray(data.roles) && data.roles.length) roles = data.roles;
-    if (Array.isArray(data.regions) && data.regions.length) {
-      regions = data.regions;
-      const sel = document.getElementById('f-region');
-      const keep = sel.value;
-      sel.innerHTML = `<option value="">${t('reg.region.none','Select a region…')}</option>` +
-        regions.map((r) => `<option value="${escapeHtml(r.value)}">${escapeHtml(r.label)}</option>`).join('');
-      sel.value = keep;
-    }
+    if (Array.isArray(data.regions) && data.regions.length) regions = data.regions;
+    if (Number(data.maxTeams)) maxTeams = Number(data.maxTeams);
   } catch (e) { /* fall back to the built-in shape */ }
+  renderRegionSelect();
   renderRoster();
+}
+
+/* Slot counter. The field is capped, so a visitor arriving at a full
+   tournament is told before filling anything in. */
+async function loadSlots(){
+  if (!tournamentId) return;
+  try {
+    const res = await fetch('/api/registrations/' + encodeURIComponent(tournamentId) + '/count');
+    const data = await res.json();
+    if (typeof data.slotsLeft === 'number') slotsLeft = data.slotsLeft;
+    if (Number(data.maxTeams)) maxTeams = Number(data.maxTeams);
+    if (data.full) { showClosed(t('reg.full','All 128 team slots are taken, so registration is now closed.')); return; }
+  } catch (e) { return; }
+  renderSlotsLeft();
+}
+
+function renderSlotsLeft(){
+  const el = document.getElementById('slots-left');
+  if (!el || slotsLeft === null) return;
+  el.textContent = t('reg.slots_left', '{left} of {total} slots left')
+    .replace('{left}', slotsLeft).replace('{total}', maxTeams);
+  el.style.display = 'block';
 }
 
 async function loadTournament(){
@@ -600,23 +629,79 @@ function showClosed(msg){
   document.getElementById('page-sub').style.display = 'none';
 }
 
+/* Every visible string on this page goes through t(), so switching language
+   redraws the whole form rather than only the shared header. Labels that carry
+   a required-marker are rebuilt with the asterisk re-appended. */
 function applyStaticLabels(){
   const set = (id, key, fallback) => {
     const el = document.getElementById(id);
     if (el) el.textContent = t(key, fallback);
   };
+  const setReq = (id, key, fallback) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = escapeHtml(t(key, fallback)) + '<span class="req">*</span>';
+  };
+  const setPh = (id, key, fallback) => {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = t(key, fallback);
+  };
+
   set('back-link', 'tourdetail.back', '← Back to Tournaments');
   set('page-sub', 'reg.sub', 'Fill in your roster and confirm with the order code from your diamond purchase.');
+
   set('h-team', 'reg.section.team', 'Team');
   set('h-roster', 'reg.section.roster', 'Roster');
   set('h-code', 'reg.section.code', 'Order code');
+
+  setReq('l-logo', 'reg.logo', 'Team logo');
+  set('logo-note', 'reg.logo_note', 'PNG or JPG, up to 2 MB.');
   set('logo-btn', 'reg.choose_image', 'Choose image');
+
+  setReq('l-tname', 'reg.team_name', 'Team name');
+  setReq('l-ttag', 'reg.team_tag', 'Team tag');
+  setReq('l-leader', 'reg.leader_name', 'Leader or manager name');
+  setReq('l-region', 'reg.region', 'Region');
+  setReq('l-tphone', 'reg.phone', 'Phone number');
+  setReq('l-tcontact', 'reg.contact', 'Telegram or Viber');
+  set('contact-note', 'reg.contact_note', 'One phone number and one Telegram or Viber account for the whole team — we contact the leader here.');
+  set('roster-note', 'reg.roster_note', 'Only in-game names are needed for each player.');
+
+  setPh('f-team-name', 'reg.ph.team_name', 'e.g. Zenith Titans');
+  setPh('f-team-tag', 'reg.ph.team_tag', 'e.g. ZT');
+  setPh('f-leader', 'reg.ph.leader', 'Who should we contact about this team?');
+  setPh('f-team-phone', 'reg.ph.phone', '09xxxxxxxxx');
+  setPh('f-team-contact', 'reg.ph.contact', '@username');
+  setPh('f-code', 'reg.ph.code', 'ZE-1234');
+
+  set('code-hint', 'reg.code.hint', "Registration is confirmed with the order code from a diamond purchase. You'll find it on your order confirmation.");
+  set('code-store-link', 'reg.code.store', 'Go to the Diamond store');
   set('check-btn', 'reg.code.check', 'Check code');
   set('submit-btn', 'reg.submit', 'Submit registration');
+
   set('done-title', 'reg.done.title', 'Registration received');
   set('done-sub', 'reg.done.sub', "Your team is in the queue. We'll review the roster and get in touch with the leader on Telegram or Viber.");
   set('done-back', 'tourdetail.back', '← Back to Tournaments');
+
+  const chip = document.getElementById('t-chip');
+  if (chip && chip.style.display !== 'none') chip.textContent = t('reg.chip', 'Team Registration');
+
+  renderRegionSelect();
+  renderSlotsLeft();
   renderRoster();
+}
+
+/* Region names are translated on the client from the region's code, so the
+   dropdown follows the language even though the server sends English labels. */
+function renderRegionSelect(){
+  const sel = document.getElementById('f-region');
+  if (!sel) return;
+  const keep = sel.value;
+  sel.innerHTML = `<option value="">${escapeHtml(t('reg.region.none','Select a region…'))}</option>` +
+    regions.map((r) => {
+      const label = t('reg.region.' + r.value, r.label);
+      return `<option value="${escapeHtml(r.value)}">${escapeHtml(label)}</option>`;
+    }).join('');
+  sel.value = keep;
 }
 
 const prevOnLangChange = window.ZenithI18n.onLangChange;
@@ -625,8 +710,10 @@ window.ZenithI18n.onLangChange = function(lang, dict){
   applyStaticLabels();
 };
 
+applyStaticLabels();
 loadSchema();
 loadTournament();
+loadSlots();
 </script>
 </body>
 </html>
