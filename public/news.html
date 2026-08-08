@@ -13,6 +13,12 @@
     --void:#0A0713; --void-rgb:10,7,19; --panel:#150C29; --panel-raised:#1D1237; --line:#2C1F4D;
     --violet:#8B5CF6; --violet-dim:#4C3592; --cyan:#4FE0E8; --signal:#FF3E9A;
     --hi:#F4EEFF; --mid:#B4A4DC; --dim:#6C6089; --radius:14px;
+    /* Backdrop behind letterboxed post images. Stays dark in light mode too,
+       so white-heavy graphics keep a visible edge. */
+    --photo-backdrop:#0D0A18;
+  }
+  :root[data-theme="light"]{
+    --photo-backdrop:#1A1230;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -139,7 +145,33 @@
     overflow:hidden;border-radius:10px;background:var(--void);border:1px solid var(--line);
   }
   .n-media iframe{width:100%;height:100%;border:0;display:block;}
-  .n-media-img{width:100%;margin:0 0 16px;display:block;max-height:480px;object-fit:cover;border-radius:10px;border:1px solid var(--line);}
+  /* Portrait 4:5 frame sized for 1080x1350 uploads. `contain` means nothing
+     is ever cropped — a 1080x1350 image fills the frame exactly, and any other
+     ratio is letterboxed against the backdrop rather than having its edges cut
+     off (the old rule was `cover` with a 480px cap, which chopped tall posts). */
+  .n-media-photo{
+    position:relative;display:block;width:100%;max-width:540px;aspect-ratio:4/5;
+    margin:0 0 16px;border-radius:10px;overflow:hidden;
+    border:1px solid var(--line);background:var(--photo-backdrop);
+  }
+  .n-media-photo .n-media-img{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:contain;display:block;
+  }
+  /* A blurred, zoomed copy fills the letterbox bars so off-ratio images still
+     look deliberate instead of sitting on empty slabs. */
+  .n-media-photo .n-media-blur{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    filter:blur(26px) saturate(1.3);transform:scale(1.15);opacity:0.5;
+  }
+  .n-media-photo .n-media-zoom{
+    position:absolute;right:8px;bottom:8px;z-index:2;
+    display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;
+    background:rgba(10,7,19,0.72);color:#F4EEFF;font-size:11px;font-weight:700;
+    opacity:0;transition:opacity .15s;backdrop-filter:blur(4px);
+  }
+  .n-media-photo:hover .n-media-zoom{opacity:1;}
+  @media (max-width:560px){ .n-media-photo{max-width:100%;} }
   .n-media-link{
     display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;padding:9px 16px;border-radius:999px;
     background:rgba(139,92,246,0.14);border:1px solid var(--violet-dim);color:var(--violet);font-weight:700;font-size:13px;
@@ -469,7 +501,12 @@ function renderMedia(item){
     if (/facebook\.com|fb\.watch/i.test(item.media)) return `<div class="n-media"><iframe src="${facebookEmbedUrl(item.media)}" loading="lazy" allowfullscreen></iframe></div>`;
     return `<a class="n-media-link" href="${escapeHtml(item.media)}" target="_blank" rel="noopener">▶️ ${escapeHtml(t('news.watch.generic','Watch video'))}</a>`;
   }
-  return `<img class="n-media-img" src="${item.media}" alt="">`;
+  return `
+    <a class="n-media-photo" href="${item.media}" target="_blank" rel="noopener" title="${escapeHtml(t('news.image.open','Open full image'))}">
+      <img class="n-media-blur" src="${item.media}" alt="" aria-hidden="true">
+      <img class="n-media-img" src="${item.media}" alt="">
+      <span class="n-media-zoom">⤢ ${escapeHtml(t('news.image.open','Open full image'))}</span>
+    </a>`;
 }
 
 function renderComments(item){
