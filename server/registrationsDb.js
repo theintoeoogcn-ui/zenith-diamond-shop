@@ -22,6 +22,13 @@ const ROLE_OPTIONS = ['Exp', 'Jungle', 'Mid', 'Gold', 'Roam', 'Sub', 'Coach'];
 const CONTACT_TYPES = ['telegram', 'viber'];
 // Hard cap on how many teams a single tournament will take.
 const MAX_TEAMS = 128;
+/* Every accepted team gets a running entry number of its own — S3-0001,
+   S3-0002 and so on — separate from the diamond order code it registered
+   with. The prefix is the season, and can be moved on per deployment. */
+const TEAM_CODE_PREFIX = process.env.TEAM_CODE_PREFIX || 'S3';
+// A tournament entry has to be backed by a diamond purchase of at least this
+// size; smaller packs don't qualify a team.
+const MIN_REGISTER_DIAMONDS = 343;
 // Which regional bracket the team plays in.
 const REGIONS = [
   { value: 'MM', label: 'Myanmar Region' },
@@ -44,6 +51,19 @@ function writeAll(map) {
   ensureFile();
   fs.writeFileSync(DB_FILE, JSON.stringify(map, null, 2), 'utf8');
   sync(SHEET_KEY, map);
+}
+
+/* The next team code for a tournament, continuing from the highest already
+   issued there rather than from the number of entries — so deleting a team
+   never hands its number to somebody else. */
+function nextTeamCode(list) {
+  const re = new RegExp('^' + TEAM_CODE_PREFIX + '-(\\d+)$');
+  let highest = 0;
+  (list || []).forEach((r) => {
+    const m = re.exec(String(r.teamCode || ''));
+    if (m) highest = Math.max(highest, Number(m[1]));
+  });
+  return `${TEAM_CODE_PREFIX}-${String(highest + 1).padStart(4, '0')}`;
 }
 
 function genId() {
@@ -115,6 +135,7 @@ function createRegistration(tournamentId, payload) {
   const list = map[tournamentId] || [];
   const entry = {
     id: genId(),
+    teamCode: nextTeamCode(list),
     tournamentId,
     teamLogo: payload.teamLogo ? String(payload.teamLogo) : '',
     teamName: str(payload.teamName, 60),
@@ -144,6 +165,7 @@ function listApproved(tournamentId) {
     .filter((r) => r.status === 'approved')
     .map((r) => ({
       id: r.id,
+      teamCode: r.teamCode || '',
       teamName: r.teamName,
       teamTag: r.teamTag,
       teamLogo: r.teamLogo,
@@ -180,5 +202,6 @@ const ready = hydrate(SHEET_KEY, DB_FILE);
 module.exports = {
   listRegistrations, listApproved, createRegistration, updateRegistration, deleteRegistration,
   validate, isCodeUsed, countTeams, isFull,
-  ROSTER_SLOTS, ROLE_OPTIONS, CONTACT_TYPES, REGIONS, MAX_TEAMS, ready,
+  ROSTER_SLOTS, ROLE_OPTIONS, CONTACT_TYPES, REGIONS, MAX_TEAMS,
+  TEAM_CODE_PREFIX, MIN_REGISTER_DIAMONDS, ready,
 };

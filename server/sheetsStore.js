@@ -30,7 +30,7 @@ const TAB_NAME = 'AppData';
 const CHUNK_SIZE = 40000;
 
 if (!ENABLED) {
-  console.warn('⚠️  Persistent storage (Google Sheets) is not configured — News posts, tournaments, prices, and home stats will reset to defaults every time this server redeploys. Set GOOGLE_SHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, and GOOGLE_PRIVATE_KEY in server/.env to fix this permanently.');
+  console.warn('⚠️  Persistent storage (Google Sheets) is not configured — orders, news posts, tournaments, prices, and home stats will reset every time this server redeploys, and order codes will restart from ZE-0001. Set GOOGLE_SHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, and GOOGLE_PRIVATE_KEY in server/.env to fix this permanently.');
 }
 
 let sheetsClient = null;

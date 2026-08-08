@@ -436,7 +436,7 @@
   }
   table.conf td{padding:12px;font-size:13px;border-bottom:1px solid var(--line);vertical-align:middle;}
   table.conf tr:last-child td{border-bottom:none;}
-  table.conf td.no{width:44px;color:var(--dim);font-weight:800;text-align:center;}
+  table.conf td.no{width:82px;color:var(--cyan);font-weight:800;text-align:center;white-space:nowrap;}
   table.conf .cteam{display:flex;align-items:center;gap:9px;min-width:0;}
   table.conf .cteam img{
     width:26px;height:26px;border-radius:7px;object-fit:contain;padding:2px;flex-shrink:0;
@@ -578,6 +578,7 @@
   .bx-qual .q-row .nm{font-size:12px;font-weight:800;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .bx-qual .q-row .nm.tbd{color:var(--dim);font-style:italic;font-weight:600;}
   .bx-row .bx-bye{color:var(--dim);font-style:italic;font-weight:700;}
+  .reg-badge.team-code{background:rgba(61,214,140,0.16);color:var(--ok);}
 
   /* ---------- modal ---------- */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,3,12,0.72);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:20px;}
@@ -750,13 +751,12 @@
       <option value="MM">Myanmar Region</option>
       <option value="TH">Thailand Region</option>
     </select>
-    <span class="bt-label admin-field" id="q-label-size">Bracket size</span>
-    <select id="f-qualifier-size" class="admin-field"></select>
     <button type="button" class="seed-btn admin-field" id="qualifier-draw-btn">🎲 Random Draw</button>
     <button type="button" class="seed-btn admin-field" id="qualifier-clear-btn" style="margin-left:0;">Clear draw</button>
   </div>
   <div class="bracket-format-pill" id="qualifier-format-pill"></div>
   <p class="q-note" id="qualifier-note">The two teams that reach the Final from each region qualify. There is no champion in the qualifier.</p>
+  <p class="q-note" id="qualifier-autosize">The bracket resizes itself to fit the confirmed teams.</p>
   <div class="q-pool" id="qualifier-pool"></div>
   <div class="bracket-scroll" id="qualifier-scroll"></div>
 </div>
@@ -971,7 +971,9 @@ const BO_OPTIONS = [1,3,5,7];
 // Each region runs its own single-elimination BO1 draw. There is no champion:
 // the two teams that reach a region's Final are the ones that qualify.
 const QUALIFIER_REGIONS = ['MM','TH'];
-const QUALIFIER_SIZES = [32,64,128];
+const QUALIFIER_SIZES = [4,8,16,32,64,128];
+// Below three confirmed teams there is nothing to play: they are through.
+const QUALIFIER_MIN_SIZE = 4;
 // Compact card metrics — a 128-team draw is 64 matches tall in round one.
 const QX = { W:180, H:60, COLGAP:46, VGAP:10, HEADH:30 };
 
@@ -990,7 +992,7 @@ let qualifierRegion = 'MM';   // which region's draw is on screen
 function defaultSettings(){
   return {
     hiddenTabs: [], bracketType: 'single', bracketSize: 8, thirdPlace: true,
-    qualifierSize: { MM:32, TH:32 },
+    qualifierSize: { MM:4, TH:4 },
   };
 }
 function normalizeSettings(s){
@@ -1003,7 +1005,7 @@ function normalizeSettings(s){
   const qualifierSize = {};
   QUALIFIER_REGIONS.forEach(r => {
     const n = Number(qs[r]);
-    qualifierSize[r] = QUALIFIER_SIZES.includes(n) ? n : 32;
+    qualifierSize[r] = QUALIFIER_SIZES.includes(n) ? n : QUALIFIER_MIN_SIZE;
   });
   return {
     hiddenTabs: Array.isArray(s.hiddenTabs) ? s.hiddenTabs.filter(k => TAB_KEYS.includes(k)) : [],
@@ -1194,10 +1196,10 @@ function applyStaticLabels(){
   set('.tab[data-tab="confirmed"]', 'tourdetail.tab.confirmed', 'Qualifier Confirm Team');
   set('.tab[data-tab="qualifier"]', 'tourdetail.tab.qualifier', 'Qualifier Bracket');
   set('#q-label-region', 'qualifier.region', 'Region');
-  set('#q-label-size', 'qualifier.size', 'Bracket size');
   set('#qualifier-draw-btn', 'qualifier.draw', '🎲 Random Draw');
   set('#qualifier-clear-btn', 'qualifier.clear', 'Clear draw');
   set('#qualifier-note', 'qualifier.qualified_note', 'The two teams that reach the Final from each region qualify. There is no champion in the qualifier.');
+  set('#qualifier-autosize', 'qualifier.autosize', 'The bracket resizes itself to fit the confirmed teams.');
   const qRegionSel = document.getElementById('f-qualifier-region');
   if (qRegionSel) {
     qRegionSel.innerHTML = QUALIFIER_REGIONS
@@ -1944,7 +1946,8 @@ function renderRegTeams(){
         </div>
         <div class="reg-meta">
           <span class="reg-badge region">${escapeHtml(regionLabel(r.region))}</span>
-          <span class="reg-badge code">${escapeHtml(r.orderCode)}</span>
+          ${r.teamCode ? `<span class="reg-badge team-code">${escapeHtml(r.teamCode)}</span>` : ''}
+          <span class="reg-badge code" title="${escapeHtml(t('reg.col.order','Order code'))}">${escapeHtml(r.orderCode)}</span>
           <span class="reg-badge ${r.status}">${t('reg.status.' + r.status, r.status)}</span>
         </div>
       </div>
@@ -1999,7 +2002,7 @@ function renderConfirmed(){
     <div class="conf-scroll">
       <table class="conf">
         <thead><tr>
-          <th class="no">#</th>
+          <th class="no">${t('reg.col.code','Code')}</th>
           <th>${t('reg.col.team','Team')}</th>
           <th>${t('reg.col.players','Player')}</th>
           <th>${t('reg.col.region','Region')}</th>
@@ -2007,7 +2010,7 @@ function renderConfirmed(){
         <tbody>
           ${approvedTeams.map((tm, i) => `
             <tr>
-              <td class="no">${i + 1}</td>
+              <td class="no">${escapeHtml(tm.teamCode || String(i + 1))}</td>
               <td>
                 <span class="cteam">
                   ${tm.teamLogo
@@ -2036,9 +2039,23 @@ function renderConfirmed(){
    at the semifinals, and the two teams that come through them — the region's
    two finalists — are the ones that qualify. */
 
+/* The bracket is shaped to fit whoever has been confirmed: the smallest
+   single-elimination draw that holds them all, grown as more teams come in.
+   Nothing is fixed at 32 — five teams get an 8-draw, seventy get a 128. */
+function fitQualifierSize(count){
+  let size = QUALIFIER_MIN_SIZE;
+  while (size < count && size < 128) size *= 2;
+  return size;
+}
+function targetQualifierSize(region){
+  return fitQualifierSize(qualifierPool(region).length);
+}
+/* The size the current draw was actually made at. It is stored so the bracket
+   doesn't reshape itself under a tournament that is already being played —
+   it only changes when the confirmed list outgrows it. */
 function qualifierSize(region){
   const n = Number((settings.qualifierSize || {})[region]);
-  return QUALIFIER_SIZES.includes(n) ? n : 32;
+  return QUALIFIER_SIZES.includes(n) ? n : QUALIFIER_MIN_SIZE;
 }
 function isQualifierSlot(slot){ return /^q-(mm|th)-/.test(String(slot || '')); }
 function qualifierPrefix(region){ return 'q-' + String(region).toLowerCase(); }
@@ -2050,7 +2067,10 @@ function qualifierPool(region){
 }
 // Bracket matches store a team id, so each registration gets a stable one.
 function qualifierTeamOf(reg){
-  return { id: 'T-q-' + reg.id, name: reg.teamName, tag: reg.teamTag, logo: reg.teamLogo || '' };
+  return {
+    id: 'T-q-' + reg.id, name: reg.teamName, tag: reg.teamTag,
+    logo: reg.teamLogo || '', code: reg.teamCode || '',
+  };
 }
 function reindexQualifierTeams(){
   qualifierTeamsById = {};
@@ -2120,8 +2140,17 @@ function shuffle(list){
    first-round seat. With `reshuffle` the whole round is cleared first, so the
    draw starts over. Returns true when anything actually changed. */
 function drawQualifierRegion(region, reshuffle){
-  const size = qualifierSize(region);
   const pool = qualifierPool(region);
+  const size = fitQualifierSize(pool.length);
+  // Outgrowing the current draw renumbers every slot, so the region starts
+  // over at the new size rather than trying to graft rounds on.
+  if (size !== qualifierSize(region)) {
+    settings = normalizeSettings({
+      ...settings,
+      qualifierSize: { ...(settings.qualifierSize || {}), [region]: size },
+    });
+    reshuffle = true;
+  }
   const slots = qualifierFirstRoundSlots(region, size);
   if (pool.length > size) return 'too_many';
 
@@ -2199,11 +2228,14 @@ async function autoDrawQualifier(){
   if (!isAdmin || autoDrawRunning || !detailLoaded || !registrationsLoaded) return;
   let changed = false;
   QUALIFIER_REGIONS.forEach((region) => {
-    const before = JSON.stringify(matches.filter(m => String(m.bracketSlot || '').startsWith(qualifierPrefix(region))));
-    const res = drawQualifierRegion(region, false);
-    if (res === 'too_many') return;
-    const after = JSON.stringify(matches.filter(m => String(m.bracketSlot || '').startsWith(qualifierPrefix(region))));
-    if (before !== after) changed = true;
+    if (qualifierPool(region).length < 3) return;   // nothing to play yet
+    const snapshot = () => JSON.stringify([
+      qualifierSize(region),
+      matches.filter(m => String(m.bracketSlot || '').startsWith(qualifierPrefix(region))),
+    ]);
+    const before = snapshot();
+    if (drawQualifierRegion(region, false) === 'too_many') return;
+    if (before !== snapshot()) changed = true;
   });
   if (!changed) return;
   autoDrawRunning = true;
@@ -2220,23 +2252,27 @@ function renderQualifier(){
   const toolbar = document.getElementById('qualifier-toolbar');
   if (!toolbar) return;
   toolbar.classList.toggle('admin-on', isAdmin);
-
-  const sizeSel = document.getElementById('f-qualifier-size');
-  sizeSel.innerHTML = QUALIFIER_SIZES
-    .map(n => `<option value="${n}">${escapeHtml(t('qualifier.size.n','{n} Teams').replace('{n}', n))}</option>`).join('');
-  sizeSel.value = String(size);
   document.getElementById('f-qualifier-region').value = region;
 
+  const shown = pool.length >= 3 ? size : fitQualifierSize(pool.length);
   document.getElementById('qualifier-format-pill').textContent =
-    `${t('qualifier.format','Single Elimination · BO1')} · ${t('qualifier.size.n','{n} Teams').replace('{n}', size)}`;
+    `${t('qualifier.format','Single Elimination · BO1')} · ${t('qualifier.size.n','{n} Teams').replace('{n}', shown)}`;
 
   document.getElementById('qualifier-pool').innerHTML =
-    `${escapeHtml(t('qualifier.pool','Confirmed teams in this region'))}: <b>${pool.length}</b> / ${size}`;
+    `${escapeHtml(t('qualifier.pool','Confirmed teams in this region'))}: <b>${pool.length}</b>`;
 
   const scroll = document.getElementById('qualifier-scroll');
   scroll.classList.toggle('tall', size > 32);
+
   if (!pool.length) {
     scroll.innerHTML = `<div class="empty-state"><div class="icon">🎲</div><p>${escapeHtml(t('qualifier.empty','No confirmed teams in this region yet. Approve teams in Register Team List and they are drawn in automatically.'))}</p></div>`;
+    return;
+  }
+  // With two teams or fewer there is no round to play — they are the region's
+  // qualifiers already, so say so instead of drawing an empty bracket.
+  if (pool.length < 3) {
+    const names = pool.map(p => `<b>${escapeHtml(p.teamName)}</b>`).join(', ');
+    scroll.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>${escapeHtml(t('qualifier.straight_through','Only these teams are confirmed here, so they go through without playing a qualifier:'))} ${names}</p></div>`;
     return;
   }
   const b = buildQualifierBracket(region, size);
@@ -2247,20 +2283,9 @@ document.getElementById('f-qualifier-region').addEventListener('change', (e) => 
   qualifierRegion = QUALIFIER_REGIONS.includes(e.target.value) ? e.target.value : 'MM';
   renderQualifier();
 });
-document.getElementById('f-qualifier-size').addEventListener('change', async (e) => {
-  const next = Number(e.target.value);
-  const prev = settings;
-  settings = normalizeSettings({
-    ...settings,
-    qualifierSize: { ...(settings.qualifierSize || {}), [qualifierRegion]: next },
-  });
-  renderQualifier();
-  const ok = await saveDetail();
-  if (!ok) { settings = prev; renderQualifier(); alert(t('tourdetail.error_save','Could not save. Please try again.')); }
-});
 document.getElementById('qualifier-draw-btn').addEventListener('click', async () => {
   if (!isAdmin) { alert(t('qualifier.admin_only','Only admins can draw or edit the qualifier bracket.')); return; }
-  if (!qualifierPool(qualifierRegion).length) { alert(t('qualifier.empty','No confirmed teams in this region yet.')); return; }
+  if (qualifierPool(qualifierRegion).length < 3) { alert(t('qualifier.straight_through','Only these teams are confirmed here, so they go through without playing a qualifier:')); return; }
   if (!confirm(t('qualifier.redraw_confirm','Re-draw the whole bracket for this region? Teams already placed will be shuffled again.'))) return;
   const res = drawQualifierRegion(qualifierRegion, true);
   if (res === 'too_many') { alert(t('qualifier.too_many','There are more confirmed teams than slots. Pick a larger bracket size.')); return; }

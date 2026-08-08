@@ -22,6 +22,14 @@ function checkOrderCode(rawCode) {
   if (order.status !== 'confirmed') {
     return { ok: false, reason: 'That order is not confirmed yet. Wait for confirmation, then register.' };
   }
+  // Only a purchase of 343 diamonds or more buys a tournament entry.
+  const diamonds = orderDb.orderDiamonds(order);
+  if (diamonds < regDb.MIN_REGISTER_DIAMONDS) {
+    return {
+      ok: false,
+      reason: `That order is for ${diamonds} diamonds. Registration needs an order of at least ${regDb.MIN_REGISTER_DIAMONDS} diamonds.`,
+    };
+  }
   if (regDb.isCodeUsed(code)) {
     return { ok: false, reason: 'That order code has already been used to register a team.' };
   }
@@ -44,6 +52,8 @@ router.get('/schema', (req, res) => {
     contactTypes: regDb.CONTACT_TYPES,
     regions: regDb.REGIONS,
     maxTeams: regDb.MAX_TEAMS,
+    minDiamonds: regDb.MIN_REGISTER_DIAMONDS,
+    teamCodePrefix: regDb.TEAM_CODE_PREFIX,
   });
 });
 

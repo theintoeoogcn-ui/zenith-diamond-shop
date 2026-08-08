@@ -58,10 +58,11 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
 
-// Wait for tournaments/pricing/home-stats/news to finish restoring their
-// last-saved state from Google Sheets (if configured) before opening the
-// server up to traffic — otherwise the very first requests after a deploy
+// Wait for orders/tournaments/pricing/home-stats/news to finish restoring
+// their last-saved state from Google Sheets (if configured) before opening
+// the server up to traffic — otherwise the very first requests after a deploy
 // could briefly see stale/default data instead of what was actually saved.
+const ordersDb = require('./db');
 const tournamentsDb = require('./tournamentsDb');
 const tournamentDetailsDb = require('./tournamentDetailsDb');
 const diamondPricingDb = require('./diamondPricingDb');
@@ -70,6 +71,7 @@ const newsDb = require('./newsDb');
 const registrationsDb = require('./registrationsDb');
 
 Promise.all([
+  ordersDb.ready,
   tournamentsDb.ready, tournamentDetailsDb.ready, diamondPricingDb.ready,
   homeStatsDb.ready, newsDb.ready, registrationsDb.ready,
 ])

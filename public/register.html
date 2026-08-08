@@ -180,7 +180,8 @@
   .done p{color:var(--mid);font-size:14px;margin:0 auto 22px;max-width:460px;line-height:1.7;}
   .done .ref{
     display:inline-block;background:var(--panel-raised);border:1px solid var(--line);
-    border-radius:10px;padding:10px 18px;font-weight:800;letter-spacing:1px;color:var(--cyan);margin-bottom:22px;
+    border-radius:10px;padding:10px 18px;font-weight:800;letter-spacing:0.6px;color:var(--cyan);
+    margin-bottom:22px;max-width:100%;overflow-wrap:anywhere;
   }
   .ghost-btn{
     background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--hi);
@@ -381,6 +382,7 @@ let roles = FALLBACK_ROLES;
 let regions = [{ value:'MM', label:'Myanmar Region' }, { value:'TH', label:'Thailand Region' }];
 let maxTeams = 128;
 let slotsLeft = null;
+let minDiamonds = 343;
 let teamLogoData = '';
 let codeVerified = false;
 let tournament = null;
@@ -555,7 +557,9 @@ formEl.addEventListener('submit', async (e) => {
     const data = await res.json();
     if (!res.ok) { showErr(escapeHtml(data.error || t('reg.err.save','Could not submit. Please try again.'))); return; }
     formEl.style.display = 'none';
-    document.getElementById('done-ref').textContent = data.registration.teamTag + ' · ' + data.registration.orderCode;
+    // The team's own entry number is what they'll be referred to by from here.
+    document.getElementById('done-ref').textContent =
+      (data.registration.teamCode || data.registration.teamTag) + ' · ' + data.registration.teamName;
     document.getElementById('done').classList.add('show');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {
@@ -574,7 +578,9 @@ async function loadSchema(){
     if (Array.isArray(data.roles) && data.roles.length) roles = data.roles;
     if (Array.isArray(data.regions) && data.regions.length) regions = data.regions;
     if (Number(data.maxTeams)) maxTeams = Number(data.maxTeams);
+    if (Number(data.minDiamonds)) minDiamonds = Number(data.minDiamonds);
   } catch (e) { /* fall back to the built-in shape */ }
+  applyStaticLabels();
   renderRegionSelect();
   renderRoster();
 }
@@ -673,7 +679,11 @@ function applyStaticLabels(){
   setPh('f-team-contact', 'reg.ph.contact', '@username');
   setPh('f-code', 'reg.ph.code', 'ZE-1234');
 
-  set('code-hint', 'reg.code.hint', "Registration is confirmed with the order code from a diamond purchase. You'll find it on your order confirmation.");
+  const hintEl = document.getElementById('code-hint');
+  if (hintEl) {
+    hintEl.textContent = t('reg.code.hint', "Registration is confirmed with the order code from a diamond purchase of at least {n} diamonds. You'll find the code on your order confirmation.")
+      .replace('{n}', minDiamonds);
+  }
   set('code-store-link', 'reg.code.store', 'Go to the Diamond store');
   set('check-btn', 'reg.code.check', 'Check code');
   set('submit-btn', 'reg.submit', 'Submit registration');

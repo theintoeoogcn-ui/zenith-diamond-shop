@@ -20,7 +20,7 @@ const BRACKET_SLOT_RE = /^[a-z0-9-]{1,24}$/;
 const TAB_KEYS = ['regteams', 'confirmed', 'qualifier', 'lineup', 'schedule', 'standings', 'bracket'];
 // The qualifier is a single-elimination BO1 draw run separately per region.
 const QUALIFIER_REGIONS = ['MM', 'TH'];
-const QUALIFIER_SIZES = [32, 64, 128];
+const QUALIFIER_SIZES = [4, 8, 16, 32, 64, 128];
 const BO_OPTIONS = [1, 3, 5, 7];
 
 function ensureFile() {
@@ -48,7 +48,7 @@ function writeAll(map) {
 }
 
 function defaultQualifier() {
-  return { MM: 32, TH: 32 };
+  return { MM: 4, TH: 4 };
 }
 
 function defaultSettings() {
@@ -70,7 +70,7 @@ function cleanSettings(s) {
   const qualifierSize = {};
   QUALIFIER_REGIONS.forEach((r) => {
     const n = Number(qs[r]);
-    qualifierSize[r] = QUALIFIER_SIZES.includes(n) ? n : 32;
+    qualifierSize[r] = QUALIFIER_SIZES.includes(n) ? n : 4;
   });
   return {
     hiddenTabs: Array.isArray(s.hiddenTabs)
