@@ -374,6 +374,93 @@
      its bottom border out of line with the rest of the row. */
   .rank-cell{display:flex;align-items:center;gap:2px;}
 
+
+  /* ---------- registrations ---------- */
+  .admin-only-note{
+    font-size:12px;color:var(--mid);background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin:0 0 18px;line-height:1.6;
+  }
+  .reg-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px;margin-bottom:14px;
+  }
+  .reg-card.approved{border-color:rgba(61,214,140,0.45);}
+  .reg-card.rejected{opacity:0.6;}
+  .reg-top{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-bottom:14px;}
+  .reg-top .logo{
+    width:46px;height:46px;border-radius:11px;object-fit:contain;padding:3px;flex-shrink:0;
+    background:var(--logo-plate);box-shadow:0 0 0 1px var(--logo-plate-line) inset;
+  }
+  .reg-top .who{min-width:0;flex:1;}
+  .reg-top .nm{font-size:15px;font-weight:800;}
+  .reg-top .sub{font-size:11.5px;color:var(--dim);margin-top:2px;}
+  .reg-badge{
+    display:inline-flex;align-items:center;height:21px;padding:0 9px;border-radius:999px;
+    font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;
+  }
+  .reg-badge.pending{background:var(--panel-raised);color:var(--mid);}
+  .reg-badge.approved{background:rgba(61,214,140,0.16);color:#3DD68C;}
+  .reg-badge.rejected{background:rgba(255,62,154,0.14);color:var(--signal);}
+  .reg-badge.region{background:rgba(139,92,246,0.16);color:var(--violet);}
+  .reg-badge.code{background:rgba(79,224,232,0.14);color:var(--cyan);letter-spacing:1px;}
+  .reg-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  /* Wide enough that a player's name and their contact don't collide; the
+     contact sits under the name so neither has to be truncated. */
+  .reg-players{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;
+    border-top:1px solid var(--line);padding-top:14px;margin-top:4px;
+  }
+  .reg-p{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;min-width:0;}
+  .reg-p .r{
+    font-size:9px;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;color:var(--violet);
+    width:52px;flex-shrink:0;padding-top:2px;
+  }
+  .reg-p .who2{min-width:0;}
+  .reg-p .n{display:block;font-weight:700;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .reg-p .c{display:block;color:var(--dim);font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .reg-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:13px;border-top:1px solid var(--line);}
+  .reg-btn{
+    border-radius:9px;font-size:12px;font-weight:700;padding:9px 16px;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel-raised);color:var(--hi);
+  }
+  .reg-btn.ok{background:rgba(61,214,140,0.16);border-color:rgba(61,214,140,0.5);color:#3DD68C;}
+  .reg-btn.no{background:rgba(255,62,154,0.12);border-color:rgba(255,62,154,0.4);color:var(--signal);}
+  .reg-btn:hover{border-color:var(--violet-dim);}
+
+  /* ---------- confirmed teams table ---------- */
+  .conf-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line);background:var(--panel);}
+  table.conf{width:100%;min-width:0;border-collapse:collapse;}
+  table.conf th{
+    text-align:left;font-size:10.5px;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;
+    color:var(--dim);padding:12px 12px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  table.conf td{padding:12px;font-size:13px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  table.conf tr:last-child td{border-bottom:none;}
+  table.conf td.no{width:44px;color:var(--dim);font-weight:800;text-align:center;}
+  table.conf .cteam{display:flex;align-items:center;gap:9px;min-width:0;}
+  table.conf .cteam img{
+    width:26px;height:26px;border-radius:7px;object-fit:contain;padding:2px;flex-shrink:0;
+    background:var(--logo-plate);box-shadow:0 0 0 1px var(--logo-plate-line) inset;
+  }
+  table.conf .cteam .fb{
+    width:26px;height:26px;border-radius:7px;flex-shrink:0;background:var(--panel-raised);
+    display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--violet);
+  }
+  table.conf .cteam .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  table.conf .cteam .tg{color:var(--cyan);font-weight:800;font-size:11px;flex-shrink:0;}
+  /* Players listed across the row, in roster order. */
+  .cplayers{display:flex;flex-wrap:wrap;gap:6px;}
+  .cplayers span{
+    background:var(--panel-raised);border-radius:7px;padding:4px 9px;
+    font-size:11.5px;font-weight:600;color:var(--mid);white-space:nowrap;
+  }
+  .cplayers span b{color:var(--hi);font-weight:700;}
+  @media (max-width:760px){
+    table.conf th:nth-child(4),table.conf td:nth-child(4){display:none;}
+    .conf-region-inline{display:inline-flex !important;}
+  }
+  .conf-region-inline{display:none;margin-top:7px;}
+
   /* ---------- bracket ---------- */
   .bracket-toolbar{
     display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;
@@ -581,6 +668,8 @@
   <button class="tab" data-tab="schedule">Match Schedule</button>
   <button class="tab" data-tab="standings">Standings</button>
   <button class="tab" data-tab="bracket">Bracket</button>
+  <button class="tab" data-tab="regteams">Register Team</button>
+  <button class="tab" data-tab="confirmed">Confirmed Teams</button>
   <button type="button" class="tabs-manage" id="tabs-manage-btn">⚙ Manage tabs</button>
 </div>
 
@@ -619,6 +708,15 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="tab-panel" id="panel-regteams">
+  <p class="admin-only-note" id="regteams-note">Submitted entries, including contact details. Visible to admins only.</p>
+  <div id="regteams-list"></div>
+</div>
+
+<div class="tab-panel" id="panel-confirmed">
+  <div id="confirmed-wrap"></div>
 </div>
 
 <div class="tab-panel" id="panel-bracket">
@@ -814,8 +912,15 @@ function roleIconInner(role){
   return `<span class="role-emoji">${emoji}</span>` +
     (src ? `<img src="${src}" alt="${escapeHtml(role || '')}" onerror="this.style.display='none'">` : '');
 }
-const TAB_KEYS = ['lineup','schedule','standings','bracket'];
-const TAB_LABELS = { lineup:'Team Lineup', schedule:'Match Schedule', standings:'Standings', bracket:'Bracket' };
+const TAB_KEYS = ['lineup','schedule','standings','bracket','regteams','confirmed'];
+const TAB_LABELS = {
+  lineup:'Team Lineup', schedule:'Match Schedule', standings:'Standings', bracket:'Bracket',
+  regteams:'Register Team', confirmed:'Confirmed Teams',
+};
+// "Register Team" holds phone numbers and contact handles, so it is admin-only
+// no matter what the visibility settings say.
+const ADMIN_ONLY_TABS = ['regteams'];
+const REGION_LABELS = { MM:'Myanmar Region', TH:'Thailand Region' };
 const BO_OPTIONS = [1,3,5,7];
 
 /* Bracket layout metrics (pixels) */
@@ -881,7 +986,7 @@ function setAdminUI(){
   adminToggleLabel.textContent = isAdmin ? t('tournament.admin.unlocked','Admin mode') : t('tournament.admin.locked','Admin');
 }
 adminToggle.addEventListener('click', async () => {
-  if (isAdmin) { isAdmin = false; sessionStorage.removeItem(ADMIN_KEY); setAdminUI(); renderAll(); return; }
+  if (isAdmin) { isAdmin = false; sessionStorage.removeItem(ADMIN_KEY); setAdminUI(); renderAll(); loadRegistrations(); return; }
   adminErr.classList.remove('show'); adminInput.value = ''; adminModal.classList.add('show'); adminInput.focus();
 });
 document.getElementById('admin-modal-cancel').addEventListener('click', () => adminModal.classList.remove('show'));
@@ -889,7 +994,7 @@ document.getElementById('admin-modal-submit').addEventListener('click', async ()
   const ok = await verifyPasscode(adminInput.value);
   if (!ok) { adminErr.classList.add('show'); return; }
   sessionStorage.setItem(ADMIN_KEY, adminInput.value);
-  isAdmin = true; adminModal.classList.remove('show'); setAdminUI(); renderAll();
+  isAdmin = true; adminModal.classList.remove('show'); setAdminUI(); renderAll(); loadRegistrations();
 });
 adminInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('admin-modal-submit').click(); });
 
@@ -915,6 +1020,7 @@ brandLink.addEventListener('click', (e) => {
     // Admin status resolves after the first render, so refresh the view to
     // reveal the admin-only controls and any sections hidden from the public.
     renderAll();
+    loadRegistrations();
   }
 })();
 
@@ -938,7 +1044,8 @@ function applyTabVisibility(){
   const hidden = settings.hiddenTabs || [];
   document.querySelectorAll('.tabs-bar .tab').forEach(tab => {
     const key = tab.dataset.tab;
-    const isHidden = hidden.includes(key);
+    // Admin-only tabs are hidden from visitors regardless of the saved settings.
+    const isHidden = hidden.includes(key) || (ADMIN_ONLY_TABS.includes(key) && !isAdmin);
     tab.classList.toggle('tab-hidden', isHidden);
     tab.classList.toggle('admin-visible', isHidden && isAdmin);
     const existing = tab.querySelector('.hidden-eye');
@@ -947,7 +1054,7 @@ function applyTabVisibility(){
   });
   document.getElementById('tabs-manage-btn').classList.toggle('show', isAdmin);
 
-  const visible = TAB_KEYS.filter(k => isAdmin || !hidden.includes(k));
+  const visible = TAB_KEYS.filter(k => (isAdmin || !hidden.includes(k)) && (isAdmin || !ADMIN_ONLY_TABS.includes(k)));
   if (!visible.length) {
     document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
     return;
@@ -1006,6 +1113,9 @@ function applyStaticLabels(){
   set('.tab[data-tab="schedule"]', 'tourdetail.tab.schedule', 'Match Schedule');
   set('.tab[data-tab="standings"]', 'tourdetail.tab.standings', 'Standings');
   set('.tab[data-tab="bracket"]', 'tourdetail.tab.bracket', 'Bracket');
+  set('.tab[data-tab="regteams"]', 'tourdetail.tab.regteams', 'Register Team');
+  set('.tab[data-tab="confirmed"]', 'tourdetail.tab.confirmed', 'Confirmed Teams');
+  set('#regteams-note', 'reg.admin_note', 'Submitted entries, including contact details. Visible to admins only.');
   set('#tabs-manage-btn', 'tourdetail.manage_tabs', '\u2699 Manage tabs');
   set('#add-team-btn', 'tourdetail.add_team', '+ Add Team');
   set('#add-match-btn', 'tourdetail.add_match', '+ Add Match');
@@ -1070,6 +1180,8 @@ function renderAll(){
   document.getElementById('add-team-btn').classList.toggle('show', isAdmin);
   document.getElementById('add-match-btn').classList.toggle('show', isAdmin);
   applyTabVisibility();
+  renderRegTeams();
+  renderConfirmed();
   renderTeams();
   renderSchedule();
   renderStandings();
@@ -1629,6 +1741,148 @@ document.getElementById('seed-bracket-btn').addEventListener('click', async () =
   else alert(t('tourdetail.error_save','Could not save. Please try again.'));
 });
 
+
+/* ---------------- registrations ---------------- */
+let registrations = [];      // admin view, full detail
+let approvedTeams = [];      // public view, contact details stripped
+
+function regionLabel(code){ return REGION_LABELS[code] || REGION_LABELS.MM; }
+
+async function loadRegistrations(){
+  // The public list needs no auth; the detailed one is admin-only, so only ask
+  // for it when we actually hold the passcode.
+  try {
+    const res = await fetch(`/api/registrations/${encodeURIComponent(tournamentId)}/approved`);
+    const data = await res.json();
+    approvedTeams = data.teams || [];
+  } catch (e) { approvedTeams = []; }
+
+  if (isAdmin) {
+    try {
+      const res = await fetch(`/api/registrations/${encodeURIComponent(tournamentId)}`, {
+        headers: { 'x-admin-passcode': sessionStorage.getItem(ADMIN_KEY) || '' },
+      });
+      const data = await res.json();
+      registrations = res.ok ? (data.registrations || []) : [];
+    } catch (e) { registrations = []; }
+  } else {
+    registrations = [];
+  }
+  renderRegTeams();
+  renderConfirmed();
+}
+
+function renderRegTeams(){
+  const wrap = document.getElementById('regteams-list');
+  if (!isAdmin) {
+    wrap.innerHTML = `<div class="empty-state"><div class="icon">🔒</div><p>${t('reg.admin_only','Sign in as an admin to review team entries.')}</p></div>`;
+    return;
+  }
+  if (!registrations.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="icon">📝</div><p>${t('reg.none','No teams have registered yet.')}</p></div>`;
+    return;
+  }
+  wrap.innerHTML = registrations.map((r) => {
+    const logo = r.teamLogo
+      ? `<img class="logo" src="${r.teamLogo}" alt="">`
+      : `<div class="logo" style="display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--violet);font-size:13px;">${escapeHtml((r.teamTag || '?').slice(0,2).toUpperCase())}</div>`;
+    return `
+    <div class="reg-card ${r.status}">
+      <div class="reg-top">
+        ${logo}
+        <div class="who">
+          <div class="nm">${escapeHtml(r.teamName)} <span style="color:var(--cyan);font-size:12px;">${escapeHtml(r.teamTag)}</span></div>
+          <div class="sub">${t('reg.leader','Leader')}: ${escapeHtml(r.leaderName)} · ${new Date(r.createdAt).toLocaleString()}</div>
+        </div>
+        <div class="reg-meta">
+          <span class="reg-badge region">${escapeHtml(regionLabel(r.region))}</span>
+          <span class="reg-badge code">${escapeHtml(r.orderCode)}</span>
+          <span class="reg-badge ${r.status}">${t('reg.status.' + r.status, r.status)}</span>
+        </div>
+      </div>
+      <div class="reg-players">
+        ${(r.players || []).map((p) => `
+          <div class="reg-p">
+            <span class="r">${escapeHtml(p.role)}</span>
+            <span class="who2">
+              <span class="n">${escapeHtml(p.name)}</span>
+              <span class="c" title="${escapeHtml(p.phone + ' · ' + p.contact)}">${escapeHtml(p.phone)} · ${escapeHtml(p.contact)}</span>
+            </span>
+          </div>`).join('')}
+      </div>
+      <div class="reg-actions">
+        ${r.status !== 'approved' ? `<button class="reg-btn ok" onclick="setRegStatus('${r.id}','approved')">✓ ${t('reg.approve','Approve')}</button>` : ''}
+        ${r.status !== 'rejected' ? `<button class="reg-btn no" onclick="setRegStatus('${r.id}','rejected')">✕ ${t('reg.reject','Reject')}</button>` : ''}
+        ${r.status !== 'pending' ? `<button class="reg-btn" onclick="setRegStatus('${r.id}','pending')">↺ ${t('reg.reset','Back to pending')}</button>` : ''}
+        <button class="reg-btn no" onclick="deleteReg('${r.id}')">🗑 ${t('reg.delete','Delete')}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.setRegStatus = async function(id, status){
+  const res = await fetch(`/api/registrations/${encodeURIComponent(tournamentId)}/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'x-admin-passcode': sessionStorage.getItem(ADMIN_KEY) || '' },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) { alert(t('tourdetail.error_save','Could not save. Please try again.')); return; }
+  await loadRegistrations();
+};
+
+window.deleteReg = async function(id){
+  if (!confirm(t('reg.delete_confirm','Delete this registration? This cannot be undone.'))) return;
+  const res = await fetch(`/api/registrations/${encodeURIComponent(tournamentId)}/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-passcode': sessionStorage.getItem(ADMIN_KEY) || '' },
+  });
+  if (!res.ok) { alert(t('tourdetail.error_save','Could not save. Please try again.')); return; }
+  await loadRegistrations();
+};
+
+/* Public table: a numbered row per approved team, with the whole roster laid
+   out across the row beside the team name. */
+function renderConfirmed(){
+  const wrap = document.getElementById('confirmed-wrap');
+  if (!approvedTeams.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="icon">🏳️</div><p>${t('reg.no_confirmed','No teams have been confirmed yet.')}</p></div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="conf-scroll">
+      <table class="conf">
+        <thead><tr>
+          <th class="no">#</th>
+          <th>${t('reg.col.team','Team')}</th>
+          <th>${t('reg.col.players','Player')}</th>
+          <th>${t('reg.col.region','Region')}</th>
+        </tr></thead>
+        <tbody>
+          ${approvedTeams.map((tm, i) => `
+            <tr>
+              <td class="no">${i + 1}</td>
+              <td>
+                <span class="cteam">
+                  ${tm.teamLogo
+                    ? `<img src="${tm.teamLogo}" alt="">`
+                    : `<span class="fb">${escapeHtml((tm.teamTag || '?').slice(0,2).toUpperCase())}</span>`}
+                  <span class="nm">${escapeHtml(tm.teamName)}</span>
+                  <span class="tg">${escapeHtml(tm.teamTag)}</span>
+                </span>
+                <span class="reg-badge region conf-region-inline">${escapeHtml(regionLabel(tm.region))}</span>
+              </td>
+              <td>
+                <div class="cplayers">
+                  ${(tm.players || []).map((p) => `<span>${escapeHtml(p.role)} <b>${escapeHtml(p.name)}</b></span>`).join('')}
+                </div>
+              </td>
+              <td><span class="reg-badge region">${escapeHtml(regionLabel(tm.region))}</span></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
 /* ---------------- team modal ---------------- */
 const teamModal = document.getElementById('team-modal');
 const teamModalErr = document.getElementById('team-modal-err');
@@ -1922,6 +2176,7 @@ if (!tournamentId) {
   applyStaticLabels();
   loadTournamentInfo();
   loadDetail();
+  loadRegistrations();
 }
 </script>
 </body>

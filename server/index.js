@@ -27,6 +27,12 @@ app.use('/api/tournaments', tournamentRoutes);
 const tournamentDetailsRoutes = require('./routes/tournament-details');
 app.use('/api/tournament-details', tournamentDetailsRoutes);
 
+// Team registration for upcoming tournaments — public to submit and to read
+// the confirmed-team list, admin-passcode-protected to review entries (those
+// carry players' phone numbers and Telegram/Viber handles).
+const registrationRoutes = require('./routes/registrations');
+app.use('/api/registrations', registrationRoutes);
+
 // Diamond package pricing — public to read, admin-passcode-protected to edit
 const diamondPricingRoutes = require('./routes/diamond-pricing');
 app.use('/api/diamond-pricing', diamondPricingRoutes);
@@ -61,8 +67,12 @@ const tournamentDetailsDb = require('./tournamentDetailsDb');
 const diamondPricingDb = require('./diamondPricingDb');
 const homeStatsDb = require('./homeStatsDb');
 const newsDb = require('./newsDb');
+const registrationsDb = require('./registrationsDb');
 
-Promise.all([tournamentsDb.ready, tournamentDetailsDb.ready, diamondPricingDb.ready, homeStatsDb.ready, newsDb.ready])
+Promise.all([
+  tournamentsDb.ready, tournamentDetailsDb.ready, diamondPricingDb.ready,
+  homeStatsDb.ready, newsDb.ready, registrationsDb.ready,
+])
   .catch((e) => console.error('Error while restoring saved data on boot:', e.message))
   .finally(() => {
     app.listen(PORT, () => {

@@ -136,6 +136,9 @@
   .t-link-btn.facebook{background:rgba(24,119,242,0.12);border-color:rgba(24,119,242,0.35);color:#4E9BFF;}
   .t-link-btn.generic{background:var(--panel-raised);}
   .t-link-btn.register{background:rgba(139,92,246,0.14);border-color:var(--violet-dim);color:var(--violet);}
+  .reg-toggle{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--hi);cursor:pointer;}
+  .reg-toggle input{width:16px;height:16px;accent-color:var(--violet);cursor:pointer;}
+  .field-hint{font-size:11.5px;color:var(--dim);margin:7px 0 0;line-height:1.5;}
   .t-cover{
     width:calc(100% + 28px);aspect-ratio:16/9;object-fit:cover;display:block;
     margin:-18px -14px 6px;border-top-left-radius:var(--radius);border-top-right-radius:var(--radius);
@@ -368,8 +371,12 @@
     </div>
 
     <div class="field">
-      <label data-i18n="tournament.form.field.registerlink">Register link</label>
-      <input type="url" id="f-registerlink" placeholder="https://forms.gle/...">
+      <label data-i18n="tournament.form.field.registration">Registration</label>
+      <label class="reg-toggle">
+        <input type="checkbox" id="f-registration-open" checked>
+        <span data-i18n="tournament.form.field.registration_open">Accept team registrations on the site</span>
+      </label>
+      <p class="field-hint" data-i18n="tournament.form.field.registration_hint">Upcoming tournaments show a Register button that opens the on-site sign-up form.</p>
     </div>
 
     <div class="modal-err" id="t-modal-err">Error</div>
@@ -431,8 +438,10 @@ function renderCard(item){
     const p = detectLinkPlatform(item.watchLink);
     return `<a class="t-link-btn ${p.cls}" href="${escapeHtml(item.watchLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${p.icon} ${escapeHtml(p.label)}</a>`;
   })() : '';
-  const registerHtml = item.registerLink
-    ? `<a class="t-link-btn register" href="${escapeHtml(item.registerLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
+  // Registration is handled on the site now: upcoming tournaments that are
+  // still accepting entries get a button through to register.html.
+  const registerHtml = (item.status !== 'past' && item.registrationOpen !== false)
+    ? `<a class="t-link-btn register" href="register.html?id=${encodeURIComponent(item.id)}" onclick="event.stopPropagation()">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
     : '';
   const linksHtml = (watchHtml || registerHtml) ? `<div class="t-links">${watchHtml}${registerHtml}</div>` : '';
 
@@ -591,7 +600,7 @@ const fSlots = document.getElementById('f-slots');
 const fFormat = document.getElementById('f-format');
 const fIcon = document.getElementById('f-icon');
 const fWatchLink = document.getElementById('f-watchlink');
-const fRegisterLink = document.getElementById('f-registerlink');
+const fRegistrationOpen = document.getElementById('f-registration-open');
 const fDesc = document.getElementById('f-desc');
 const fCover = document.getElementById('f-cover');
 const coverBox = document.getElementById('cover-box');
@@ -638,7 +647,7 @@ function openCreate(){
   tModalTitle.textContent = t('tournament.form.title.create','Create tournament');
   fTitle.value = ''; fStatus.value = 'upcoming'; fDate.value = ''; fPrize.value = '';
   fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = '';
-  fWatchLink.value = ''; fRegisterLink.value = '';
+  fWatchLink.value = ''; fRegistrationOpen.checked = true;
   setCoverPreview(null); fCover.value = '';
   tModalErr.classList.remove('show');
   tModal.classList.add('show');
@@ -653,7 +662,8 @@ window.openEdit = function(id){
   fTitle.value = item.title || ''; fStatus.value = item.status === 'past' ? 'past' : 'upcoming';
   fDate.value = item.date || ''; fPrize.value = item.prize || ''; fSlots.value = item.slots || '';
   fFormat.value = item.format || ''; fIcon.value = item.icon || '🏆'; fDesc.value = item.description || '';
-  fWatchLink.value = item.watchLink || ''; fRegisterLink.value = item.registerLink || '';
+  fWatchLink.value = item.watchLink || '';
+  fRegistrationOpen.checked = item.registrationOpen !== false;
   setCoverPreview(item.coverImage || null); fCover.value = '';
   tModalErr.classList.remove('show');
   tModal.classList.add('show');
@@ -690,7 +700,7 @@ document.getElementById('t-modal-save').addEventListener('click', async () => {
     description: fDesc.value.trim(),
     coverImage: coverImageData || '',
     watchLink: fWatchLink.value.trim(),
-    registerLink: fRegisterLink.value.trim(),
+    registrationOpen: fRegistrationOpen.checked,
   };
   if (!payload.title) {
     tModalErr.textContent = t('tournament.error.save','Could not save. Please try again.');

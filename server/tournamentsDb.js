@@ -56,7 +56,9 @@ function createTournament(data) {
     icon: data.icon ? String(data.icon).trim() : '🏆',
     coverImage: data.coverImage ? String(data.coverImage) : '',
     watchLink: data.watchLink ? String(data.watchLink).trim() : '',
-    registerLink: data.registerLink ? String(data.registerLink).trim() : '',
+    // Registration now happens on the site (register.html) rather than via an
+    // external form link, so this is a switch rather than a URL.
+    registrationOpen: data.registrationOpen === undefined ? true : !!data.registrationOpen,
     createdAt: new Date().toISOString(),
   };
   list.push(item);
@@ -70,7 +72,7 @@ function updateTournament(id, patch) {
   if (idx === -1) return null;
 
   const clean = { ...list[idx] };
-  const fields = ['title', 'status', 'date', 'prize', 'format', 'slots', 'description', 'icon', 'watchLink', 'registerLink'];
+  const fields = ['title', 'status', 'date', 'prize', 'format', 'slots', 'description', 'icon', 'watchLink'];
   fields.forEach((f) => {
     if (patch[f] !== undefined) {
       clean[f] = f === 'status'
@@ -81,6 +83,11 @@ function updateTournament(id, patch) {
   if (patch.coverImage !== undefined) {
     clean.coverImage = String(patch.coverImage);
   }
+  if (patch.registrationOpen !== undefined) {
+    clean.registrationOpen = !!patch.registrationOpen;
+  }
+  // Older records may still carry the retired external link field.
+  delete clean.registerLink;
   list[idx] = clean;
   writeAll(list);
   return list[idx];
