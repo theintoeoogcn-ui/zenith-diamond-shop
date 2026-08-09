@@ -755,7 +755,7 @@
   .mv-hero-chip{
     width:32px;height:32px;border-radius:9px;background:var(--panel) center/cover no-repeat;
     display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--hi);
-    border:2px solid var(--ring,var(--violet));flex-shrink:0;cursor:default;
+    border:2px solid var(--ring,var(--violet));flex-shrink:0;cursor:pointer;
   }
   .mv-duration{
     display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--mid);
@@ -774,11 +774,25 @@
   #mv-tooltip{
     position:fixed;pointer-events:none;background:var(--panel);border:1px solid var(--line);
     border-radius:10px;padding:9px 12px;font-size:12px;color:var(--hi);box-shadow:0 12px 30px rgba(0,0,0,.5);
-    z-index:200;display:none;min-width:150px;
+    z-index:200;display:none;min-width:150px;max-width:240px;
   }
-  #mv-tooltip .tt-name{font-weight:800;margin-bottom:4px;}
+  #mv-tooltip.pinned{pointer-events:auto;}
+  #mv-tooltip .tt-name{font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
   #mv-tooltip .tt-kda{color:var(--mid);margin-bottom:3px;}
-  #mv-tooltip .tt-items{color:var(--dim);font-size:11px;line-height:1.5;}
+  #mv-tooltip .tt-items{color:var(--dim);font-size:11px;line-height:1.5;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .tt-item-chip{display:flex;align-items:center;gap:4px;background:var(--panel-raised);border:1px solid var(--line);border-radius:999px;padding:2px 8px 2px 2px;}
+  .tt-item-icon{width:18px;height:18px;border-radius:5px;background:var(--panel) center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;}
+  .tt-icon-upload{
+    border:1px dashed var(--violet-dim);background:transparent;color:var(--violet);border-radius:6px;
+    width:18px;height:18px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+    font-size:9px;cursor:pointer;line-height:1;padding:0;
+  }
+  .tt-icon-upload:hover{background:rgba(139,92,246,0.14);}
+  .tt-close{
+    position:absolute;top:6px;right:6px;width:16px;height:16px;border:none;background:transparent;
+    color:var(--dim);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;
+  }
+  .tt-close:hover{color:var(--signal);}
 
   .mv-add-zone{margin-top:14px;}
   .mv-add-form{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel-raised);margin-top:10px;}
@@ -2807,7 +2821,7 @@ const mvTooltip = document.getElementById('mv-tooltip');
 let mvMatchId = null;
 let mvAddingGame = false;
 let mvBansOpen = false;
-const heroImageCache = new Map();
+let mvTooltipPinned = false;
 
 function findMatch(id){ return matches.find(x => x.id === id) || null; }
 
@@ -2815,6 +2829,7 @@ window.openMatchView = function(id){
   mvMatchId = id;
   mvAddingGame = false;
   mvBansOpen = false;
+  loadIconLibrary().then(renderMatchView);
   renderMatchView();
   matchViewModal.classList.add('show');
 };
@@ -2822,88 +2837,165 @@ document.getElementById('match-view-close').addEventListener('click', () => matc
 window.mvToggleAddGame = function(){ mvAddingGame = true; renderMatchView(); };
 window.mvToggleBans = function(){ mvBansOpen = !mvBansOpen; renderMatchView(); };
 
-// Hero portraits are looked up best-effort from a public MLBB hero-data
-// endpoint; unmatched heroes fall back to an initials badge. No admin data
-// is sent here, only a hero name, so this is safe to call from the browser
-// (unlike the vision extraction, which needs the server proxy).
-async function getHeroImage(heroName){
-  if (!heroName) return null;
-  if (heroImageCache.has(heroName)) return heroImageCache.get(heroName);
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
-    const resp = await fetch(`https://openmlbb.fastapicloud.dev/api/heroes/${encodeURIComponent(heroName)}/detail`, { signal: controller.signal });
-    clearTimeout(timeout);
-    if (!resp.ok) throw new Error('not found');
-    const json = await resp.json();
-    const url = findHeroImageUrl(json);
-    heroImageCache.set(heroName, url);
-    return url;
-  } catch (e) {
-    heroImageCache.set(heroName, null);
-    return null;
-  }
+// Hero & item icons come from our own admin-uploaded library (/api/icons)
+// rather than a third-party MLBB data API — the one used earlier went dark,
+// and there's no reliable public source that covers items too. Icons are
+// added by the admin, once per name, straight from this view (see the
+// upload buttons in the pinned player popover below), so the library fills
+// itself in naturally as real matches get reviewed.
+let iconLibrary = { heroes: {}, items: {} };
+let iconLibraryLoaded = false;
+function normalizeIconName(name){ return String(name || '').trim().toLowerCase().slice(0, 60); }
+function heroIconUrl(name){
+  const e = iconLibrary.heroes[normalizeIconName(name)];
+  return e ? e.media : null;
 }
-function findHeroImageUrl(obj, depth){
-  depth = depth || 0;
-  if (!obj || depth > 5 || typeof obj !== 'object') return null;
-  const keys = ['ix', 'icon', 'image', 'avatar', 'i2x'];
-  for (const key of keys) {
-    if (typeof obj[key] === 'string' && obj[key].startsWith('http')) return obj[key];
-  }
-  for (const k in obj) {
-    const found = findHeroImageUrl(obj[k], depth + 1);
-    if (found) return found;
-  }
-  return null;
+function itemIconUrl(name){
+  const e = iconLibrary.items[normalizeIconName(name)];
+  return e ? e.media : null;
+}
+async function loadIconLibrary(){
+  try {
+    const res = await fetch('/api/icons');
+    if (!res.ok) return;
+    const data = await res.json();
+    iconLibrary = { heroes: data.heroes || {}, items: data.items || {} };
+    iconLibraryLoaded = true;
+  } catch (e) { /* offline or blocked — chips just fall back to initials/text */ }
 }
 function heroInitials(name){
   if (!name) return '?';
   return name.split(/[\s'-]+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
+function iconFileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+// Admin-only: uploads one hero/item icon, updates the shared library cache,
+// then re-renders so every chip for that name (across every game in this
+// match) picks it up immediately.
+async function uploadIconFor(kind, name, file){
+  if (!file) return;
+  if (file.size > 300 * 1024) { alert(t('tourdetail.mv.icon_too_large','Please choose a smaller image (under 300KB).')); return; }
+  try {
+    const image = await iconFileToBase64(file);
+    const res = await fetch('/api/icons/' + kind, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
+      body: JSON.stringify({ name, image }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Upload failed.');
+    iconLibrary = { heroes: data.heroes || {}, items: data.items || {} };
+    mvHideTooltip();
+    renderMatchView();
+  } catch (e) {
+    alert(t('tourdetail.mv.icon_upload_failed','Could not upload that icon: ') + (e.message || ''));
+  }
+}
+function wireIconUploadButtons(root){
+  root.querySelectorAll('.tt-icon-upload').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const kind = btn.getAttribute('data-kind');
+      const name = btn.getAttribute('data-name');
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*';
+      input.addEventListener('change', () => uploadIconFor(kind, name, input.files[0]));
+      input.click();
+    });
+  });
+}
 
-function mvShowTooltip(e, player){
+function mvTooltipHtml(player, pinned){
   const kdaKnown = player.kills != null || player.deaths != null || player.assists != null;
-  const itemsKnown = player.items && player.items.length > 0;
-  mvTooltip.innerHTML = `
-    <div class="tt-name">${escapeHtml(player.heroName || 'Unknown')}${player.mvp ? ' ⭐' : ''}</div>
+  const items = player.items || [];
+  const heroIcon = heroIconUrl(player.heroName);
+  const canEdit = pinned && isAdmin;
+  const heroUploadBtn = canEdit
+    ? `<button type="button" class="tt-icon-upload" data-kind="hero" data-name="${escapeHtml(player.heroName || '')}" title="${escapeHtml(t('tourdetail.mv.upload_icon','Upload icon'))}">${heroIcon ? '✎' : '📷'}</button>`
+    : '';
+  const itemsHtml = items.map((itemName) => {
+    const url = itemIconUrl(itemName);
+    const iconInner = url ? `style="background-image:url('${url}')"` : '';
+    const itemUploadBtn = (canEdit && !url)
+      ? `<button type="button" class="tt-icon-upload" data-kind="item" data-name="${escapeHtml(itemName)}" title="${escapeHtml(t('tourdetail.mv.upload_icon','Upload icon'))}">📷</button>`
+      : '';
+    return `<span class="tt-item-chip"><span class="tt-item-icon" ${iconInner}>${url ? '' : '🎒'}</span>${escapeHtml(itemName)}${itemUploadBtn}</span>`;
+  }).join('');
+  return `
+    <div class="tt-name">
+      ${heroIcon ? `<img src="${heroIcon}" alt="" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">` : ''}
+      <span>${escapeHtml(player.heroName || 'Unknown')}${player.mvp ? ' ⭐' : ''}</span>
+      ${heroUploadBtn}
+    </div>
     ${player.playerName ? `<div class="tt-kda">${escapeHtml(player.playerName)}</div>` : ''}
     ${kdaKnown ? `<div class="tt-kda">${player.kills ?? '?'} / ${player.deaths ?? '?'} / ${player.assists ?? '?'} (K/D/A)</div>` : ''}
-    ${itemsKnown ? `<div class="tt-items">${player.items.map(escapeHtml).join(' · ')}</div>` : ''}
+    ${items.length ? `<div class="tt-items">${itemsHtml}</div>` : ''}
+    ${pinned ? `<button type="button" class="tt-close" onclick="mvHideTooltip()">✕</button>` : ''}
   `;
+}
+function mvShowTooltip(e, player, pinned){
+  mvTooltip.innerHTML = mvTooltipHtml(player, pinned);
   mvTooltip.style.display = 'block';
+  mvTooltip.classList.toggle('pinned', !!pinned);
+  if (pinned) wireIconUploadButtons(mvTooltip);
   mvPositionTooltip(e);
 }
 function mvPositionTooltip(e){
-  mvTooltip.style.left = (e.clientX + 14) + 'px';
-  mvTooltip.style.top = (e.clientY + 14) + 'px';
+  if (mvTooltipPinned) return; // keep it put once pinned, so clicking the upload button doesn't jump the panel
+  const x = Math.min(e.clientX + 14, window.innerWidth - 250);
+  const y = Math.min(e.clientY + 14, window.innerHeight - 160);
+  mvTooltip.style.left = x + 'px';
+  mvTooltip.style.top = y + 'px';
 }
-function mvHideTooltip(){ mvTooltip.style.display = 'none'; }
+function mvHideTooltip(){
+  if (mvTooltipPinned) return;
+  mvTooltip.style.display = 'none';
+}
+window.mvHideTooltip = function(){
+  mvTooltipPinned = false;
+  mvTooltip.classList.remove('pinned');
+  mvTooltip.style.display = 'none';
+};
+document.addEventListener('click', (e) => {
+  if (mvTooltipPinned && !mvTooltip.contains(e.target) && !e.target.closest('.mv-hero-chip')) {
+    window.mvHideTooltip();
+  }
+});
 
 // Player data rides in a data attribute (URI-encoded JSON — never raw HTML,
 // so no separate escaping is needed to embed it safely in the markup) and is
-// read back on hover to fill the tooltip.
+// read back on hover/click to fill the tooltip.
 function mvHeroChipHtml(player, ringVar){
   const payload = encodeURIComponent(JSON.stringify({
     heroName: player.heroName || '', playerName: player.playerName || '',
     kills: player.kills, deaths: player.deaths, assists: player.assists,
     items: player.items || [], mvp: !!player.mvp,
   }));
-  return `<div class="mv-hero-chip" data-hero="${escapeHtml(player.heroName || '')}" data-player="${payload}" style="--ring:var(${ringVar})">${escapeHtml(heroInitials(player.heroName))}</div>`;
+  const url = heroIconUrl(player.heroName);
+  const bg = url ? ` style="--ring:var(${ringVar});background-image:url('${url}')"` : ` style="--ring:var(${ringVar})"`;
+  return `<div class="mv-hero-chip" data-hero="${escapeHtml(player.heroName || '')}" data-player="${payload}"${bg}>${url ? '' : escapeHtml(heroInitials(player.heroName))}</div>`;
 }
 function mvWireHeroChips(container){
   container.querySelectorAll('.mv-hero-chip[data-hero]').forEach((chip) => {
-    const heroName = chip.getAttribute('data-hero');
-    if (heroName) {
-      getHeroImage(heroName).then((url) => {
-        if (url) { chip.style.backgroundImage = `url("${url}")`; chip.textContent = ''; }
-      });
-    }
     chip.addEventListener('mouseenter', (e) => {
-      try { mvShowTooltip(e, JSON.parse(decodeURIComponent(chip.getAttribute('data-player')))); } catch (err) { /* ignore */ }
+      if (mvTooltipPinned) return;
+      try { mvShowTooltip(e, JSON.parse(decodeURIComponent(chip.getAttribute('data-player'))), false); } catch (err) { /* ignore */ }
     });
     chip.addEventListener('mousemove', mvPositionTooltip);
     chip.addEventListener('mouseleave', mvHideTooltip);
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      try {
+        mvTooltipPinned = true;
+        mvShowTooltip(e, JSON.parse(decodeURIComponent(chip.getAttribute('data-player'))), true);
+      } catch (err) { /* ignore */ }
+    });
   });
 }
 
@@ -3106,7 +3198,11 @@ function renderMatchView(){
         }
         const chips = [...(g.bansA || []), ...(g.bansB || [])];
         const chipsHtml = chips.length
-          ? chips.map((name) => `<div class="mv-ban-chip"><div class="mini" data-hero="${escapeHtml(name)}"></div><span>${escapeHtml(name)}</span></div>`).join('')
+          ? chips.map((name) => {
+              const url = heroIconUrl(name);
+              const bg = url ? ` style="background-image:url('${url}')"` : '';
+              return `<div class="mv-ban-chip"><div class="mini"${bg}></div><span>${escapeHtml(name)}</span></div>`;
+            }).join('')
           : `<span class="mv-no-bans">${escapeHtml(t('tourdetail.mv.no_bans_detected','No bans detected.'))}</span>`;
         return `<div class="mv-bans-row"><div class="who">${escapeHtml(gameLabel(i))}</div><div class="mv-ban-chips">${chipsHtml}</div></div>`;
       }).join('');
@@ -3136,10 +3232,6 @@ function renderMatchView(){
   `;
 
   mvWireHeroChips(mvBody);
-  mvBody.querySelectorAll('.mv-ban-chip .mini[data-hero]').forEach((mini) => {
-    const heroName = mini.getAttribute('data-hero');
-    if (heroName) getHeroImage(heroName).then((url) => { if (url) mini.style.backgroundImage = `url("${url}")`; });
-  });
   if (mvAddingGame) mvWireAddGameForm();
 }
 

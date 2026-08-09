@@ -62,6 +62,12 @@ app.use('/api/youtube-live', youtubeLiveRoutes);
 const visionRoutes = require('./routes/vision');
 app.use('/api/vision', visionRoutes);
 
+// Hero/item icon library for the Match Schedule hero-pick view — public to
+// read, admin-passcode-protected to upload. Self-hosted instead of relying
+// on a third-party MLBB data API (the one used at first went dark).
+const iconsRoutes = require('./routes/icons');
+app.use('/api/icons', iconsRoutes);
+
 if (!process.env.ADMIN_PASSCODE) {
   console.warn('⚠️  ADMIN_PASSCODE is not set — the "Create Tournament" admin panel is disabled until you set one in server/.env.');
 }
@@ -82,11 +88,12 @@ const homeStatsDb = require('./homeStatsDb');
 const newsDb = require('./newsDb');
 const registrationsDb = require('./registrationsDb');
 const adsDb = require('./adsDb');
+const iconsDb = require('./iconsDb');
 
 Promise.all([
   ordersDb.ready,
   tournamentsDb.ready, tournamentDetailsDb.ready, diamondPricingDb.ready,
-  homeStatsDb.ready, newsDb.ready, registrationsDb.ready, adsDb.ready,
+  homeStatsDb.ready, newsDb.ready, registrationsDb.ready, adsDb.ready, iconsDb.ready,
 ])
   .catch((e) => console.error('Error while restoring saved data on boot:', e.message))
   .finally(() => {
