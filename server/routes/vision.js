@@ -23,7 +23,11 @@ const router = express.Router();
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || '';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const VISION_MODEL = process.env.GEMINI_VISION_MODEL || 'gemini-2.5-flash';
+// gemini-2.5-flash was retired for new API keys/projects in 2026 ("no longer
+// available to new users" — 404 NOT_FOUND). gemini-3.5-flash-lite is the
+// current stable, free-tier-eligible model built for exactly this kind of
+// job (fast multimodal extraction from screenshots), so it's the default now.
+const VISION_MODEL = process.env.GEMINI_VISION_MODEL || 'gemini-3.5-flash-lite';
 
 if (!GEMINI_API_KEY) {
   console.warn('⚠️  GEMINI_API_KEY is not set — screenshot hero-pick extraction is disabled until you set one in server/.env. Get a free key (no credit card) at aistudio.google.com.');
