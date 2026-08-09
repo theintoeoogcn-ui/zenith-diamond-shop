@@ -224,9 +224,15 @@
   .match-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,248px),1fr));gap:14px;}
   .match-card{
     position:relative;background:var(--panel);border:1px solid var(--line);
-    border-radius:14px;padding:16px;
+    border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s ease;
     container-type:inline-size;container-name:matchcard;
   }
+  .match-card:hover{border-color:var(--violet-dim);}
+  .match-view-hint{
+    margin-top:12px;padding-top:11px;border-top:1px solid var(--line);
+    text-align:center;font-size:11px;font-weight:700;color:var(--dim);
+  }
+  .match-card:hover .match-view-hint{color:var(--cyan);}
   /* Status, best-of, group and kick-off time all share one centred row.
      The right padding keeps the last chip clear of the admin edit/delete
      buttons, which are absolutely positioned in the card's top-right. */
@@ -710,6 +716,101 @@
   .modal-actions .cancel{background:var(--panel-raised);color:var(--mid);border:1px solid var(--line);}
   .modal-actions .cancel:hover{color:var(--hi);}
 
+  /* ---------- match detail modal (hero picks / bans / casters) ---------- */
+  .modal.modal-wide{max-width:640px;padding:0;}
+  .mv-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:18px 22px;border-bottom:1px solid var(--line);
+  }
+  .mv-head h3{margin:0;font-size:15px;color:var(--mid);font-weight:700;}
+  .mv-close{
+    width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--panel-raised);
+    color:var(--mid);cursor:pointer;font-size:13px;flex-shrink:0;
+  }
+  .mv-close:hover{color:var(--hi);border-color:var(--violet-dim);}
+  .mv-body{padding:20px 22px 22px;}
+  .mv-date{
+    display:inline-flex;background:var(--panel-raised);border:1px solid var(--line);border-radius:999px;
+    padding:6px 14px;font-size:12px;font-weight:700;color:var(--hi);margin-bottom:16px;
+  }
+  .mv-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin-bottom:22px;}
+  .mv-team{display:flex;align-items:center;gap:10px;min-width:0;}
+  .mv-team.right{flex-direction:row-reverse;text-align:right;}
+  .mv-team .nm{font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mv-score-wrap{text-align:center;flex-shrink:0;}
+  .mv-score{font-size:26px;font-weight:800;color:var(--hi);letter-spacing:0.5px;}
+  .mv-score span{color:var(--dim);}
+  .mv-bo{font-size:10px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:var(--dim);margin-top:2px;}
+  .mv-games{display:flex;flex-direction:column;gap:10px;}
+  .mv-game{background:var(--panel-raised);border:1px solid var(--line);border-radius:12px;padding:12px;position:relative;}
+  .mv-game-main{display:grid;grid-template-columns:auto 1fr auto 1fr auto;align-items:center;gap:8px;}
+  .mv-side-badge{
+    width:22px;height:22px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:800;
+  }
+  .mv-side-badge.win{background:rgba(61,214,140,0.16);color:#3DD68C;}
+  .mv-side-badge.loss{background:rgba(255,62,154,0.12);color:var(--signal);}
+  .mv-picks{display:flex;gap:5px;flex-wrap:wrap;}
+  .mv-picks.right{justify-content:flex-end;}
+  .mv-hero-chip{
+    width:32px;height:32px;border-radius:9px;background:var(--panel) center/cover no-repeat;
+    display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--hi);
+    border:2px solid var(--ring,var(--violet));flex-shrink:0;cursor:default;
+  }
+  .mv-duration{
+    display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--mid);
+    background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 9px;
+    justify-self:center;white-space:nowrap;
+  }
+  .mv-map{text-align:center;font-size:11px;color:var(--dim);margin-top:9px;font-weight:600;}
+  .mv-remove-game{
+    position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:6px;border:1px solid var(--line);
+    background:var(--panel);color:var(--mid);cursor:pointer;font-size:10px;display:none;align-items:center;justify-content:center;
+  }
+  .mv-remove-game.show{display:flex;}
+  .mv-remove-game:hover{border-color:var(--signal);color:var(--signal);}
+  .mv-empty{text-align:center;padding:30px 16px;color:var(--mid);font-size:12.5px;border:1px dashed var(--line);border-radius:12px;}
+
+  #mv-tooltip{
+    position:fixed;pointer-events:none;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:9px 12px;font-size:12px;color:var(--hi);box-shadow:0 12px 30px rgba(0,0,0,.5);
+    z-index:200;display:none;min-width:150px;
+  }
+  #mv-tooltip .tt-name{font-weight:800;margin-bottom:4px;}
+  #mv-tooltip .tt-kda{color:var(--mid);margin-bottom:3px;}
+  #mv-tooltip .tt-items{color:var(--dim);font-size:11px;line-height:1.5;}
+
+  .mv-add-zone{margin-top:14px;}
+  .mv-add-form{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel-raised);margin-top:10px;}
+  .field-label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:600;}
+  .mv-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  @media (max-width:480px){ .mv-grid2{grid-template-columns:1fr;} }
+  .mv-uploader{
+    border:1.5px dashed var(--line);border-radius:10px;padding:14px 10px;text-align:center;
+    color:var(--mid);font-size:11.5px;cursor:pointer;
+  }
+  .mv-uploader.has-file{border-color:var(--cyan);color:var(--cyan);}
+  .mv-uploader input{display:none;}
+  .mv-status-line{font-size:12px;color:var(--mid);margin-top:8px;}
+  .mv-status-line.error{color:var(--signal);}
+  .mv-bans-bar{
+    display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:16px;
+    border-top:1px solid var(--line);font-weight:700;font-size:13px;
+  }
+  .mv-bans-body{display:none;margin-top:12px;}
+  .mv-bans-body.show{display:block;}
+  .mv-bans-row{margin-bottom:10px;}
+  .mv-bans-row .who{font-size:10.5px;color:var(--dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;font-weight:800;}
+  .mv-ban-chips{display:flex;gap:7px;flex-wrap:wrap;}
+  .mv-ban-chip{
+    display:flex;align-items:center;gap:5px;background:var(--panel-raised);border:1px solid var(--line);
+    border-radius:999px;padding:3px 9px 3px 3px;font-size:11.5px;color:var(--mid);
+  }
+  .mv-ban-chip .mini{width:20px;height:20px;border-radius:6px;background:var(--panel) center/cover no-repeat;flex-shrink:0;filter:grayscale(1);}
+  .mv-no-bans{color:var(--dim);font-size:12px;}
+  .mv-casters{text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--mid);}
+  .mv-casters b{color:var(--hi);}
+
   .logo-upload{display:flex;align-items:center;gap:10px;}
   .logo-preview{
     width:44px;height:44px;border-radius:10px;object-fit:contain;flex-shrink:0;padding:3px;
@@ -1000,6 +1101,7 @@
       </div>
     </div>
     <div class="field"><label>Match time</label><input type="datetime-local" id="f-match-when"></div>
+    <div class="field"><label>Casters (comma-separated, optional)</label><input type="text" id="f-match-casters" placeholder="e.g. Hades, Bel Ou"></div>
     <div class="modal-err" id="match-modal-err">Error</div>
     <div class="modal-actions">
       <button class="cancel" id="match-modal-cancel">Cancel</button>
@@ -1007,6 +1109,18 @@
     </div>
   </div>
 </div>
+
+<!-- ---------- match view modal: hero picks / bans / casters ---------- -->
+<div class="modal-overlay" id="match-view-modal">
+  <div class="modal modal-wide">
+    <div class="mv-head">
+      <h3 id="mv-title">Match</h3>
+      <button type="button" class="mv-close" id="match-view-close" aria-label="Close">✕</button>
+    </div>
+    <div class="mv-body" id="mv-body"></div>
+  </div>
+</div>
+<div id="mv-tooltip"></div>
 
 <!-- ---------- bracket slot modal ---------- -->
 <div class="modal-overlay" id="bracket-modal">
@@ -1475,17 +1589,19 @@ function renderMatchCard(m){
     } else {
       voteHtml = `
         <div class="vote-buttons">
-          <button onclick="castVote('${m.id}','a')">${t('tourdetail.vote_for','Vote')} ${escapeHtml(teamA ? teamA.name : '?')}</button>
-          <button onclick="castVote('${m.id}','b')">${t('tourdetail.vote_for','Vote')} ${escapeHtml(teamB ? teamB.name : '?')}</button>
+          <button onclick="event.stopPropagation(); castVote('${m.id}','a')">${t('tourdetail.vote_for','Vote')} ${escapeHtml(teamA ? teamA.name : '?')}</button>
+          <button onclick="event.stopPropagation(); castVote('${m.id}','b')">${t('tourdetail.vote_for','Vote')} ${escapeHtml(teamB ? teamB.name : '?')}</button>
         </div>`;
     }
   }
 
+  const gameCount = (m.games || []).length;
+
   return `
-    <div class="match-card ${isAdmin ? 'is-admin' : ''}">
+    <div class="match-card ${isAdmin ? 'is-admin' : ''}" onclick="openMatchView('${m.id}')">
       <div class="card-admin-actions ${isAdmin ? 'show' : ''}">
-        <button onclick="openMatchEdit('${m.id}')">✏️</button>
-        <button class="del" onclick="deleteMatch('${m.id}')">🗑</button>
+        <button onclick="event.stopPropagation(); openMatchEdit('${m.id}')">✏️</button>
+        <button class="del" onclick="event.stopPropagation(); deleteMatch('${m.id}')">🗑</button>
       </div>
       <div class="match-meta-row">
         <span class="match-status ${m.status}">${t('tourdetail.status.' + m.status, m.status)}</span>
@@ -1499,6 +1615,7 @@ function renderMatchCard(m){
         <div class="match-team">${teamLogoHtml(teamB)}<span class="tname">${escapeHtml(teamB ? teamB.name : '?')}</span></div>
       </div>
       ${votingOpen ? `<div class="vote-bar-wrap" id="vote-wrap-${m.id}">${voteHtml}</div>` : ''}
+      <div class="match-view-hint">${gameCount ? escapeHtml(t('tourdetail.view_games','🎮 View {n} game details').replace('{n}', gameCount)) : escapeHtml(t('tourdetail.view_games_empty','🎮 View match details'))}</div>
     </div>`;
 }
 
@@ -2594,6 +2711,7 @@ const fMatchScoreB = document.getElementById('f-match-scoreb');
 const fMatchStatus = document.getElementById('f-match-status');
 const fMatchWhen = document.getElementById('f-match-when');
 const fMatchBo = document.getElementById('f-match-bo');
+const fMatchCasters = document.getElementById('f-match-casters');
 let editingMatchId = null;
 
 function populateTeamSelects(selA, selB, extra){
@@ -2614,7 +2732,7 @@ document.getElementById('add-match-btn').addEventListener('click', () => {
   populateDaySuggestions();
   fMatchGroup.value = 'A'; fMatchDay.value = activeDayTab || 'Day 1';
   fMatchScoreA.value = ''; fMatchScoreB.value = ''; fMatchStatus.value = 'upcoming'; fMatchWhen.value = '';
-  fMatchBo.value = '3';
+  fMatchBo.value = '3'; fMatchCasters.value = '';
   matchModalErr.classList.remove('show');
   matchModal.classList.add('show');
 });
@@ -2633,6 +2751,7 @@ window.openMatchEdit = function(id){
   fMatchStatus.value = m.status || 'upcoming';
   fMatchWhen.value = m.scheduledAt ? m.scheduledAt.slice(0, 16) : '';
   fMatchBo.value = String(BO_OPTIONS.includes(Number(m.bestOf)) ? Number(m.bestOf) : 3);
+  fMatchCasters.value = m.casters || '';
   matchModalErr.classList.remove('show');
   matchModal.classList.add('show');
 };
@@ -2656,6 +2775,7 @@ document.getElementById('match-modal-save').addEventListener('click', async () =
     scheduledAt: fMatchWhen.value ? new Date(fMatchWhen.value).toISOString() : '',
     bestOf: Number(fMatchBo.value) || 3,
     votes: { a: 0, b: 0 },
+    casters: fMatchCasters.value.trim(),
   };
   if (!data.teamAId || !data.teamBId) {
     matchModalErr.textContent = t('tourdetail.error_save','Could not save. Please try again.');
@@ -2674,6 +2794,354 @@ document.getElementById('match-modal-save').addEventListener('click', async () =
   if (ok) { matchModal.classList.remove('show'); activeDayTab = data.day; }
   else { matchModalErr.textContent = t('tourdetail.error_save','Could not save. Please try again.'); matchModalErr.classList.add('show'); }
 });
+
+/* ---------------- match view modal: hero picks / bans / casters ----------------
+   Clicking a match card (Match Schedule tab) opens this. Everyone can view it;
+   admins additionally get an "+ Add Game" flow that uploads a result
+   screenshot (required) and a pick/ban screenshot (optional) to the server's
+   /api/vision/extract proxy — the Anthropic API key never touches the
+   browser, see server/routes/vision.js. */
+const matchViewModal = document.getElementById('match-view-modal');
+const mvBody = document.getElementById('mv-body');
+const mvTooltip = document.getElementById('mv-tooltip');
+let mvMatchId = null;
+let mvAddingGame = false;
+let mvBansOpen = false;
+const heroImageCache = new Map();
+
+function findMatch(id){ return matches.find(x => x.id === id) || null; }
+
+window.openMatchView = function(id){
+  mvMatchId = id;
+  mvAddingGame = false;
+  mvBansOpen = false;
+  renderMatchView();
+  matchViewModal.classList.add('show');
+};
+document.getElementById('match-view-close').addEventListener('click', () => matchViewModal.classList.remove('show'));
+window.mvToggleAddGame = function(){ mvAddingGame = true; renderMatchView(); };
+window.mvToggleBans = function(){ mvBansOpen = !mvBansOpen; renderMatchView(); };
+
+// Hero portraits are looked up best-effort from a public MLBB hero-data
+// endpoint; unmatched heroes fall back to an initials badge. No admin data
+// is sent here, only a hero name, so this is safe to call from the browser
+// (unlike the vision extraction, which needs the server proxy).
+async function getHeroImage(heroName){
+  if (!heroName) return null;
+  if (heroImageCache.has(heroName)) return heroImageCache.get(heroName);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    const resp = await fetch(`https://openmlbb.fastapicloud.dev/api/heroes/${encodeURIComponent(heroName)}/detail`, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!resp.ok) throw new Error('not found');
+    const json = await resp.json();
+    const url = findHeroImageUrl(json);
+    heroImageCache.set(heroName, url);
+    return url;
+  } catch (e) {
+    heroImageCache.set(heroName, null);
+    return null;
+  }
+}
+function findHeroImageUrl(obj, depth){
+  depth = depth || 0;
+  if (!obj || depth > 5 || typeof obj !== 'object') return null;
+  const keys = ['ix', 'icon', 'image', 'avatar', 'i2x'];
+  for (const key of keys) {
+    if (typeof obj[key] === 'string' && obj[key].startsWith('http')) return obj[key];
+  }
+  for (const k in obj) {
+    const found = findHeroImageUrl(obj[k], depth + 1);
+    if (found) return found;
+  }
+  return null;
+}
+function heroInitials(name){
+  if (!name) return '?';
+  return name.split(/[\s'-]+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function mvShowTooltip(e, player){
+  const kdaKnown = player.kills != null || player.deaths != null || player.assists != null;
+  const itemsKnown = player.items && player.items.length > 0;
+  mvTooltip.innerHTML = `
+    <div class="tt-name">${escapeHtml(player.heroName || 'Unknown')}${player.mvp ? ' ⭐' : ''}</div>
+    ${player.playerName ? `<div class="tt-kda">${escapeHtml(player.playerName)}</div>` : ''}
+    ${kdaKnown ? `<div class="tt-kda">${player.kills ?? '?'} / ${player.deaths ?? '?'} / ${player.assists ?? '?'} (K/D/A)</div>` : ''}
+    ${itemsKnown ? `<div class="tt-items">${player.items.map(escapeHtml).join(' · ')}</div>` : ''}
+  `;
+  mvTooltip.style.display = 'block';
+  mvPositionTooltip(e);
+}
+function mvPositionTooltip(e){
+  mvTooltip.style.left = (e.clientX + 14) + 'px';
+  mvTooltip.style.top = (e.clientY + 14) + 'px';
+}
+function mvHideTooltip(){ mvTooltip.style.display = 'none'; }
+
+// Player data rides in a data attribute (URI-encoded JSON — never raw HTML,
+// so no separate escaping is needed to embed it safely in the markup) and is
+// read back on hover to fill the tooltip.
+function mvHeroChipHtml(player, ringVar){
+  const payload = encodeURIComponent(JSON.stringify({
+    heroName: player.heroName || '', playerName: player.playerName || '',
+    kills: player.kills, deaths: player.deaths, assists: player.assists,
+    items: player.items || [], mvp: !!player.mvp,
+  }));
+  return `<div class="mv-hero-chip" data-hero="${escapeHtml(player.heroName || '')}" data-player="${payload}" style="--ring:var(${ringVar})">${escapeHtml(heroInitials(player.heroName))}</div>`;
+}
+function mvWireHeroChips(container){
+  container.querySelectorAll('.mv-hero-chip[data-hero]').forEach((chip) => {
+    const heroName = chip.getAttribute('data-hero');
+    if (heroName) {
+      getHeroImage(heroName).then((url) => {
+        if (url) { chip.style.backgroundImage = `url("${url}")`; chip.textContent = ''; }
+      });
+    }
+    chip.addEventListener('mouseenter', (e) => {
+      try { mvShowTooltip(e, JSON.parse(decodeURIComponent(chip.getAttribute('data-player')))); } catch (err) { /* ignore */ }
+    });
+    chip.addEventListener('mousemove', mvPositionTooltip);
+    chip.addEventListener('mouseleave', mvHideTooltip);
+  });
+}
+
+function mvGameRowHtml(g){
+  const leftWin = g.resultA === 'win', rightWin = g.resultB === 'win';
+  const leftBadge = `<div class="mv-side-badge ${g.resultA ? (leftWin ? 'win' : 'loss') : ''}">${g.resultA ? (leftWin ? 'W' : 'L') : '–'}</div>`;
+  const rightBadge = `<div class="mv-side-badge ${g.resultB ? (rightWin ? 'win' : 'loss') : ''}">${g.resultB ? (rightWin ? 'W' : 'L') : '–'}</div>`;
+  const leftPicks = (g.playersA || []).map(p => mvHeroChipHtml(p, '--violet')).join('');
+  const rightPicks = (g.playersB || []).map(p => mvHeroChipHtml(p, '--cyan')).join('');
+  return `
+    <div class="mv-game">
+      ${isAdmin ? `<button type="button" class="mv-remove-game show" onclick="event.stopPropagation(); removeGame('${g.id}')">✕</button>` : ''}
+      <div class="mv-game-main">
+        ${leftBadge}
+        <div class="mv-picks">${leftPicks}</div>
+        <div class="mv-duration">⏱ ${escapeHtml(g.durationFormatted || '--:--')}</div>
+        <div class="mv-picks right">${rightPicks}</div>
+        ${rightBadge}
+      </div>
+      ${g.mapLabel ? `<div class="mv-map">${escapeHtml(g.mapLabel)}</div>` : ''}
+    </div>`;
+}
+
+function mvAddGameFormHtml(){
+  return `
+    <div class="mv-add-zone">
+      <div class="mv-add-form">
+        <div class="mv-grid2">
+          <div>
+            <span class="field-label">${escapeHtml(t('tourdetail.mv.result_ss','Post-match result screenshot (required)'))}</span>
+            <div class="mv-uploader" id="mv-result-uploader">
+              <input type="file" accept="image/*" id="mv-result-file">
+              <span id="mv-result-label">${escapeHtml(t('tourdetail.mv.click_upload','Click to choose the Victory/Defeat screen'))}</span>
+            </div>
+          </div>
+          <div>
+            <span class="field-label">${escapeHtml(t('tourdetail.mv.ban_ss','Pick/ban screenshot (optional)'))}</span>
+            <div class="mv-uploader" id="mv-ban-uploader">
+              <input type="file" accept="image/*" id="mv-ban-file">
+              <span id="mv-ban-label">${escapeHtml(t('tourdetail.mv.click_upload_optional','Click to choose the draft/ban screen (optional)'))}</span>
+            </div>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label>${escapeHtml(t('tourdetail.mv.map_label','Map / game label (optional)'))}</label>
+          <input type="text" id="mv-map-input" placeholder="e.g. Broken Walls">
+        </div>
+        <div class="modal-actions" style="margin-top:0;">
+          <button class="cancel" type="button" id="mv-cancel-game">${escapeHtml(t('tourdetail.mv.cancel','Cancel'))}</button>
+          <button class="save" type="button" id="mv-extract-game">${escapeHtml(t('tourdetail.mv.extract','Extract & Add'))}</button>
+        </div>
+        <div class="mv-status-line" id="mv-status-line"></div>
+      </div>
+    </div>`;
+}
+
+function mvNormalizePlayer(p){
+  return {
+    heroName: p && p.hero_name ? String(p.hero_name) : '',
+    playerName: p && p.player_name ? String(p.player_name) : '',
+    kills: p ? p.kills : null,
+    deaths: p ? p.deaths : null,
+    assists: p ? p.assists : null,
+    items: p && Array.isArray(p.items) ? p.items : [],
+    mvp: !!(p && p.mvp),
+  };
+}
+function mvFileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function mvCallVision(base64, mediaType, kind){
+  const res = await fetch('/api/vision/extract', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
+    body: JSON.stringify({ image: base64, mediaType, kind }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Extraction failed.');
+  return data;
+}
+
+function mvWireAddGameForm(){
+  const resultUploaderEl = document.getElementById('mv-result-uploader');
+  const resultFileInput = document.getElementById('mv-result-file');
+  const resultLabel = document.getElementById('mv-result-label');
+  const banUploaderEl = document.getElementById('mv-ban-uploader');
+  const banFileInput = document.getElementById('mv-ban-file');
+  const banLabel = document.getElementById('mv-ban-label');
+  const mapInput = document.getElementById('mv-map-input');
+  const statusLine = document.getElementById('mv-status-line');
+  const extractBtn = document.getElementById('mv-extract-game');
+  const cancelBtn = document.getElementById('mv-cancel-game');
+
+  resultUploaderEl.addEventListener('click', () => resultFileInput.click());
+  resultFileInput.addEventListener('change', () => {
+    if (resultFileInput.files[0]) {
+      resultLabel.textContent = '✓ ' + resultFileInput.files[0].name;
+      resultUploaderEl.classList.add('has-file');
+    }
+  });
+  banUploaderEl.addEventListener('click', () => banFileInput.click());
+  banFileInput.addEventListener('change', () => {
+    if (banFileInput.files[0]) {
+      banLabel.textContent = '✓ ' + banFileInput.files[0].name;
+      banUploaderEl.classList.add('has-file');
+    }
+  });
+  cancelBtn.addEventListener('click', () => { mvAddingGame = false; renderMatchView(); });
+
+  extractBtn.addEventListener('click', async () => {
+    const resultFile = resultFileInput.files[0];
+    const banFile = banFileInput.files[0];
+    if (!resultFile) {
+      statusLine.textContent = t('tourdetail.mv.need_result','Please choose the post-match result screenshot.');
+      statusLine.className = 'mv-status-line error';
+      return;
+    }
+    extractBtn.disabled = true;
+    statusLine.className = 'mv-status-line';
+    statusLine.textContent = t('tourdetail.mv.extracting_result','Reading the result screenshot…');
+    try {
+      const resultB64 = await mvFileToBase64(resultFile);
+      const resultData = await mvCallVision(resultB64, resultFile.type || 'image/png', 'result');
+      let bansData = null;
+      if (banFile) {
+        statusLine.textContent = t('tourdetail.mv.extracting_bans','Reading the ban screenshot…');
+        const banB64 = await mvFileToBase64(banFile);
+        bansData = await mvCallVision(banB64, banFile.type || 'image/png', 'bans');
+      }
+      const game = {
+        id: 'G-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1000),
+        mapLabel: mapInput.value.trim(),
+        durationSeconds: (resultData && resultData.duration_seconds != null) ? resultData.duration_seconds : null,
+        durationFormatted: (resultData && resultData.duration_formatted) || '',
+        resultA: resultData && resultData.left_team_result === 'Victory' ? 'win' : (resultData && resultData.left_team_result === 'Defeat' ? 'loss' : null),
+        resultB: resultData && resultData.right_team_result === 'Victory' ? 'win' : (resultData && resultData.right_team_result === 'Defeat' ? 'loss' : null),
+        playersA: ((resultData && resultData.left_team_players) || []).map(mvNormalizePlayer),
+        playersB: ((resultData && resultData.right_team_players) || []).map(mvNormalizePlayer),
+        hasBans: !!bansData,
+        bansA: (bansData && bansData.left_team_bans) || [],
+        bansB: (bansData && bansData.right_team_bans) || [],
+      };
+      const m = findMatch(mvMatchId);
+      if (!m) throw new Error('Match no longer exists.');
+      m.games = [...(m.games || []), game];
+      statusLine.textContent = t('tournament.form.saving','Saving…');
+      const ok = await saveDetail();
+      if (!ok) throw new Error(t('tourdetail.error_save','Could not save. Please try again.'));
+      mvAddingGame = false;
+      renderMatchView();
+    } catch (err) {
+      statusLine.textContent = t('tourdetail.mv.extract_error','Something went wrong: ') + (err.message || '');
+      statusLine.className = 'mv-status-line error';
+      extractBtn.disabled = false;
+    }
+  });
+}
+
+window.removeGame = async function(gameId){
+  if (!confirm(t('tourdetail.mv.remove_confirm','Remove this game?'))) return;
+  const m = findMatch(mvMatchId);
+  if (!m) return;
+  m.games = (m.games || []).filter(g => g.id !== gameId);
+  const ok = await saveDetail();
+  if (!ok) alert(t('tourdetail.error_save','Could not save. Please try again.'));
+  renderMatchView();
+};
+
+function renderMatchView(){
+  const m = findMatch(mvMatchId);
+  if (!m) { matchViewModal.classList.remove('show'); return; }
+  const teamA = findTeam(m.teamAId), teamB = findTeam(m.teamBId);
+  document.getElementById('mv-title').textContent = `${teamA ? teamA.name : '?'} vs ${teamB ? teamB.name : '?'}`;
+
+  const games = m.games || [];
+  let winsA = 0, winsB = 0;
+  games.forEach((g) => { if (g.resultA === 'win') winsA++; if (g.resultB === 'win') winsB++; });
+
+  const gamesHtml = games.length
+    ? `<div class="mv-games">${games.map(mvGameRowHtml).join('')}</div>`
+    : `<div class="mv-empty">${escapeHtml(t('tourdetail.mv.no_games','No games added yet.'))}</div>`;
+
+  const addZoneHtml = !isAdmin ? '' : (
+    mvAddingGame
+      ? mvAddGameFormHtml()
+      : `<div class="mv-add-zone"><button type="button" class="create-btn show" onclick="mvToggleAddGame()">+ ${escapeHtml(t('tourdetail.mv.add_game','Add Game'))}</button></div>`
+  );
+
+  const gameLabel = (i) => t('tourdetail.mv.game_n','Game {n}').replace('{n}', String(i + 1));
+  const bansBodyHtml = !games.length
+    ? `<div class="mv-no-bans">${escapeHtml(t('tourdetail.mv.no_games','No games added yet.'))}</div>`
+    : games.map((g, i) => {
+        if (!g.hasBans) {
+          return `<div class="mv-bans-row"><div class="who">${escapeHtml(gameLabel(i))}</div><div class="mv-no-bans">${escapeHtml(t('tourdetail.mv.no_ban_ss','No ban screenshot provided.'))}</div></div>`;
+        }
+        const chips = [...(g.bansA || []), ...(g.bansB || [])];
+        const chipsHtml = chips.length
+          ? chips.map((name) => `<div class="mv-ban-chip"><div class="mini" data-hero="${escapeHtml(name)}"></div><span>${escapeHtml(name)}</span></div>`).join('')
+          : `<span class="mv-no-bans">${escapeHtml(t('tourdetail.mv.no_bans_detected','No bans detected.'))}</span>`;
+        return `<div class="mv-bans-row"><div class="who">${escapeHtml(gameLabel(i))}</div><div class="mv-ban-chips">${chipsHtml}</div></div>`;
+      }).join('');
+
+  const castersHtml = m.casters
+    ? `<div class="mv-casters">🎙 <b>${escapeHtml(t('tourdetail.mv.casters','Casters'))}:</b> ${escapeHtml(m.casters.split(',').map((c) => c.trim()).filter(Boolean).join(', '))}</div>`
+    : '';
+
+  mvBody.innerHTML = `
+    ${m.scheduledAt ? `<div class="mv-date">${escapeHtml(formatWhenDate(m.scheduledAt))} · ${escapeHtml(formatWhenTime(m.scheduledAt))}</div>` : ''}
+    <div class="mv-teams">
+      <div class="mv-team">${teamLogoHtml(teamA, 44)}<span class="nm">${escapeHtml(teamA ? teamA.name : '?')}</span></div>
+      <div class="mv-score-wrap">
+        <div class="mv-score">${winsA} <span>:</span> ${winsB}</div>
+        <div class="mv-bo">${boLabel(m.bestOf)}</div>
+      </div>
+      <div class="mv-team right">${teamLogoHtml(teamB, 44)}<span class="nm">${escapeHtml(teamB ? teamB.name : '?')}</span></div>
+    </div>
+    ${gamesHtml}
+    ${addZoneHtml}
+    <div class="mv-bans-bar">
+      <span>🚫 ${escapeHtml(t('tourdetail.mv.bans','Bans'))}</span>
+      <button type="button" class="reg-btn" style="flex:none;padding:6px 12px;" onclick="mvToggleBans()">${mvBansOpen ? '🙈 ' + escapeHtml(t('tourdetail.mv.hide','Hide')) : '👁 ' + escapeHtml(t('tourdetail.mv.show','Show'))}</button>
+    </div>
+    <div class="mv-bans-body ${mvBansOpen ? 'show' : ''}">${bansBodyHtml}</div>
+    ${castersHtml}
+  `;
+
+  mvWireHeroChips(mvBody);
+  mvBody.querySelectorAll('.mv-ban-chip .mini[data-hero]').forEach((mini) => {
+    const heroName = mini.getAttribute('data-hero');
+    if (heroName) getHeroImage(heroName).then((url) => { if (url) mini.style.backgroundImage = `url("${url}")`; });
+  });
+  if (mvAddingGame) mvWireAddGameForm();
+}
 
 /* ---------------- bracket slot modal ---------------- */
 const bracketModal = document.getElementById('bracket-modal');

@@ -119,6 +119,63 @@ function cleanScore(v) {
   return Number.isFinite(Number(v)) ? Number(v) : null;
 }
 
+// A single player's line in one game's post-match result (hero, KDA, items).
+// Extracted from a screenshot by the admin's vision-assisted "Add Game" flow,
+// so every field is treated as untrusted input, same as any other client
+// payload — capped lengths/ranges, never trusted as-is.
+function cleanGamePlayer(p) {
+  if (!p || typeof p !== 'object') return null;
+  const heroName = String(p.heroName || '').trim().slice(0, 40);
+  if (!heroName) return null;
+  const clampInt = (v) => {
+    if (v === null || v === undefined || v === '') return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.max(0, Math.min(99, Math.round(n))) : null;
+  };
+  return {
+    heroName,
+    playerName: p.playerName ? String(p.playerName).trim().slice(0, 40) : '',
+    kills: clampInt(p.kills),
+    deaths: clampInt(p.deaths),
+    assists: clampInt(p.assists),
+    items: Array.isArray(p.items)
+      ? p.items.filter((x) => typeof x === 'string').slice(0, 6).map((x) => x.trim().slice(0, 30)).filter(Boolean)
+      : [],
+    mvp: p.mvp === true,
+  };
+}
+
+const GAME_RESULTS = ['win', 'loss'];
+
+function cleanBanList(arr) {
+  return Array.isArray(arr)
+    ? arr.filter((x) => typeof x === 'string').slice(0, 10).map((x) => x.trim().slice(0, 30)).filter(Boolean)
+    : [];
+}
+
+// One game within a Bo3/Bo5 match — hero picks per side, result, duration,
+// bans (if a ban-phase screenshot was provided for this game).
+function cleanGame(g) {
+  if (!g || typeof g !== 'object') return null;
+  const durationSecondsRaw = Number(g.durationSeconds);
+  return {
+    id: g.id || genId('G'),
+    mapLabel: String(g.mapLabel || '').trim().slice(0, 40),
+    durationSeconds: Number.isFinite(durationSecondsRaw) ? Math.max(0, Math.min(9999, Math.round(durationSecondsRaw))) : null,
+    durationFormatted: g.durationFormatted ? String(g.durationFormatted).trim().slice(0, 10) : '',
+    resultA: GAME_RESULTS.includes(g.resultA) ? g.resultA : null,
+    resultB: GAME_RESULTS.includes(g.resultB) ? g.resultB : null,
+    playersA: Array.isArray(g.playersA) ? g.playersA.map(cleanGamePlayer).filter(Boolean).slice(0, 6) : [],
+    playersB: Array.isArray(g.playersB) ? g.playersB.map(cleanGamePlayer).filter(Boolean).slice(0, 6) : [],
+    // Distinguishes "no ban screenshot was given for this game" from "a ban
+    // screenshot was given and it showed zero bans" — the UI renders those
+    // two states differently.
+    hasBans: g.hasBans === true,
+    bansA: cleanBanList(g.bansA),
+    bansB: cleanBanList(g.bansB),
+  };
+}
+
 function cleanMatch(m) {
   const stage = m.stage === 'bracket' ? 'bracket' : 'group';
   const base = {
@@ -132,6 +189,8 @@ function cleanMatch(m) {
     scheduledAt: String(m.scheduledAt || '').trim(),
     bestOf: BO_OPTIONS.includes(Number(m.bestOf)) ? Number(m.bestOf) : 3,
     votes: { a: Number(m.votes && m.votes.a) || 0, b: Number(m.votes && m.votes.b) || 0 },
+    casters: String(m.casters || '').trim().slice(0, 200),
+    games: Array.isArray(m.games) ? m.games.map(cleanGame).filter(Boolean).slice(0, 9) : [],
   };
   if (stage === 'group') {
     return {
