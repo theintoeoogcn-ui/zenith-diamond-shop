@@ -208,6 +208,11 @@
     background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
     padding:18px 14px;text-align:center;cursor:pointer;position:relative;isolation:isolate;
     transition:border-color .15s, transform .1s;
+    /* Scope layout/paint to each card so the browser doesn't have to
+       re-evaluate the whole grid while its masked pseudo-elements repaint —
+       this is what was making the grid feel sticky/janky while scrolling
+       on phones. */
+    contain:layout paint style;
   }
   /* Rim light — a bright arc travelling continuously around the border. The
      two masks cut out the middle so only the 1px edge lights up. */
@@ -249,22 +254,14 @@
   @media (prefers-reduced-motion:reduce){
     .card::before,.card::after{animation:none;}
   }
-  .card.selected{
-    border-color:var(--violet);
-    box-shadow:0 0 0 1px var(--violet), 0 0 22px rgba(139,92,246,0.35);
-    background:var(--panel-raised);
-    animation:cardPop .25s ease;
-  }
-  .card.selected::before{opacity:1;animation-duration:2.6s;}
-  .card.selected::after{opacity:calc(var(--glow-strength) * 2.2);}
-  @keyframes cardPop{0%{transform:scale(.94);}100%{transform:scale(1);}}
-  .card .amt{font-family:var(--font-main);font-weight:800;font-size:21px;margin-bottom:10px;}
-  .card img.card-icon{width:30px;height:30px;margin-bottom:8px;}
-  .card .price{font-size:15px;color:var(--cyan);font-weight:700;}
-  .card .badge{
-    position:absolute;top:-9px;left:10px;background:var(--signal);color:#fff;
-    font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;
-    font-family:var(--font-main);font-weight:600;
+  /* The rim-spin animates a custom property through a conic-gradient mask,
+     which is a paint-only (non-composited) animation — with a dozen cards
+     all spinning at once it competes with the browser for the main thread
+     during scroll and shows up as stutter on phones. Touch devices don't
+     get the hover effect this animation exists for anyway, so keep the
+     rim/glow static there and only animate on pointers that can hover. */
+  @media not all and (hover:hover) and (pointer:fine){
+    .card::before,.card::after{animation:none;}
   }
 
   .pass-card{
