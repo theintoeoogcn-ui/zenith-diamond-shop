@@ -1080,6 +1080,36 @@
     document.querySelectorAll(".lang-switch button").forEach((btn) => {
       btn.addEventListener("click", () => applyLang(btn.dataset.lang));
     });
+
+    // Mobile dropdown: below 900px the lang switch collapses to a single
+    // trigger chip (the active language). First tap opens the list instead
+    // of firing a language change; tapping an option (or outside) closes it.
+    const langSwitch = document.querySelector(".lang-switch");
+    if (langSwitch) {
+      const isMobile = () => window.matchMedia("(max-width:900px)").matches;
+      // capture phase: runs before the button's own click listener above,
+      // so it can swallow the very first tap and just open the menu.
+      langSwitch.addEventListener(
+        "click",
+        (e) => {
+          if (!isMobile() || langSwitch.classList.contains("open")) return;
+          e.stopPropagation();
+          langSwitch.classList.add("open");
+        },
+        true
+      );
+      langSwitch.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+        if (langSwitch.classList.contains("open") && e.target.closest("button[data-lang]")) {
+          langSwitch.classList.remove("open");
+        }
+      });
+      document.addEventListener("click", (e) => {
+        if (langSwitch.classList.contains("open") && !langSwitch.contains(e.target)) {
+          langSwitch.classList.remove("open");
+        }
+      });
+    }
   }
 
   // apply saved theme immediately (before paint) to avoid a flash

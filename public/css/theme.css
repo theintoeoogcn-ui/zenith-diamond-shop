@@ -48,47 +48,111 @@ body,
 }
 
 /* ============================================================
-   header controls: theme toggle + language switch
+   header controls: admin pill + language switch + theme toggle + menu
+   Every page defines its own local <style> for these (leftover from
+   before this shared file existed), so plain `.lang-switch{}` here would
+   lose to whichever loads later in the given page. Scoping through
+   `.hdr-controls` / `header` raises the specificity just enough that
+   this file always wins, which is what makes it possible to guarantee
+   one consistent control height across every page from a single place.
    ============================================================ */
-.hdr-controls{display:flex;align-items:center;gap:14px;}
+:root{ --hdr-ctrl-h:42px; }
 
-.lang-switch{
-  position:relative;display:flex;background:var(--panel);border:1px solid var(--line);
+.hdr-controls{display:flex;align-items:center;gap:10px;}
+
+.hdr-controls .admin-toggle,
+.hdr-controls .lang-switch,
+.hdr-controls .theme-toggle,
+header .mobile-menu-btn{
+  height:var(--hdr-ctrl-h);box-sizing:border-box;margin:0;
+}
+
+.hdr-controls .lang-switch{
+  position:relative;display:flex;align-items:stretch;background:var(--panel);border:1px solid var(--line);
   border-radius:999px;padding:3px;gap:2px;
 }
-.lang-switch button{
+.hdr-controls .lang-switch button{
   position:relative;z-index:2;border:none;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
   font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.5px;
-  color:var(--dim);padding:6px 10px;border-radius:999px;transition:color .25s ease;
+  color:var(--dim);padding:0 12px;border-radius:999px;transition:color .25s ease;
 }
-.lang-switch button.active{color:#fff;}
-.lang-switch .pill{
+.hdr-controls .lang-switch button.active{color:#fff;}
+.hdr-controls .lang-switch .pill{
   position:absolute;top:3px;bottom:3px;left:3px;width:calc(33.333% - 2px);
   background:linear-gradient(135deg,var(--violet),#6D3FE0);border-radius:999px;
   transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:1;
 }
 
-.theme-toggle{
-  position:relative;width:42px;height:42px;border-radius:12px;cursor:pointer;
-  background:var(--panel);border:1px solid var(--line);
+.hdr-controls .theme-toggle{
+  position:relative;width:var(--hdr-ctrl-h);border-radius:12px;cursor:pointer;
+  background:var(--panel);border:1px solid var(--line);flex-shrink:0;
   display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
-.theme-toggle:hover{border-color:var(--violet-dim);}
-.theme-toggle .icon-wrap{position:relative;width:20px;height:20px;}
-.theme-toggle svg{
+.hdr-controls .theme-toggle:hover{border-color:var(--violet-dim);}
+.hdr-controls .theme-toggle .icon-wrap{position:relative;width:20px;height:20px;}
+.hdr-controls .theme-toggle svg{
   position:absolute;inset:0;width:20px;height:20px;
   transition:transform .5s cubic-bezier(.4,0,.2,1), opacity .35s ease;
 }
-.theme-toggle .icon-sun{color:#FFB454;opacity:0;transform:rotate(-90deg) scale(.4);}
-.theme-toggle .icon-moon{color:var(--cyan);opacity:1;transform:rotate(0) scale(1);}
-[data-theme="light"] .theme-toggle .icon-sun{opacity:1;transform:rotate(0) scale(1);}
-[data-theme="light"] .theme-toggle .icon-moon{opacity:0;transform:rotate(90deg) scale(.4);}
-.theme-toggle .ray{transform-origin:10px 10px;animation:sunSpin 12s linear infinite;}
+.hdr-controls .theme-toggle .icon-sun{color:#FFB454;opacity:0;transform:rotate(-90deg) scale(.4);}
+.hdr-controls .theme-toggle .icon-moon{color:var(--cyan);opacity:1;transform:rotate(0) scale(1);}
+[data-theme="light"] .hdr-controls .theme-toggle .icon-sun{opacity:1;transform:rotate(0) scale(1);}
+[data-theme="light"] .hdr-controls .theme-toggle .icon-moon{opacity:0;transform:rotate(90deg) scale(.4);}
+.hdr-controls .theme-toggle .ray{transform-origin:10px 10px;animation:sunSpin 12s linear infinite;}
 @keyframes sunSpin{to{transform:rotate(360deg);}}
 
+header .mobile-menu-btn{
+  display:none;width:var(--hdr-ctrl-h);flex-shrink:0;align-items:center;justify-content:center;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  color:var(--hi);font-size:16px;cursor:pointer;padding:0;line-height:1;
+}
+
+.hdr-controls .admin-toggle{
+  display:none;align-items:center;gap:6px;
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  padding:0 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
+  font-family:var(--font-main);
+}
+.hdr-controls .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
+.hdr-controls .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+
 @media (max-width:900px){
+  :root{ --hdr-ctrl-h:38px; }
   .hdr-controls{gap:8px;}
-  .lang-switch button{padding:6px 8px;font-size:10px;}
+  header .mobile-menu-btn{display:flex;}
+}
+
+/* ---------- mobile language dropdown ----------
+   Under 900px the three-way pill has no room to sit next to the theme
+   toggle and hamburger at a readable size, so it collapses to just the
+   active language as a trigger chip; tapping it drops the other two
+   down as a small floating menu instead. */
+@media (max-width:900px){
+  .hdr-controls .lang-switch{padding:0;border:none;background:transparent;gap:0;}
+  .hdr-controls .lang-switch .pill{display:none;}
+  .hdr-controls .lang-switch button{display:none;}
+  .hdr-controls .lang-switch button.active{
+    display:flex;align-items:center;justify-content:center;gap:4px;
+    height:100%;min-width:52px;padding:0 12px;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--hi);
+  }
+  .hdr-controls .lang-switch button.active::after{
+    content:"";width:5px;height:5px;margin-left:1px;
+    border-right:1.5px solid var(--dim);border-bottom:1.5px solid var(--dim);transform:rotate(45deg);
+  }
+  .hdr-controls .lang-switch.open button{
+    display:flex;align-items:center;
+    position:absolute;top:calc(100% + 8px);right:0;
+    width:96px;height:36px;padding:0 14px;
+    border-radius:8px;background:var(--panel);border:1px solid var(--line);color:var(--mid);
+    z-index:39;box-shadow:0 12px 24px rgba(0,0,0,0.35);
+  }
+  .hdr-controls .lang-switch.open button:nth-of-type(1){transform:translateY(0);}
+  .hdr-controls .lang-switch.open button:nth-of-type(2){transform:translateY(44px);}
+  .hdr-controls .lang-switch.open button:nth-of-type(3){transform:translateY(88px);}
+  .hdr-controls .lang-switch.open button.active{background:var(--violet);border-color:transparent;color:#fff;}
+  .hdr-controls .lang-switch.open button.active::after{display:none;}
 }
 
 /* ============================================================

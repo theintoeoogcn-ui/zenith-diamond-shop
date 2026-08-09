@@ -86,8 +86,21 @@
     display:inline-flex;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;
     background:rgba(139,92,246,0.18);color:var(--violet);margin-bottom:8px;
   }
-  .hero-meta{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0 0;color:var(--mid);font-size:13px;}
-  .hero-meta span b{color:var(--hi);}
+  /* Date / prize / format / slots as even chips instead of plain text that
+     wraps mid-sentence — every chip is the same shape, so the row stays
+     legible how ever many of them fit per line at a given width. */
+  .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 0;}
+  .hero-meta .meta-chip{
+    display:flex;align-items:center;gap:7px;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:9px 14px;font-size:12.5px;color:var(--mid);
+  }
+  .hero-meta .meta-chip i{font-style:normal;color:var(--dim);}
+  .hero-meta .meta-chip b{color:var(--hi);font-weight:700;}
+  @media (max-width:640px){
+    .hero-meta{gap:8px;}
+    .hero-meta .meta-chip{flex:1 1 calc(50% - 8px);padding:8px 12px;font-size:12px;}
+  }
   @media (max-width:900px){ .hero{padding:30px 20px 0;} h1{font-size:24px;} }
 
   .tabs-bar{display:flex;align-items:center;gap:6px;padding:26px 48px 0;border-bottom:1px solid var(--line);overflow-x:auto;}
@@ -395,7 +408,7 @@
   .reg-top .nm{font-size:15px;font-weight:800;}
   .reg-top .sub{font-size:11.5px;color:var(--dim);margin-top:2px;}
   .reg-badge{
-    display:inline-flex;align-items:center;height:21px;padding:0 9px;border-radius:999px;
+    display:inline-flex;align-items:center;height:21px;padding:0 9px;border-radius:999px;flex-shrink:0;
     font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;
   }
   .reg-badge.pending{background:var(--panel-raised);color:var(--mid);}
@@ -403,7 +416,18 @@
   .reg-badge.rejected{background:rgba(255,62,154,0.14);color:var(--signal);}
   .reg-badge.region{background:rgba(139,92,246,0.16);color:var(--violet);}
   .reg-badge.code{background:rgba(79,224,232,0.14);color:var(--cyan);letter-spacing:1px;}
-  .reg-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  /* One row, always. On a phone the four chips (region / team code / order
+     code / status) can be a hair wider than the card, so this scrolls
+     sideways instead of ever wrapping a chip onto a second line. */
+  .reg-meta{
+    display:flex;flex-wrap:nowrap;gap:6px;align-items:center;
+    overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+    width:100%;
+  }
+  .reg-meta::-webkit-scrollbar{display:none;}
+  @media (max-width:420px){
+    .reg-badge{font-size:9px;padding:0 7px;height:20px;}
+  }
   /* Wide enough that a player's name and their contact don't collide; the
      contact sits under the name so neither has to be truncated. */
   .reg-players{
@@ -418,14 +442,22 @@
   .reg-p .who2{min-width:0;}
   .reg-p .n{display:block;font-weight:700;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .reg-p .c{display:block;color:var(--dim);font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .reg-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:13px;border-top:1px solid var(--line);}
+  /* Always one row: buttons share the width evenly (flex:1) instead of
+     wrapping the odd one out onto its own line on a narrow phone. */
+  .reg-actions{display:flex;gap:8px;flex-wrap:nowrap;margin-top:14px;padding-top:13px;border-top:1px solid var(--line);}
   .reg-btn{
-    border-radius:9px;font-size:12px;font-weight:700;padding:9px 16px;cursor:pointer;
+    flex:1 1 0;min-width:0;
+    display:flex;align-items:center;justify-content:center;gap:5px;
+    border-radius:9px;font-size:12px;font-weight:700;padding:9px 10px;cursor:pointer;
     border:1px solid var(--line);background:var(--panel-raised);color:var(--hi);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .reg-btn.ok{background:rgba(61,214,140,0.16);border-color:rgba(61,214,140,0.5);color:#3DD68C;}
   .reg-btn.no{background:rgba(255,62,154,0.12);border-color:rgba(255,62,154,0.4);color:var(--signal);}
   .reg-btn:hover{border-color:var(--violet-dim);}
+  @media (max-width:420px){
+    .reg-btn{font-size:11px;padding:9px 6px;gap:3px;}
+  }
 
   /* ---------- confirmed teams table ---------- */
   .conf-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line);background:var(--panel);}
@@ -437,7 +469,9 @@
   table.conf td{padding:12px;font-size:13px;border-bottom:1px solid var(--line);vertical-align:middle;}
   table.conf tr:last-child td{border-bottom:none;}
   table.conf td.no{width:82px;color:var(--cyan);font-weight:800;text-align:center;white-space:nowrap;}
-  table.conf .cteam{display:flex;align-items:center;gap:9px;min-width:0;}
+  /* Logo, name, tag and region all share this one row; wraps only if the
+     team name genuinely doesn't fit at the container's narrowest width. */
+  table.conf .cteam{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0;row-gap:6px;}
   table.conf .cteam img{
     width:26px;height:26px;border-radius:7px;object-fit:contain;padding:2px;flex-shrink:0;
     background:var(--logo-plate);box-shadow:0 0 0 1px var(--logo-plate-line) inset;
@@ -448,14 +482,22 @@
   }
   table.conf .cteam .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   table.conf .cteam .tg{color:var(--cyan);font-weight:800;font-size:11px;flex-shrink:0;}
-  /* Players listed across the row, in roster order. */
-  .cplayers{display:flex;flex-wrap:wrap;gap:6px;}
-  .cplayers span{
-    background:var(--panel-raised);border-radius:7px;padding:4px 9px;
-    font-size:11.5px;font-weight:600;color:var(--mid);white-space:nowrap;
+  /* Roster laid out as a tidy label/value grid — same idiom as the
+     Register Team List roster — rather than loose wrapping chips. */
+  .cplayers{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:8px 16px;
   }
-  .cplayers span b{color:var(--hi);font-weight:700;}
-  .conf-region-inline{display:none;margin-top:7px;}
+  .cplayer{display:flex;align-items:baseline;gap:8px;min-width:0;}
+  .cplayer .role{
+    font-size:9px;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;color:var(--violet);
+    width:46px;flex-shrink:0;
+  }
+  .cplayer .pname{
+    font-size:12.5px;font-weight:700;color:var(--hi);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .conf-region-inline{display:none;}
   table.conf td.no .code-chip{
     display:inline-block;background:rgba(79,224,232,0.12);border:1px solid rgba(79,224,232,0.3);
     border-radius:7px;padding:4px 9px;font-size:11.5px;font-weight:800;letter-spacing:0.5px;color:var(--cyan);
@@ -486,15 +528,23 @@
     table.conf td.c-team{padding-top:0;margin-bottom:10px;}
     table.conf .cteam .nm{white-space:normal;overflow-wrap:anywhere;}
     .conf-region-inline{display:inline-flex !important;}
-    .cplayers span{font-size:11px;padding:4px 8px;}
+    .cplayers{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px 12px;}
   }
 
   /* ---------- bracket ---------- */
+  /* Each control group (label + its select, or the action buttons) is its
+     own row-level unit via .bt-field / .bt-actions, so the toolbar reflows
+     cleanly instead of individual labels/selects/buttons wrapping apart
+     from each other on narrow screens. */
   .bracket-toolbar{
-    display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px;
+    display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-bottom:22px;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
   }
-  .bracket-toolbar .bt-label{font-size:11px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:var(--dim);}
+  .bracket-toolbar .bt-field{display:flex;align-items:center;gap:9px;}
+  .bracket-toolbar .bt-label{
+    font-size:11px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:var(--dim);
+    white-space:nowrap;
+  }
   .bracket-toolbar select{
     background:var(--void);border:1px solid var(--line);border-radius:9px;color:var(--hi);
     font-family:var(--font-main);font-size:12.5px;font-weight:700;padding:8px 11px;outline:none;cursor:pointer;
@@ -502,13 +552,24 @@
   .bracket-toolbar select:focus{border-color:var(--violet);}
   .bracket-toolbar .bt-check{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--mid);cursor:pointer;}
   .bracket-toolbar .bt-check input{accent-color:var(--violet);width:15px;height:15px;cursor:pointer;}
+  .bracket-toolbar .bt-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;}
   .seed-btn{
-    margin-left:auto;background:rgba(79,224,232,0.12);border:1px solid rgba(79,224,232,0.4);
+    background:rgba(79,224,232,0.12);border:1px solid rgba(79,224,232,0.4);
     color:var(--cyan);border-radius:999px;font-family:var(--font-main);font-size:12px;
     font-weight:800;padding:8px 14px;cursor:pointer;white-space:nowrap;
   }
   .seed-btn:hover{background:rgba(79,224,232,0.2);}
   .seed-btn:disabled{opacity:0.45;cursor:not-allowed;}
+  /* Below this, each unit takes the full width and stacks — a select next
+     to a half-width button never looks intentional, a full-width row does. */
+  @media (max-width:640px){
+    .bracket-toolbar{padding:14px;}
+    .bracket-toolbar .bt-field{width:100%;justify-content:space-between;}
+    .bracket-toolbar .bt-field select{flex:1;max-width:220px;}
+    .bracket-toolbar .bt-check{width:100%;}
+    .bracket-toolbar .bt-actions{width:100%;margin-left:0;}
+    .bracket-toolbar .bt-actions .seed-btn{flex:1;text-align:center;}
+  }
   .bracket-format-pill{
     display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:999px;
     background:rgba(139,92,246,0.14);color:var(--violet);font-size:12px;font-weight:800;
@@ -790,13 +851,17 @@
 <!-- ---------- qualifier bracket ---------- -->
 <div class="tab-panel" id="panel-qualifier">
   <div class="bracket-toolbar" id="qualifier-toolbar">
-    <span class="bt-label" id="q-label-region">Region</span>
-    <select id="f-qualifier-region">
-      <option value="MM">Myanmar Region</option>
-      <option value="TH">Thailand Region</option>
-    </select>
-    <button type="button" class="seed-btn admin-field" id="qualifier-draw-btn">🎲 Random Draw</button>
-    <button type="button" class="seed-btn admin-field" id="qualifier-clear-btn" style="margin-left:0;">Clear draw</button>
+    <div class="bt-field">
+      <span class="bt-label" id="q-label-region">Region</span>
+      <select id="f-qualifier-region">
+        <option value="MM">Myanmar Region</option>
+        <option value="TH">Thailand Region</option>
+      </select>
+    </div>
+    <div class="bt-actions">
+      <button type="button" class="seed-btn admin-field" id="qualifier-draw-btn">🎲 Random Draw</button>
+      <button type="button" class="seed-btn admin-field" id="qualifier-clear-btn">Clear draw</button>
+    </div>
   </div>
   <div class="bracket-format-pill" id="qualifier-format-pill"></div>
   <p class="q-note" id="qualifier-note">The two teams that reach the Final from each region qualify. There is no champion in the qualifier.</p>
@@ -807,17 +872,23 @@
 
 <div class="tab-panel" id="panel-bracket">
   <div class="bracket-toolbar" id="bracket-toolbar" style="display:none;">
-    <span class="bt-label">Format</span>
-    <select id="f-bracket-type">
-      <option value="single">Single Elimination</option>
-      <option value="double">Double Elimination</option>
-    </select>
-    <span class="bt-label">Teams</span>
-    <select id="f-bracket-size"></select>
+    <div class="bt-field">
+      <span class="bt-label">Format</span>
+      <select id="f-bracket-type">
+        <option value="single">Single Elimination</option>
+        <option value="double">Double Elimination</option>
+      </select>
+    </div>
+    <div class="bt-field">
+      <span class="bt-label">Teams</span>
+      <select id="f-bracket-size"></select>
+    </div>
     <label class="bt-check" id="third-place-wrap-label">
       <input type="checkbox" id="f-third-place"> Third Place Match
     </label>
-    <button type="button" class="seed-btn" id="seed-bracket-btn" title="Fill the first round from the group standings">⇅ Seed from Standings</button>
+    <div class="bt-actions">
+      <button type="button" class="seed-btn" id="seed-bracket-btn" title="Fill the first round from the group standings">⇅ Seed from Standings</button>
+    </div>
   </div>
   <div class="bracket-format-pill" id="bracket-format-pill"></div>
   <div class="bracket-scroll" id="bracket-scroll"></div>
@@ -1278,10 +1349,10 @@ function renderHero(){
     ic.textContent = tournamentInfo.icon || '🏆'; ic.style.display = 'block';
   }
   const metaParts = [];
-  if (tournamentInfo.date) metaParts.push(`<span>${t('tournament.field.date','Date')}: <b>${escapeHtml(tournamentInfo.date)}</b></span>`);
-  if (tournamentInfo.prize) metaParts.push(`<span>${t('tournament.field.prize','Prize pool')}: <b>${escapeHtml(tournamentInfo.prize)}</b></span>`);
-  if (tournamentInfo.format) metaParts.push(`<span>${t('tournament.field.format','Format')}: <b>${escapeHtml(tournamentInfo.format)}</b></span>`);
-  if (tournamentInfo.slots) metaParts.push(`<span>${t('tournament.field.slots','Slots')}: <b>${escapeHtml(tournamentInfo.slots)}</b></span>`);
+  if (tournamentInfo.date) metaParts.push(`<span class="meta-chip"><i>${t('tournament.field.date','Date')}</i><b>${escapeHtml(tournamentInfo.date)}</b></span>`);
+  if (tournamentInfo.prize) metaParts.push(`<span class="meta-chip"><i>${t('tournament.field.prize','Prize pool')}</i><b>${escapeHtml(tournamentInfo.prize)}</b></span>`);
+  if (tournamentInfo.format) metaParts.push(`<span class="meta-chip"><i>${t('tournament.field.format','Format')}</i><b>${escapeHtml(tournamentInfo.format)}</b></span>`);
+  if (tournamentInfo.slots) metaParts.push(`<span class="meta-chip"><i>${t('tournament.field.slots','Slots')}</i><b>${escapeHtml(tournamentInfo.slots)}</b></span>`);
   document.getElementById('hero-meta').innerHTML = metaParts.join('');
 }
 
@@ -2074,12 +2145,12 @@ function renderConfirmed(){
                     : `<span class="fb">${escapeHtml((tm.teamTag || '?').slice(0,2).toUpperCase())}</span>`}
                   <span class="nm">${escapeHtml(tm.teamName)}</span>
                   <span class="tg">${escapeHtml(tm.teamTag)}</span>
+                  <span class="reg-badge region conf-region-inline">${escapeHtml(regionLabel(tm.region))}</span>
                 </span>
-                <span class="reg-badge region conf-region-inline">${escapeHtml(regionLabel(tm.region))}</span>
               </td>
               <td class="c-players">
                 <div class="cplayers">
-                  ${(tm.players || []).map((p) => `<span><i>${escapeHtml(p.role)}</i><b>${escapeHtml(p.name)}</b></span>`).join('')}
+                  ${(tm.players || []).map((p) => `<div class="cplayer"><span class="role">${escapeHtml(p.role)}</span><span class="pname">${escapeHtml(p.name)}</span></div>`).join('')}
                 </div>
               </td>
               <td class="c-region"><span class="reg-badge region">${escapeHtml(regionLabel(tm.region))}</span></td>
