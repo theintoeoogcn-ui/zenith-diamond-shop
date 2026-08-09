@@ -56,9 +56,9 @@ const youtubeLiveRoutes = require('./routes/youtube-live');
 app.use('/api/youtube-live', youtubeLiveRoutes);
 
 // Match-screenshot hero-pick extraction (Match Schedule "+ Add Game") —
-// admin-passcode-protected, proxies to Anthropic's vision API using a
-// server-side key so it's never exposed to the browser. Disabled (503)
-// until ANTHROPIC_API_KEY is set — see routes/vision.js.
+// admin-passcode-protected, proxies to Google Gemini's free-tier vision API
+// using a server-side key so it's never exposed to the browser. Disabled
+// (503) until GEMINI_API_KEY is set — see routes/vision.js.
 const visionRoutes = require('./routes/vision');
 app.use('/api/vision', visionRoutes);
 
