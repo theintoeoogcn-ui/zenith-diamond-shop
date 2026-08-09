@@ -41,6 +41,11 @@ app.use('/api/diamond-pricing', diamondPricingRoutes);
 const homeStatsRoutes = require('./routes/home-stats');
 app.use('/api/home-stats', homeStatsRoutes);
 
+// Home page ad creatives (sidebar/sticky/stacked desktop widget, mobile
+// placements) — public to read, admin-passcode-protected to edit
+const adsRoutes = require('./routes/ads');
+app.use('/api/ads', adsRoutes);
+
 // News posts — public to read/like/comment, admin-passcode-protected to create/edit/delete/moderate
 const newsRoutes = require('./routes/news');
 app.use('/api/news', newsRoutes);
@@ -49,6 +54,13 @@ app.use('/api/news', newsRoutes);
 // "Live Now" badge on video posts, no admin action needed.
 const youtubeLiveRoutes = require('./routes/youtube-live');
 app.use('/api/youtube-live', youtubeLiveRoutes);
+
+// Match-screenshot hero-pick extraction (Match Schedule "+ Add Game") —
+// admin-passcode-protected, proxies to Anthropic's vision API using a
+// server-side key so it's never exposed to the browser. Disabled (503)
+// until ANTHROPIC_API_KEY is set — see routes/vision.js.
+const visionRoutes = require('./routes/vision');
+app.use('/api/vision', visionRoutes);
 
 if (!process.env.ADMIN_PASSCODE) {
   console.warn('⚠️  ADMIN_PASSCODE is not set — the "Create Tournament" admin panel is disabled until you set one in server/.env.');
@@ -69,11 +81,12 @@ const diamondPricingDb = require('./diamondPricingDb');
 const homeStatsDb = require('./homeStatsDb');
 const newsDb = require('./newsDb');
 const registrationsDb = require('./registrationsDb');
+const adsDb = require('./adsDb');
 
 Promise.all([
   ordersDb.ready,
   tournamentsDb.ready, tournamentDetailsDb.ready, diamondPricingDb.ready,
-  homeStatsDb.ready, newsDb.ready, registrationsDb.ready,
+  homeStatsDb.ready, newsDb.ready, registrationsDb.ready, adsDb.ready,
 ])
   .catch((e) => console.error('Error while restoring saved data on boot:', e.message))
   .finally(() => {

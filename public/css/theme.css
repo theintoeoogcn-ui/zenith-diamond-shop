@@ -61,6 +61,7 @@ body,
 .hdr-controls{display:flex;align-items:center;gap:10px;}
 
 .hdr-controls .admin-toggle,
+.hdr-controls .ads-manage-btn,
 .hdr-controls .lang-switch,
 .hdr-controls .theme-toggle,
 header .mobile-menu-btn{
@@ -108,14 +109,17 @@ header .mobile-menu-btn{
   color:var(--hi);font-size:16px;cursor:pointer;padding:0;line-height:1;
 }
 
-.hdr-controls .admin-toggle{
+.hdr-controls .admin-toggle,
+.hdr-controls .ads-manage-btn{
   display:none;align-items:center;gap:6px;
   background:var(--panel);border:1px solid var(--line);border-radius:999px;
   padding:0 14px;font-size:12px;font-weight:700;letter-spacing:0.3px;cursor:pointer;color:var(--dim);
   font-family:var(--font-main);
 }
-.hdr-controls .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
+.hdr-controls .admin-toggle:hover,
+.hdr-controls .ads-manage-btn:hover{border-color:var(--violet-dim);color:var(--hi);}
 .hdr-controls .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+.hdr-controls .ads-manage-btn.show{display:flex;}
 
 @media (max-width:900px){
   :root{ --hdr-ctrl-h:38px; }

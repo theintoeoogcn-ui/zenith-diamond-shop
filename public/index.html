@@ -88,13 +88,16 @@
   .hero{
     position:relative;
     min-height:calc(100vh - 73px);
-    overflow:hidden;
     display:flex;align-items:center;
   }
   @media (max-width:980px){
     .hero{min-height:auto;flex-direction:column;}
   }
 
+  /* overflow:hidden lives here (not on .hero) so the desktop ad widget can
+     use position:sticky inside .hero — an overflow other than visible on
+     any ancestor between a sticky element and the page's scrolling element
+     stops it from sticking, even if that ancestor never scrolls itself. */
   .hero-media{position:absolute;inset:0;z-index:0;background:var(--void);overflow:hidden;}
   .hero-media video{
     width:100%;height:100%;object-fit:cover;object-position:78% center;display:block;
@@ -176,6 +179,147 @@
   }
   .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
   .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
+  /* .ads-manage-btn sizing/visibility comes from css/theme.css (the shared
+     .hdr-controls rules that keep every header control the same height) —
+     not redeclared here so there's only one place that governs it. */
+
+  /* ============================================================
+     Ads — shared card look
+     ============================================================ */
+  .ad-card{
+    position:relative;border-radius:16px;overflow:hidden;background:var(--panel-raised);
+    border:1px solid var(--line);
+  }
+  .ad-card-link{display:block;position:relative;color:inherit;}
+  .ad-card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+  .ad-card-overlay{
+    position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+    padding:16px;min-height:100%;
+    background:linear-gradient(180deg, rgba(10,7,19,0.05) 0%, rgba(10,7,19,0.55) 55%, rgba(10,7,19,0.86) 100%);
+  }
+  .ad-card.lg .ad-card-overlay{min-height:220px;justify-content:flex-end;}
+  .ad-card.sm .ad-card-overlay{min-height:96px;justify-content:flex-end;padding:12px 14px;}
+  .ad-badge{
+    align-self:flex-start;background:rgba(139,92,246,0.85);color:#fff;font-size:9.5px;font-weight:800;
+    letter-spacing:0.5px;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+  }
+  .ad-headline{font-family:var(--font-main);font-weight:800;font-size:16px;line-height:1.3;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.4);}
+  .ad-card.sm .ad-headline{font-size:13px;}
+  .ad-subtext{font-size:11.5px;color:rgba(255,255,255,0.82);}
+  .ad-cta{
+    margin-top:4px;display:inline-flex;align-items:center;gap:5px;background:var(--violet);color:#fff;
+    font-size:11px;font-weight:800;letter-spacing:0.3px;padding:7px 13px;border-radius:9px;
+  }
+  .ad-sponsored-tag{
+    position:absolute;top:8px;right:8px;z-index:2;font-size:8px;font-weight:700;letter-spacing:0.5px;
+    text-transform:uppercase;color:rgba(255,255,255,0.75);background:rgba(0,0,0,0.4);
+    padding:2px 6px;border-radius:5px;pointer-events:none;
+  }
+  .ad-stack{display:flex;flex-direction:column;gap:10px;}
+
+  /* enter transitions — the incoming frame animates in; kept simple (no
+     double-buffered exit animation) so rotation can't ever get two frames
+     stuck mid-crossfade on top of each other. */
+  @keyframes adEnterFade{from{opacity:0;}to{opacity:1;}}
+  @keyframes adEnterSlide{from{opacity:0;transform:translateX(26px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes adEnterZoom{from{opacity:0;transform:scale(.88);}to{opacity:1;transform:scale(1);}}
+  @keyframes adEnterFlip{from{opacity:0;transform:rotateX(-16deg) translateY(-8px);}to{opacity:1;transform:rotateX(0) translateY(0);}}
+  .ad-anim-fade{animation:adEnterFade .5s ease both;}
+  .ad-anim-slide{animation:adEnterSlide .5s cubic-bezier(.16,1,.3,1) both;}
+  .ad-anim-zoom{animation:adEnterZoom .45s cubic-bezier(.34,1.56,.64,1) both;}
+  .ad-anim-flip{animation:adEnterFlip .5s ease both;perspective:700px;}
+  @media (prefers-reduced-motion:reduce){
+    .ad-anim-fade,.ad-anim-slide,.ad-anim-zoom,.ad-anim-flip{animation:none;}
+  }
+
+  /* ---------- desktop widget: sidebar + sticky + rotating single/stacked ---------- */
+  .hero-ad{
+    display:none;position:sticky;top:96px;align-self:flex-start;flex-shrink:0;
+    width:280px;margin-left:24px;z-index:2;
+  }
+  @media (min-width:981px){ .hero-ad.has-ads{display:block;} }
+  .ad-glow{
+    position:absolute;inset:-25%;z-index:-1;pointer-events:none;border-radius:50%;
+    background:conic-gradient(from 0deg, rgba(139,92,246,0.55), rgba(79,224,232,0.4), rgba(255,62,154,0.35), rgba(139,92,246,0.55));
+    filter:blur(42px);opacity:0.5;animation:adGlowSpin 11s linear infinite;
+  }
+  @keyframes adGlowSpin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion:reduce){ .ad-glow{animation:none;} }
+  #ad-slot-desktop{position:relative;}
+
+  /* ---------- mobile: in-flow card between hero and stats ---------- */
+  .mobile-ad-card{display:none;padding:0 20px;margin:0 0 28px;}
+  @media (max-width:980px){ .mobile-ad-card.has-ads{display:block;} }
+  .mobile-ad-card .ad-card.lg .ad-card-overlay{min-height:150px;}
+
+  /* ---------- mobile: sticky bottom banner ---------- */
+  .ad-sticky-bottom{
+    display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:60;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.4);overflow:hidden;
+  }
+  @media (max-width:980px){ .ad-sticky-bottom.show{display:flex;} }
+  .ad-sticky-bottom .ad-slot-bottom{flex:1;display:flex;align-items:center;gap:10px;padding:9px 10px;min-width:0;}
+  .ad-sticky-bottom img{width:40px;height:40px;border-radius:9px;object-fit:cover;flex-shrink:0;}
+  .ad-sticky-bottom .txt{min-width:0;flex:1;}
+  .ad-sticky-bottom .txt .h{font-size:12px;font-weight:800;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ad-sticky-bottom .txt .s{font-size:10.5px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ad-sticky-bottom .cta-mini{
+    flex-shrink:0;background:var(--violet);color:#fff;font-size:10.5px;font-weight:800;
+    padding:6px 11px;border-radius:8px;white-space:nowrap;
+  }
+  .ad-sticky-bottom .close-btn{
+    flex-shrink:0;width:28px;align-self:stretch;background:var(--panel-raised);border:none;border-left:1px solid var(--line);
+    color:var(--dim);cursor:pointer;font-size:12px;
+  }
+  .ad-sticky-bottom .close-btn:hover{color:var(--hi);}
+
+  /* ---------- mobile: once-per-visit interstitial ---------- */
+  .ad-interstitial-overlay{
+    display:none;position:fixed;inset:0;z-index:110;background:rgba(5,3,12,0.78);backdrop-filter:blur(4px);
+    align-items:center;justify-content:center;padding:24px;
+  }
+  @media (max-width:980px){ .ad-interstitial-overlay.show{display:flex;} }
+  .ad-interstitial{position:relative;width:100%;max-width:320px;animation:modalPop .25s ease;}
+  .ad-interstitial .ad-card.lg .ad-card-overlay{min-height:280px;}
+  .ad-interstitial-close{
+    position:absolute;top:-14px;right:-14px;z-index:3;width:32px;height:32px;border-radius:50%;
+    background:var(--panel);border:1px solid var(--line);color:var(--hi);cursor:pointer;font-size:14px;
+  }
+
+  /* ---------- admin: Manage Ads panel ---------- */
+  .modal.modal-ads{max-width:480px;}
+  .ads-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;max-height:340px;overflow-y:auto;}
+  .ads-row{
+    display:flex;align-items:center;gap:10px;background:var(--void);border:1px solid var(--line);
+    border-radius:10px;padding:9px;
+  }
+  .ads-row img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+  .ads-row .meta{min-width:0;flex:1;}
+  .ads-row .meta .h{font-size:13px;font-weight:700;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ads-row .meta .s{font-size:10.5px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ads-row .row-actions{display:flex;gap:5px;flex-shrink:0;}
+  .ads-row .row-actions button{
+    width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:var(--panel-raised);
+    color:var(--mid);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
+  }
+  .ads-row .row-actions button:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .ads-row .row-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
+  .ads-row.inactive{opacity:0.5;}
+  .ads-empty{text-align:center;padding:26px 14px;color:var(--mid);font-size:12.5px;border:1px dashed var(--line);border-radius:10px;margin-bottom:16px;}
+  .modal .field select{
+    width:100%;background:var(--void);border:1px solid var(--line);border-radius:9px;
+    padding:10px 12px;color:var(--hi);font-family:var(--font-main);font-size:14px;font-weight:600;outline:none;
+  }
+  .modal .field-row{display:flex;gap:10px;}
+  .modal .field-row .field{flex:1;}
+  .modal .field-check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--mid);margin-bottom:14px;}
+  .modal .field-check input{width:16px;height:16px;accent-color:var(--violet);cursor:pointer;}
+  .ad-media-upload{display:flex;align-items:center;gap:10px;}
+  .ad-media-preview{
+    width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--void);
+    border:1px solid var(--line);
+  }
 
   /* ---------- modal ---------- */
   .modal-overlay{
@@ -233,6 +377,7 @@
     <button type="button" class="admin-toggle" id="admin-toggle">
       <span id="admin-toggle-label" data-i18n="tournament.admin.locked">Admin</span>
     </button>
+    <button type="button" class="ads-manage-btn" id="ads-manage-btn">📢 <span data-i18n="ads.manage_btn">Ads</span></button>
     <div class="lang-switch" role="group" aria-label="Language">
       <div class="pill"></div>
       <button type="button" data-lang="mm">MM</button>
@@ -267,6 +412,11 @@
       <a class="hero-btn secondary" href="diamond-plan.html" data-i18n="home.btn.diamond">💎 Diamond</a>
     </div>
 
+    <!-- mobile placement 1: between hero buttons and stats -->
+    <div class="mobile-ad-card" id="mobile-ad-card">
+      <div class="ad-slot-mobile" id="ad-slot-mobile"></div>
+    </div>
+
     <div class="stats reveal-stagger">
       <div class="stat"><button type="button" class="stat-edit" data-key="tournaments" title="Edit">✏️</button><span class="icon">🏆</span><span class="num" id="stat-tournaments">2+</span><span class="lbl" data-i18n="home.stat.tournament">Tournament</span></div>
       <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="icon">💎</span><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
@@ -275,8 +425,28 @@
     </div>
   </div>
 
+  <!-- desktop widget: sidebar position + sticky while scrolling + rotates
+       between a single card and a stacked pair -->
+  <aside class="hero-ad" id="hero-ad" aria-label="Sponsored">
+    <div class="ad-glow"></div>
+    <div class="ad-slot" id="ad-slot-desktop"></div>
+  </aside>
+
 </div>
 
+<!-- mobile placement 2: sticky bottom banner -->
+<div class="ad-sticky-bottom" id="ad-sticky-bottom">
+  <div class="ad-slot-bottom" id="ad-slot-bottom"></div>
+  <button type="button" class="close-btn" id="ad-sticky-bottom-close" aria-label="Close">✕</button>
+</div>
+
+<!-- mobile placement 3: full-screen interstitial, shown once per visit -->
+<div class="ad-interstitial-overlay" id="ad-interstitial-overlay">
+  <div class="ad-interstitial" id="ad-interstitial">
+    <button type="button" class="ad-interstitial-close" id="ad-interstitial-close" aria-label="Close">✕</button>
+    <div id="ad-slot-interstitial"></div>
+  </div>
+</div>
 
 <footer>
   <span data-i18n="footer.est">EST 2026</span>
@@ -310,6 +480,72 @@
     <div class="modal-actions">
       <button class="cancel" id="stat-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
       <button class="save" id="stat-modal-save" data-i18n="tournament.form.save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- manage ads modal ---------- -->
+<div class="modal-overlay" id="ads-modal">
+  <div class="modal modal-ads">
+    <h3 data-i18n="ads.manage.title">Manage Ads</h3>
+    <div class="ads-list" id="ads-list"></div>
+    <div class="ads-empty" id="ads-empty" style="display:none;" data-i18n="ads.manage.empty">No ads yet — add one below.</div>
+    <div class="modal-actions">
+      <button class="cancel" id="ads-modal-close" data-i18n="ads.manage.close">Close</button>
+      <button class="save" id="ads-add-btn" data-i18n="ads.manage.add">+ Add Ad</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- add/edit ad modal ---------- -->
+<div class="modal-overlay" id="ad-form-modal">
+  <div class="modal">
+    <h3 id="ad-form-title" data-i18n="ads.form.title_add">Add ad</h3>
+    <div class="field">
+      <label data-i18n="ads.form.media">Image / GIF (max 1.5MB)</label>
+      <div class="ad-media-upload">
+        <img class="ad-media-preview" id="ad-media-preview" src="" alt="" style="display:none;">
+        <button type="button" class="upload-btn" id="ad-media-upload-btn" data-i18n="ads.form.upload">Choose file</button>
+        <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" id="ad-media-input" style="display:none;">
+      </div>
+    </div>
+    <div class="field">
+      <label data-i18n="ads.form.headline">Headline</label>
+      <input type="text" id="ad-f-headline" maxlength="60">
+    </div>
+    <div class="field-row">
+      <div class="field"><label data-i18n="ads.form.badge">Badge (optional)</label><input type="text" id="ad-f-badge" maxlength="30" placeholder="SPECIAL OFFER"></div>
+      <div class="field"><label data-i18n="ads.form.subtext">Subtext (optional)</label><input type="text" id="ad-f-subtext" maxlength="80"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label data-i18n="ads.form.cta_text">Button text (optional)</label><input type="text" id="ad-f-cta-text" maxlength="24" placeholder="Top Up Now"></div>
+      <div class="field"><label data-i18n="ads.form.cta_link">Button link (optional)</label><input type="text" id="ad-f-cta-link" maxlength="300" placeholder="diamond-plan.html"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="ads.form.transition">Transition</label>
+        <select id="ad-f-transition">
+          <option value="fade" data-i18n="ads.form.transition.fade">Fade</option>
+          <option value="slide" data-i18n="ads.form.transition.slide">Slide</option>
+          <option value="zoom" data-i18n="ads.form.transition.zoom">Zoom</option>
+          <option value="flip" data-i18n="ads.form.transition.flip">Flip</option>
+          <option value="random" data-i18n="ads.form.transition.random">Random (mix it up)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="ads.form.placement">Show on</label>
+        <select id="ad-f-placement">
+          <option value="both" data-i18n="ads.form.placement.both">Desktop &amp; Mobile</option>
+          <option value="desktop" data-i18n="ads.form.placement.desktop">Desktop only</option>
+          <option value="mobile" data-i18n="ads.form.placement.mobile">Mobile only</option>
+        </select>
+      </div>
+    </div>
+    <label class="field-check"><input type="checkbox" id="ad-f-active" checked> <span data-i18n="ads.form.active">Active</span></label>
+    <div class="modal-err" id="ad-form-err">Error</div>
+    <div class="modal-actions">
+      <button class="cancel" id="ad-form-cancel" data-i18n="tournament.form.cancel">Cancel</button>
+      <button class="save" id="ad-form-save" data-i18n="tournament.form.save">Save</button>
     </div>
   </div>
 </div>
@@ -394,6 +630,8 @@ function setAdminUI(){
   adminToggle.classList.toggle('on', isAdmin);
   adminToggleLabel.textContent = isAdmin ? t('tournament.admin.unlocked','Admin mode') : t('tournament.admin.locked','Admin');
   adminToggleLabel.setAttribute('data-i18n', isAdmin ? 'tournament.admin.unlocked' : 'tournament.admin.locked');
+  const adsBtn = document.getElementById('ads-manage-btn');
+  if (adsBtn) adsBtn.classList.toggle('show', isAdmin);
 }
 
 adminToggle.addEventListener('click', async () => {
@@ -474,6 +712,303 @@ document.getElementById('stat-modal-save').addEventListener('click', async () =>
   } finally {
     saveBtn.disabled = false;
     saveBtn.textContent = t('tournament.form.save','Save');
+  }
+});
+
+/* ================= Ads =================
+   One admin-managed list (/api/ads) feeds three home-page surfaces:
+     - desktop: a sticky sidebar widget beside the hero that rotates every
+       5s between a single card and a stacked pair
+     - mobile: an in-flow card between the hero buttons and the stats, plus
+       a persistent sticky bottom banner (same rotation, synced)
+     - mobile: a full-screen interstitial shown once per visit (sessionStorage)
+   All text fields are escaped on render; ctaLink is already restricted to
+   http(s)/relative paths server-side (see adsDb.js), never javascript:. */
+function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const AD_ROTATE_MS = 5000;
+const AD_TRANSITIONS = ['fade','slide','zoom','flip'];
+let allAds = [];
+let desktopCursor = 0, desktopToggle = 0, mobileCursor = 0;
+let desktopTimer = null, mobileTimer = null;
+const AD_BOTTOM_CLOSED_KEY = 'zenith-ad-bottom-closed';
+const AD_INTERSTITIAL_SEEN_KEY = 'zenith-ad-interstitial-seen'; // sessionStorage: once per visit
+
+function adsFor(placement){
+  return allAds.filter(a => a.active && (a.placement === 'both' || a.placement === placement));
+}
+function pickTransition(ad){
+  if (!ad) return 'fade';
+  if (ad.transition === 'random') return AD_TRANSITIONS[Math.floor(Math.random() * AD_TRANSITIONS.length)];
+  return AD_TRANSITIONS.includes(ad.transition) ? ad.transition : 'fade';
+}
+function playEnterAnim(el, anim){
+  el.classList.remove('ad-anim-fade','ad-anim-slide','ad-anim-zoom','ad-anim-flip');
+  void el.offsetWidth; // force reflow so the animation restarts every rotation
+  el.classList.add('ad-anim-' + anim);
+}
+function adCardHtml(ad, size){
+  const hasLink = !!ad.ctaLink;
+  const openTag = hasLink
+    ? `<a class="ad-card-link" href="${escapeHtml(ad.ctaLink)}" target="_blank" rel="noopener sponsored">`
+    : `<div class="ad-card-link">`;
+  const closeTag = hasLink ? `</a>` : `</div>`;
+  return `
+    <div class="ad-card ${size}">
+      ${openTag}
+        <img class="ad-card-img" src="${ad.media}" alt="">
+        <div class="ad-card-overlay">
+          ${ad.badge ? `<span class="ad-badge">${escapeHtml(ad.badge)}</span>` : ''}
+          ${ad.headline ? `<div class="ad-headline">${escapeHtml(ad.headline)}</div>` : ''}
+          ${ad.subtext ? `<div class="ad-subtext">${escapeHtml(ad.subtext)}</div>` : ''}
+          ${ad.ctaText ? `<span class="ad-cta">${escapeHtml(ad.ctaText)}</span>` : ''}
+        </div>
+      ${closeTag}
+      <span class="ad-sponsored-tag" data-i18n="ads.sponsored">Sponsored</span>
+    </div>`;
+}
+
+/* ---- desktop: sidebar / sticky / single↔stacked rotation ---- */
+function nextDesktopFrame(){
+  const ads = adsFor('desktop');
+  if (!ads.length) return [];
+  let size = (desktopToggle % 2 === 0) ? 1 : 2;
+  if (size > ads.length) size = 1;
+  const picked = [];
+  for (let k = 0; k < size; k++) { picked.push(ads[desktopCursor % ads.length]); desktopCursor++; }
+  desktopToggle++;
+  return picked;
+}
+function renderDesktopAdFrame(){
+  const widget = document.getElementById('hero-ad');
+  const slot = document.getElementById('ad-slot-desktop');
+  const frame = nextDesktopFrame();
+  if (!frame.length) { widget.classList.remove('has-ads'); return; }
+  widget.classList.add('has-ads');
+  const html = frame.length === 1
+    ? adCardHtml(frame[0], 'lg')
+    : `<div class="ad-stack">${frame.map(a => adCardHtml(a, 'sm')).join('')}</div>`;
+  slot.innerHTML = html;
+  playEnterAnim(slot, pickTransition(frame[0]));
+}
+function startDesktopRotation(){
+  clearInterval(desktopTimer);
+  desktopCursor = 0; desktopToggle = 0;
+  renderDesktopAdFrame();
+  if (adsFor('desktop').length > 1) desktopTimer = setInterval(renderDesktopAdFrame, AD_ROTATE_MS);
+}
+
+/* ---- mobile: in-flow card + sticky bottom banner (synced) ---- */
+function nextMobileAd(){
+  const ads = adsFor('mobile');
+  if (!ads.length) return null;
+  const ad = ads[mobileCursor % ads.length];
+  mobileCursor++;
+  return ad;
+}
+function bottomBannerHtml(ad){
+  const hasLink = !!ad.ctaLink;
+  const openTag = hasLink ? `<a class="ad-card-link" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;" href="${escapeHtml(ad.ctaLink)}" target="_blank" rel="noopener sponsored">` : `<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">`;
+  const closeTag = hasLink ? `</a>` : `</div>`;
+  return `
+    ${openTag}
+      <img src="${ad.media}" alt="">
+      <div class="txt">
+        <div class="h">${escapeHtml(ad.headline || '')}</div>
+        ${ad.subtext ? `<div class="s">${escapeHtml(ad.subtext)}</div>` : ''}
+      </div>
+      ${ad.ctaText ? `<span class="cta-mini">${escapeHtml(ad.ctaText)}</span>` : ''}
+    ${closeTag}`;
+}
+function renderMobileAdFrame(){
+  const cardWrap = document.getElementById('mobile-ad-card');
+  const bottomWrap = document.getElementById('ad-sticky-bottom');
+  const ads = adsFor('mobile');
+  if (!ads.length) { cardWrap.classList.remove('has-ads'); bottomWrap.classList.remove('show'); return; }
+  const ad = nextMobileAd();
+  const anim = pickTransition(ad);
+
+  cardWrap.classList.add('has-ads');
+  const cardSlot = document.getElementById('ad-slot-mobile');
+  cardSlot.innerHTML = adCardHtml(ad, 'lg');
+  playEnterAnim(cardSlot, anim);
+
+  if (sessionStorage.getItem(AD_BOTTOM_CLOSED_KEY) !== '1') {
+    bottomWrap.classList.add('show');
+    const bottomSlot = document.getElementById('ad-slot-bottom');
+    bottomSlot.innerHTML = bottomBannerHtml(ad);
+    playEnterAnim(bottomSlot, anim);
+  }
+}
+function startMobileRotation(){
+  clearInterval(mobileTimer);
+  mobileCursor = 0;
+  renderMobileAdFrame();
+  if (adsFor('mobile').length > 1) mobileTimer = setInterval(renderMobileAdFrame, AD_ROTATE_MS);
+}
+document.getElementById('ad-sticky-bottom-close').addEventListener('click', () => {
+  sessionStorage.setItem(AD_BOTTOM_CLOSED_KEY, '1');
+  document.getElementById('ad-sticky-bottom').classList.remove('show');
+});
+
+/* ---- mobile: once-per-visit interstitial ---- */
+function maybeShowInterstitial(){
+  if (sessionStorage.getItem(AD_INTERSTITIAL_SEEN_KEY) === '1') return;
+  const ad = adsFor('mobile')[0];
+  if (!ad) return;
+  setTimeout(() => {
+    sessionStorage.setItem(AD_INTERSTITIAL_SEEN_KEY, '1');
+    document.getElementById('ad-slot-interstitial').innerHTML = adCardHtml(ad, 'lg');
+    document.getElementById('ad-interstitial-overlay').classList.add('show');
+  }, 2500);
+}
+function closeInterstitial(){ document.getElementById('ad-interstitial-overlay').classList.remove('show'); }
+document.getElementById('ad-interstitial-close').addEventListener('click', closeInterstitial);
+document.getElementById('ad-interstitial-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'ad-interstitial-overlay') closeInterstitial();
+});
+
+async function loadAds(){
+  try {
+    const res = await fetch('/api/ads');
+    allAds = await res.json();
+    if (!Array.isArray(allAds)) allAds = [];
+  } catch (e) { allAds = []; }
+  startDesktopRotation();
+  startMobileRotation();
+  maybeShowInterstitial();
+}
+loadAds();
+
+/* ---- admin: Manage Ads panel ---- */
+const adsModal = document.getElementById('ads-modal');
+const adFormModal = document.getElementById('ad-form-modal');
+const adFormErr = document.getElementById('ad-form-err');
+let editingAdId = null;
+let adMediaData = '';
+
+function renderAdsList(){
+  const list = document.getElementById('ads-list');
+  const empty = document.getElementById('ads-empty');
+  if (!allAds.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = allAds.map((ad) => `
+    <div class="ads-row ${ad.active ? '' : 'inactive'}">
+      <img src="${ad.media}" alt="">
+      <div class="meta">
+        <div class="h">${escapeHtml(ad.headline || '(no headline)')}</div>
+        <div class="s">${escapeHtml(ad.placement)} · ${escapeHtml(ad.transition)} · ${ad.active ? t('ads.manage.active','active') : t('ads.manage.inactive','inactive')}</div>
+      </div>
+      <div class="row-actions">
+        <button type="button" title="${escapeHtml(t('ads.manage.toggle','Toggle active'))}" onclick="toggleAdActive('${ad.id}')">${ad.active ? '🙈' : '👁'}</button>
+        <button type="button" title="${escapeHtml(t('ads.manage.edit','Edit'))}" onclick="editAd('${ad.id}')">✏️</button>
+        <button type="button" class="del" title="${escapeHtml(t('reg.delete','Delete'))}" onclick="deleteAd('${ad.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+async function saveAdsList(nextAds){
+  const res = await fetch('/api/ads', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
+    body: JSON.stringify({ ads: nextAds }),
+  });
+  if (!res.ok) return false;
+  allAds = await res.json();
+  return true;
+}
+
+window.toggleAdActive = async function(id){
+  const next = allAds.map(a => a.id === id ? { ...a, active: !a.active } : a);
+  const ok = await saveAdsList(next);
+  if (ok) { renderAdsList(); startDesktopRotation(); startMobileRotation(); }
+};
+window.deleteAd = async function(id){
+  if (!confirm(t('ads.manage.delete_confirm','Delete this ad?'))) return;
+  const next = allAds.filter(a => a.id !== id);
+  const ok = await saveAdsList(next);
+  if (ok) { renderAdsList(); startDesktopRotation(); startMobileRotation(); }
+};
+window.editAd = function(id){
+  const ad = allAds.find(a => a.id === id);
+  if (ad) openAdForm(ad);
+};
+
+document.getElementById('ads-manage-btn').addEventListener('click', () => {
+  renderAdsList();
+  adsModal.classList.add('show');
+});
+document.getElementById('ads-modal-close').addEventListener('click', () => adsModal.classList.remove('show'));
+document.getElementById('ads-add-btn').addEventListener('click', () => openAdForm(null));
+
+function openAdForm(ad){
+  editingAdId = ad ? ad.id : null;
+  adMediaData = ad ? ad.media : '';
+  document.getElementById('ad-form-title').textContent = ad ? t('ads.form.title_edit','Edit ad') : t('ads.form.title_add','Add ad');
+  document.getElementById('ad-f-headline').value = ad ? ad.headline : '';
+  document.getElementById('ad-f-badge').value = ad ? ad.badge : '';
+  document.getElementById('ad-f-subtext').value = ad ? ad.subtext : '';
+  document.getElementById('ad-f-cta-text').value = ad ? ad.ctaText : '';
+  document.getElementById('ad-f-cta-link').value = ad ? ad.ctaLink : '';
+  document.getElementById('ad-f-transition').value = ad ? ad.transition : 'fade';
+  document.getElementById('ad-f-placement').value = ad ? ad.placement : 'both';
+  document.getElementById('ad-f-active').checked = ad ? !!ad.active : true;
+  const preview = document.getElementById('ad-media-preview');
+  if (adMediaData) { preview.src = adMediaData; preview.style.display = 'block'; } else { preview.style.display = 'none'; }
+  adFormErr.classList.remove('show');
+  adFormModal.classList.add('show');
+}
+document.getElementById('ad-form-cancel').addEventListener('click', () => adFormModal.classList.remove('show'));
+
+document.getElementById('ad-media-upload-btn').addEventListener('click', () => document.getElementById('ad-media-input').click());
+document.getElementById('ad-media-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { alert(t('ads.form.error_filetype','Please choose an image or GIF file.')); return; }
+  if (file.size > 1.5 * 1024 * 1024) { alert(t('ads.form.error_filesize','That file is too large — 1.5MB max.')); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    adMediaData = reader.result;
+    const preview = document.getElementById('ad-media-preview');
+    preview.src = adMediaData;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('ad-form-save').addEventListener('click', async () => {
+  if (!adMediaData) {
+    adFormErr.textContent = t('ads.form.error_need_media','Please choose an image or GIF first.');
+    adFormErr.classList.add('show');
+    return;
+  }
+  const data = {
+    id: editingAdId || undefined,
+    media: adMediaData,
+    headline: document.getElementById('ad-f-headline').value.trim(),
+    badge: document.getElementById('ad-f-badge').value.trim(),
+    subtext: document.getElementById('ad-f-subtext').value.trim(),
+    ctaText: document.getElementById('ad-f-cta-text').value.trim(),
+    ctaLink: document.getElementById('ad-f-cta-link').value.trim(),
+    transition: document.getElementById('ad-f-transition').value,
+    placement: document.getElementById('ad-f-placement').value,
+    active: document.getElementById('ad-f-active').checked,
+  };
+  const btn = document.getElementById('ad-form-save');
+  btn.disabled = true; btn.textContent = t('tournament.form.saving','Saving…');
+  const next = editingAdId
+    ? allAds.map(a => a.id === editingAdId ? { ...a, ...data } : a)
+    : [...allAds, data];
+  const ok = await saveAdsList(next);
+  btn.disabled = false; btn.textContent = t('tournament.form.save','Save');
+  if (ok) {
+    adFormModal.classList.remove('show');
+    renderAdsList();
+    startDesktopRotation();
+    startMobileRotation();
+  } else {
+    adFormErr.textContent = t('tourdetail.error_save','Could not save. Please try again.');
+    adFormErr.classList.add('show');
   }
 });
 
