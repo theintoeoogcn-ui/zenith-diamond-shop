@@ -24,6 +24,36 @@ const SHEET_KEY = 'icons';
 const MAX_MEDIA_BYTES = 300 * 1024; // ~300KB decoded — plenty for a small square icon
 const MAX_ENTRIES_PER_KIND = 400; // generous headroom over MLBB's actual hero/item roster
 
+// A small starter set of hero portraits (name -> official Moonton CDN URL),
+// bundled with the app so the library isn't empty on day one. Sourced once
+// from a community MLBB data project; only a partial roster (the pipeline
+// that produced it couldn't reach the rest — see hero-icon-seed.json).
+// Everything not in this list, and every item icon, is filled in by the
+// admin uploading it once from the match view (see routes/icons.js) — those
+// uploads always take priority and are never overwritten by this seed.
+const HERO_SEED = require('./hero-icon-seed.json');
+
+function isTrustedSeedUrl(v) {
+  return typeof v === 'string' && v.length < 300 && /^https:\/\//i.test(v);
+}
+
+// Fills in any hero from HERO_SEED that isn't already present (from an
+// earlier admin upload or a previous seed run). Never overwrites existing
+// entries, so an admin's own upload always wins.
+function seedDefaults() {
+  const data = readAll();
+  let changed = false;
+  for (const [name, url] of Object.entries(HERO_SEED)) {
+    if (!isTrustedSeedUrl(url)) continue;
+    const norm = normalizeName(name);
+    if (norm && !data.heroes[norm]) {
+      data.heroes[norm] = { name, media: url };
+      changed = true;
+    }
+  }
+  if (changed) writeAll(data);
+}
+
 function ensureFile() {
   if (!fs.existsSync(path.dirname(DB_FILE))) fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
   if (!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify({ heroes: {}, items: {} }), 'utf8');
@@ -101,6 +131,9 @@ function removeIcon(kind, displayName) {
   return data;
 }
 
-const ready = hydrate(SHEET_KEY, DB_FILE);
+// Order matters: pull down whatever's already saved in Sheets first (which
+// may include admin uploads from a previous deploy), *then* seed — so the
+// seed only ever fills genuine gaps.
+const ready = hydrate(SHEET_KEY, DB_FILE).then(seedDefaults);
 
 module.exports = { getIcons, setIcon, removeIcon, normalizeName, ready, MAX_MEDIA_BYTES, MAX_ENTRIES_PER_KIND };
