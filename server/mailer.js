@@ -114,12 +114,18 @@ function voucherHtml(order) {
         </tr></table>
       </div>
     </div>
-    <div style="max-width:420px;margin:18px auto 0;text-align:center;padding:0 12px;">
-      <div style="font-size:13px;color:#B4A4DC;line-height:1.6;">
-        Thank you for choosing Zenith Esports — we hope to see you back for your next top-up soon.
-      </div>
-      <div style="font-size:13px;color:#B4A4DC;line-height:1.6;margin-top:4px;">
-        Zenith Esports မှာ ဝယ်ယူအားပေးတဲ့အတွက် ကျေးဇူးတင်ပါတယ် — နောက်တစ်ကြိမ် Diamond ဝယ်ယူဖို့ ထပ်လာလည်ပေးပါဦးနော်။
+    <div style="max-width:420px;margin:16px auto 0;">
+      <div style="background:#150C29;border:1px solid #2C1F4D;border-radius:16px;padding:24px 22px;text-align:center;">
+        <div style="width:34px;height:34px;line-height:34px;border-radius:50%;background:rgba(139,92,246,0.15);display:inline-block;font-size:15px;color:#8B5CF6;margin:0 0 12px;">♦</div>
+        <div style="font-size:15px;font-weight:700;color:#F4EEFF;line-height:1.6;">
+          ဝယ်ယူအားပေးတဲ့အတွက် ကျေးဇူးတင်ပါတယ်
+        </div>
+        <div style="font-size:13px;color:#B4A4DC;line-height:1.6;margin-top:4px;">
+          နောက်တစ်ကြိမ် ထပ်လာဝယ်ပေးပါဦးနော်
+        </div>
+        <div style="font-size:11px;color:#6C6089;line-height:1.6;margin-top:14px;padding-top:14px;border-top:1px solid #2C1F4D;">
+          Thank you for shopping with Zenith Esports — see you next time!
+        </div>
       </div>
     </div>
   </div>`;
