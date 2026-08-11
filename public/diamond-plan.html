@@ -523,7 +523,11 @@
     margin:16px 20px 0;border-top:1px solid var(--line);
     padding:16px 20px 18px;display:flex;align-items:center;gap:14px;
   }
-  .voucher-qr{width:64px;height:64px;background:var(--hi);border-radius:8px;flex-shrink:0;}
+  .voucher-qr{
+    width:64px;height:64px;background:var(--hi);border-radius:8px;flex-shrink:0;
+    overflow:hidden;line-height:0;
+  }
+  .voucher-qr canvas,.voucher-qr img{width:100% !important;height:100% !important;display:block;}
   .voucher-foot .note{font-size:10px;color:var(--dim);line-height:1.5;}
   .voucher-save{
     display:block;width:100%;margin-top:12px;padding:10px;text-align:center;
@@ -1215,10 +1219,14 @@ function showVoucher(order){
 
   if (!voucherQrDrawn && window.QRCode) {
     voucherQrDrawn = true;
+    // Drawn once at a fixed high resolution — the .voucher-qr CSS (below)
+    // scales the resulting canvas/img to fill whatever size the container
+    // is at the current breakpoint (64px on phones, 88px on desktop),
+    // instead of leaving a mismatched gap around a fixed 64px code.
     new QRCode(document.getElementById('voucher-qr'), {
       text: 'https://zenithwbf.com',
-      width: 64,
-      height: 64,
+      width: 240,
+      height: 240,
       colorDark: '#1B1030',
       colorLight: '#F4EEFF',
     });
