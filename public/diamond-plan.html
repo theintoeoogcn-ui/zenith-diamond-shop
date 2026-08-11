@@ -515,10 +515,10 @@
   }
   .voucher-perf .notch.l{left:-12px;} .voucher-perf .notch.r{right:-12px;}
   .voucher-details{padding:16px 20px 0;}
-  .voucher-details table{width:100%;font-size:12px;border-collapse:collapse;font-family:var(--font-main);}
-  .voucher-details td{padding:5px 0;}
-  .voucher-details td:first-child{color:var(--dim);}
-  .voucher-details td:last-child{text-align:right;color:var(--hi);font-weight:600;}
+  .voucher-grid{display:grid;grid-template-columns:1fr;font-family:var(--font-main);}
+  .voucher-item{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:12px;}
+  .voucher-item .k{color:var(--dim);}
+  .voucher-item .v{color:var(--hi);font-weight:600;text-align:right;}
   .voucher-foot{
     margin:16px 20px 0;border-top:1px solid var(--line);
     padding:16px 20px 18px;display:flex;align-items:center;gap:14px;
@@ -531,6 +531,28 @@
     border:1px solid var(--line);border-radius:10px;cursor:pointer;font-family:var(--font-main);
   }
   .voucher-save:hover{border-color:var(--violet);}
+
+  /* Wider screens get a roomier receipt: bigger card, two-column detail
+     grid (label stacked over value, like a real printed receipt), and
+     larger code/logo/QR so the popup doesn't look stretched-thin and
+     lost in the middle of a big monitor. */
+  @media (min-width:700px){
+    .voucher-modal{max-width:460px;}
+    .voucher-brand img{width:30px;height:30px;}
+    .voucher-brand .name{font-size:14px;}
+    .voucher-code{font-size:27px;}
+    .voucher-check{width:46px;height:46px;font-size:20px;}
+    .voucher-grid{grid-template-columns:1fr 1fr;column-gap:28px;}
+    .voucher-item{flex-direction:column;align-items:flex-start;gap:3px;padding:9px 0;}
+    .voucher-item .v{text-align:left;font-size:14px;}
+    .voucher-item.full{
+      grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:space-between;
+      border-top:1px solid var(--line);margin-top:2px;padding-top:12px;
+    }
+    .voucher-foot{padding:18px 22px 22px;gap:18px;}
+    .voucher-qr{width:88px;height:88px;}
+    .voucher-foot .note{font-size:11px;}
+  }
 
   footer{
     display:flex;justify-content:space-between;padding:26px 48px;
@@ -619,6 +641,11 @@
           <label for="server-id" data-i18n="diamond.field.server">Server</label>
           <input id="server-id" type="text" placeholder="e.g. 2891">
         </div>
+      </div>
+
+      <div class="field">
+        <label for="email-input" data-i18n="diamond.field.email">Email (voucher will be sent here)</label>
+        <input id="email-input" type="email" placeholder="e.g. you@gmail.com" inputmode="email">
       </div>
 
       <div class="ign-row" id="ign-row" style="display:none;">
@@ -778,13 +805,13 @@
       </div>
       <div class="voucher-perf"><div class="notch l"></div><div class="notch r"></div></div>
       <div class="voucher-details">
-        <table>
-          <tr><td data-i18n="diamond.voucher.package">Package</td><td id="voucher-package">—</td></tr>
-          <tr><td data-i18n="diamond.voucher.amount">Amount</td><td id="voucher-amount">—</td></tr>
-          <tr><td data-i18n="diamond.voucher.gameid">Game ID</td><td id="voucher-gameid">—</td></tr>
-          <tr><td data-i18n="diamond.voucher.date">Date</td><td id="voucher-date">—</td></tr>
-          <tr><td data-i18n="diamond.voucher.method">Payment method</td><td id="voucher-method">—</td></tr>
-        </table>
+        <div class="voucher-grid">
+          <div class="voucher-item"><span class="k" data-i18n="diamond.voucher.package">Package</span><span class="v" id="voucher-package">—</span></div>
+          <div class="voucher-item"><span class="k" data-i18n="diamond.voucher.amount">Amount</span><span class="v" id="voucher-amount">—</span></div>
+          <div class="voucher-item"><span class="k" data-i18n="diamond.voucher.gameid">Game ID</span><span class="v" id="voucher-gameid">—</span></div>
+          <div class="voucher-item"><span class="k" data-i18n="diamond.voucher.date">Date</span><span class="v" id="voucher-date">—</span></div>
+          <div class="voucher-item full"><span class="k" data-i18n="diamond.voucher.method">Payment method</span><span class="v" id="voucher-method">—</span></div>
+        </div>
       </div>
       <div class="voucher-foot">
         <div class="voucher-qr" id="voucher-qr"></div>
@@ -1114,6 +1141,7 @@ async function submitOrder(){
     paymentMethod: selectedPayment,
     senderNumber: document.getElementById('sender-number').value.trim(),
     senderName: document.getElementById('sender-name').value.trim(),
+    email: document.getElementById('email-input').value.trim(),
   };
 
   try {

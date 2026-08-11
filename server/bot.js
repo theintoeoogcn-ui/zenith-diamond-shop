@@ -1,6 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 const { getOrder, updateOrder } = require('./db');
 const { appendOrderRow } = require('./googleSheets');
+const { sendVoucherEmail } = require('./mailer');
 
 const TOKEN = process.env.BOT_TOKEN;
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
@@ -176,7 +177,10 @@ if (BOT_ENABLED) {
       }
     }));
 
-    if (action === 'confirm') appendOrderRow(updated).catch(() => {});
+    if (action === 'confirm') {
+      appendOrderRow(updated).catch(() => {});
+      sendVoucherEmail(updated).catch(() => {}); // mailer.js already never throws, but belt-and-suspenders
+    }
   });
 
   bot.on('polling_error', (err) => {

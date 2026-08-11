@@ -3,11 +3,15 @@ const router = express.Router();
 const { createOrder, getOrder } = require('../db');
 const { notifyAdmin } = require('../bot');
 
+// Deliberately loose (not RFC-5322-exact) — just enough to catch obvious
+// typos before we bother trying to send a voucher to it later.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // Create a new order and alert the admin on Telegram
 router.post('/', async (req, res) => {
   const {
     gameId, serverId, ignName, packageLabel, amount, paymentMethod,
-    senderNumber, screenshotBase64, screenshotMime,
+    senderNumber, screenshotBase64, screenshotMime, email,
   } = req.body || {};
 
   if (!gameId || !serverId || !packageLabel || !amount || !paymentMethod) {
@@ -15,6 +19,10 @@ router.post('/', async (req, res) => {
   }
   if (typeof amount !== 'number' || amount <= 0) {
     return res.status(400).json({ error: 'Amount must be a positive number.' });
+  }
+  const trimmedEmail = email ? String(email).trim() : '';
+  if (trimmedEmail && !EMAIL_RE.test(trimmedEmail)) {
+    return res.status(400).json({ error: 'That email address doesn\'t look right.' });
   }
 
   let screenshotBuffer = null;
@@ -34,6 +42,7 @@ router.post('/', async (req, res) => {
     amount,
     paymentMethod: String(paymentMethod).trim(),
     senderNumber: senderNumber ? String(senderNumber).trim() : null,
+    email: trimmedEmail || null,
     hasScreenshot: !!screenshotBuffer,
   });
 

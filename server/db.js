@@ -61,7 +61,7 @@ function diamondsInLabel(label) {
   return nums.reduce((sum, n) => sum + Number(n), 0);
 }
 
-function createOrder({ gameId, serverId, ignName, packageLabel, amount, paymentMethod, senderNumber, hasScreenshot }) {
+function createOrder({ gameId, serverId, ignName, packageLabel, amount, paymentMethod, senderNumber, hasScreenshot, email }) {
   const orders = readAll();
   const code = nextCode(orders);
 
@@ -77,6 +77,9 @@ function createOrder({ gameId, serverId, ignName, packageLabel, amount, paymentM
     amount,
     paymentMethod,
     senderNumber: senderNumber || null,
+    // Optional — if given, the voucher is emailed here once the order is
+    // confirmed (see server/mailer.js, triggered from bot.js).
+    email: email || null,
     hasScreenshot: !!hasScreenshot,
     status: 'pending', // pending -> notified -> confirmed | rejected
     createdAt: new Date().toISOString(),
