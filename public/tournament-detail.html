@@ -2863,6 +2863,48 @@ async function loadIconLibrary(){
     iconLibraryLoaded = true;
   } catch (e) { /* offline or blocked — chips just fall back to initials/text */ }
 }
+
+// ---- Static icon folder (public/assets/hero-icons/, public/assets/item-icons/) ----
+// Drop a file named after the hero/item (see the README.txt in each folder)
+// and it's picked up automatically — no admin upload needed. This is
+// checked in addition to, and takes priority over, the uploaded icon
+// library above; whichever resolves first for a given name is cached so
+// repeat chips for the same hero/item don't re-probe the network.
+function slugifyIconName(name){
+  return String(name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+const staticIconCache = new Map(); // "hero:miya" -> url string | null (null = confirmed absent)
+function staticIconPath(kind, name){
+  const slug = slugifyIconName(name);
+  if (!slug) return null;
+  return `/assets/${kind === 'hero' ? 'hero-icons' : 'item-icons'}/${slug}.png`;
+}
+function probeImage(url){
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(url);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+// Resolves the best available icon for a name: a static file first, then
+// the uploaded library, else null (caller falls back to initials/text).
+// Callback-based (rather than returned promise) so call sites can fire off
+// the probe and keep rendering synchronously with whatever's already known,
+// upgrading the chip in place once the probe settles.
+function resolveIconUrl(kind, name, onResolved){
+  const cacheKey = kind + ':' + normalizeIconName(name);
+  if (staticIconCache.has(cacheKey)) {
+    onResolved(staticIconCache.get(cacheKey) || (kind === 'hero' ? heroIconUrl(name) : itemIconUrl(name)));
+    return;
+  }
+  const staticUrl = staticIconPath(kind, name);
+  if (!staticUrl) { onResolved(kind === 'hero' ? heroIconUrl(name) : itemIconUrl(name)); return; }
+  probeImage(staticUrl).then((found) => {
+    staticIconCache.set(cacheKey, found);
+    onResolved(found || (kind === 'hero' ? heroIconUrl(name) : itemIconUrl(name)));
+  });
+}
 function heroInitials(name){
   if (!name) return '?';
   return name.split(/[\s'-]+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -2925,11 +2967,11 @@ function mvTooltipHtml(player, pinned){
     const itemUploadBtn = (canEdit && !url)
       ? `<button type="button" class="tt-icon-upload" data-kind="item" data-name="${escapeHtml(itemName)}" title="${escapeHtml(t('tourdetail.mv.upload_icon','Upload icon'))}">📷</button>`
       : '';
-    return `<span class="tt-item-chip"><span class="tt-item-icon" ${iconInner}>${url ? '' : '🎒'}</span>${escapeHtml(itemName)}${itemUploadBtn}</span>`;
+    return `<span class="tt-item-chip" data-item="${escapeHtml(itemName)}"><span class="tt-item-icon" ${iconInner}>${url ? '' : '🎒'}</span>${escapeHtml(itemName)}${itemUploadBtn}</span>`;
   }).join('');
   return `
-    <div class="tt-name">
-      ${heroIcon ? `<img src="${heroIcon}" alt="" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">` : ''}
+    <div class="tt-name" data-hero-slot="${escapeHtml(player.heroName || '')}">
+      ${heroIcon ? `<img src="${heroIcon}" alt="" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">` : '<span class="tt-hero-slot-img"></span>'}
       <span>${escapeHtml(player.heroName || 'Unknown')}${player.mvp ? ' ⭐' : ''}</span>
       ${heroUploadBtn}
     </div>
@@ -2939,11 +2981,36 @@ function mvTooltipHtml(player, pinned){
     ${pinned ? `<button type="button" class="tt-close" onclick="mvHideTooltip()">✕</button>` : ''}
   `;
 }
+// Upgrades whatever the synchronous DB-only render showed, once the static
+// hero-icons/item-icons folder probe (see resolveIconUrl) settles.
+function wireTooltipIconProbes(root, player){
+  if (!heroIconUrl(player.heroName)) {
+    resolveIconUrl('hero', player.heroName, (url) => {
+      if (!url) return;
+      const slot = root.querySelector('.tt-hero-slot-img');
+      if (slot) slot.outerHTML = `<img src="${url}" alt="" style="width:20px;height:20px;border-radius:6px;object-fit:cover;">`;
+      const btn = root.querySelector(`.tt-icon-upload[data-kind="hero"]`);
+      if (btn) btn.remove();
+    });
+  }
+  root.querySelectorAll('.tt-item-chip[data-item]').forEach((chip) => {
+    const itemName = chip.getAttribute('data-item');
+    if (itemIconUrl(itemName)) return; // already resolved synchronously
+    resolveIconUrl('item', itemName, (url) => {
+      if (!url) return;
+      const iconEl = chip.querySelector('.tt-item-icon');
+      if (iconEl) { iconEl.style.backgroundImage = `url('${url}')`; iconEl.textContent = ''; }
+      const btn = chip.querySelector('.tt-icon-upload[data-kind="item"]');
+      if (btn) btn.remove();
+    });
+  });
+}
 function mvShowTooltip(e, player, pinned){
   mvTooltip.innerHTML = mvTooltipHtml(player, pinned);
   mvTooltip.style.display = 'block';
   mvTooltip.classList.toggle('pinned', !!pinned);
   if (pinned) wireIconUploadButtons(mvTooltip);
+  wireTooltipIconProbes(mvTooltip, player);
   mvPositionTooltip(e);
 }
 function mvPositionTooltip(e){
@@ -2996,6 +3063,14 @@ function mvWireHeroChips(container){
         mvShowTooltip(e, JSON.parse(decodeURIComponent(chip.getAttribute('data-player'))), true);
       } catch (err) { /* ignore */ }
     });
+    // Static-folder icon may resolve after the initial synchronous render
+    // (it's a probed network request) — upgrade the chip in place if so.
+    const heroName = chip.getAttribute('data-hero');
+    if (heroName) {
+      resolveIconUrl('hero', heroName, (url) => {
+        if (url) { chip.style.backgroundImage = `url('${url}')`; chip.textContent = ''; }
+      });
+    }
   });
 }
 
@@ -3201,7 +3276,7 @@ function renderMatchView(){
           ? chips.map((name) => {
               const url = heroIconUrl(name);
               const bg = url ? ` style="background-image:url('${url}')"` : '';
-              return `<div class="mv-ban-chip"><div class="mini"${bg}></div><span>${escapeHtml(name)}</span></div>`;
+              return `<div class="mv-ban-chip"><div class="mini" data-hero="${escapeHtml(name)}"${bg}></div><span>${escapeHtml(name)}</span></div>`;
             }).join('')
           : `<span class="mv-no-bans">${escapeHtml(t('tourdetail.mv.no_bans_detected','No bans detected.'))}</span>`;
         return `<div class="mv-bans-row"><div class="who">${escapeHtml(gameLabel(i))}</div><div class="mv-ban-chips">${chipsHtml}</div></div>`;
@@ -3232,6 +3307,12 @@ function renderMatchView(){
   `;
 
   mvWireHeroChips(mvBody);
+  mvBody.querySelectorAll('.mv-ban-chip .mini[data-hero]').forEach((mini) => {
+    const heroName = mini.getAttribute('data-hero');
+    if (heroName && !heroIconUrl(heroName)) {
+      resolveIconUrl('hero', heroName, (url) => { if (url) mini.style.backgroundImage = `url('${url}')`; });
+    }
+  });
   if (mvAddingGame) mvWireAddGameForm();
 }
 

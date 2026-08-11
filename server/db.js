@@ -80,7 +80,11 @@ function createOrder({ gameId, serverId, ignName, packageLabel, amount, paymentM
     hasScreenshot: !!hasScreenshot,
     status: 'pending', // pending -> notified -> confirmed | rejected
     createdAt: new Date().toISOString(),
-    telegramMessageId: null,
+    telegramMessageId: null, // kept for backward compat with old saved orders
+    // Every chat the order notification was posted to (admin DM, and the
+    // optional group — see GROUP_CHAT_ID in bot.js), so a Confirm/Reject tap
+    // in any one of them can update all of them to stay in sync.
+    telegramMessages: [],
   };
   orders.push(order);
   writeAll(orders);

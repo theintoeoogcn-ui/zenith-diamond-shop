@@ -4,6 +4,11 @@ const { appendOrderRow } = require('./googleSheets');
 
 const TOKEN = process.env.BOT_TOKEN;
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
+// Optional second destination — e.g. a staff Telegram group — that gets the
+// exact same new-order message with the same Confirm/Reject buttons. Telegram
+// doesn't restrict who can tap an inline button, so anyone in that group can
+// already confirm/reject; no extra permission code is needed for that part.
+const GROUP_CHAT_ID = process.env.GROUP_CHAT_ID || '';
 
 // If the bot isn't configured yet, don't crash the whole server — just run
 // without Telegram notifications so the storefront/API still work locally.
@@ -38,6 +43,14 @@ function formatOrderText(order) {
   );
 }
 
+// Admin DM plus the optional group, deduped in case someone points both env
+// vars at the same chat.
+function notifyTargets() {
+  const targets = [ADMIN_CHAT_ID];
+  if (GROUP_CHAT_ID && GROUP_CHAT_ID !== ADMIN_CHAT_ID) targets.push(GROUP_CHAT_ID);
+  return targets;
+}
+
 async function notifyAdmin(order, screenshotBuffer) {
   if (!BOT_ENABLED) {
     console.log(`[bot disabled] Would have notified admin about order ${order.code}. Set BOT_TOKEN/ADMIN_CHAT_ID in server/.env to enable Telegram alerts.`);
@@ -54,26 +67,40 @@ async function notifyAdmin(order, screenshotBuffer) {
     ],
   };
 
-  let sent;
-  if (screenshotBuffer) {
-    sent = await bot.sendPhoto(ADMIN_CHAT_ID, screenshotBuffer, {
-      caption: text,
-      parse_mode: 'Markdown',
-      reply_markup: keyboard,
-    });
-  } else {
-    sent = await bot.sendMessage(ADMIN_CHAT_ID, text, {
-      parse_mode: 'Markdown',
-      reply_markup: keyboard,
-    });
+  // Post to every configured destination independently — one chat rejecting
+  // the message (e.g. the bot got removed from the group) shouldn't stop the
+  // admin DM from going out.
+  const messages = [];
+  for (const chatId of notifyTargets()) {
+    try {
+      let sent;
+      if (screenshotBuffer) {
+        sent = await bot.sendPhoto(chatId, screenshotBuffer, {
+          caption: text,
+          parse_mode: 'Markdown',
+          reply_markup: keyboard,
+        });
+      } else {
+        sent = await bot.sendMessage(chatId, text, {
+          parse_mode: 'Markdown',
+          reply_markup: keyboard,
+        });
+      }
+      messages.push({ chatId: String(chatId), messageId: sent.message_id, hasScreenshot: !!screenshotBuffer });
+    } catch (err) {
+      console.error(`Failed to notify Telegram chat ${chatId} about order ${order.code}:`, err.message);
+    }
   }
+
+  if (!messages.length) return null; // every destination failed — order stays 'pending'
 
   updateOrder(order.code, {
     status: 'notified',
-    telegramMessageId: sent.message_id,
+    telegramMessageId: messages[0].messageId, // kept for backward compat
+    telegramMessages: messages,
     hasScreenshot: !!screenshotBuffer,
   });
-  return sent;
+  return messages;
 }
 
 if (BOT_ENABLED) {
@@ -93,29 +120,59 @@ if (BOT_ENABLED) {
       return;
     }
 
-    const editParams = { chat_id: query.message.chat.id, message_id: query.message.message_id, parse_mode: 'Markdown' };
-    const editFn = order.hasScreenshot
-      ? (newText) => bot.editMessageCaption(newText, editParams)
-      : (newText) => bot.editMessageText(newText, editParams);
-
+    // Whoever's chat this button lives in — admin DM or the group — acts as
+    // the "first responder"; everyone else's copy of the message just gets
+    // updated to match below. No per-user permission check on purpose: any
+    // member of the group is allowed to confirm/reject, same as the admin.
+    let updated, ackText, resultSuffix;
     if (action === 'confirm') {
-      const updated = updateOrder(code, { status: 'confirmed' });
-      await bot.answerCallbackQuery(query.id, { text: 'Marked as confirmed' });
-      await editFn(
-        formatOrderText(order) + `\n\n✅ *Confirmed* — deliver ${order.packageLabel} to game ID ${order.gameId} (server ${order.serverId}).`
-      );
-      appendOrderRow(updated).catch(() => {});
+      updated = updateOrder(code, { status: 'confirmed' });
+      ackText = 'Marked as confirmed';
+      resultSuffix = `\n\n✅ *Confirmed* — deliver ${order.packageLabel} to game ID ${order.gameId} (server ${order.serverId}).`;
     } else if (action === 'reject') {
-      updateOrder(code, { status: 'rejected' });
-      await bot.answerCallbackQuery(query.id, { text: 'Marked as rejected' });
-      await editFn(
-        formatOrderText(order) + `\n\n❌ *Rejected* — no payment found for this code.`
-      );
+      updated = updateOrder(code, { status: 'rejected' });
+      ackText = 'Marked as rejected';
+      resultSuffix = `\n\n❌ *Rejected* — no payment found for this code.`;
+    } else {
+      return;
     }
+
+    await bot.answerCallbackQuery(query.id, { text: ackText });
+    const resultText = formatOrderText(order) + resultSuffix;
+
+    // Fall back to the single old-style message reference for orders that
+    // were already 'notified' before this multi-chat version deployed.
+    const messages = (Array.isArray(order.telegramMessages) && order.telegramMessages.length)
+      ? order.telegramMessages
+      : (order.telegramMessageId
+          ? [{ chatId: String(query.message.chat.id), messageId: order.telegramMessageId, hasScreenshot: order.hasScreenshot }]
+          : []);
+
+    await Promise.all(messages.map(async (m) => {
+      const editParams = { chat_id: m.chatId, message_id: m.messageId, parse_mode: 'Markdown' };
+      try {
+        if (m.hasScreenshot) await bot.editMessageCaption(resultText, editParams);
+        else await bot.editMessageText(resultText, editParams);
+      } catch (err) {
+        // e.g. the message is too old to edit, or the bot was removed from
+        // that chat since — don't let one failed edit block the others.
+        console.error(`Failed to update Telegram message in chat ${m.chatId} for order ${code}:`, err.message);
+      }
+    }));
+
+    if (action === 'confirm') appendOrderRow(updated).catch(() => {});
   });
 
   bot.on('polling_error', (err) => {
     console.error('Telegram polling error:', err.message);
+  });
+
+  // Logs the chat ID of any message the bot can see — the easiest way to
+  // find a group's chat ID for GROUP_CHAT_ID: add the bot to the group,
+  // send/mention it in any message, then check this service's logs on
+  // Render for a line starting with "[telegram chat id]".
+  bot.on('message', (msg) => {
+    console.log(`[telegram chat id] ${msg.chat.id}  (type: ${msg.chat.type}, title: ${msg.chat.title || msg.chat.first_name || 'n/a'})`);
   });
 }
 
