@@ -479,6 +479,54 @@
     padding:0 22px 20px;text-decoration:underline;cursor:pointer;
   }
 
+  /* ---------- voucher (shown once the order is confirmed) ---------- */
+  .voucher-wrap{display:none;padding:0 22px 22px;}
+  .voucher-wrap.show{display:block;}
+  .voucher{
+    background:var(--void);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  }
+  .voucher-top{padding:18px 20px 14px;display:flex;align-items:center;justify-content:space-between;}
+  .voucher-brand{display:flex;align-items:center;gap:8px;}
+  .voucher-brand img{width:24px;height:24px;object-fit:contain;border-radius:6px;}
+  .voucher-brand .name{font-size:13px;font-weight:700;color:var(--hi);font-family:var(--font-main);}
+  .voucher-brand .url{font-size:10px;color:var(--dim);}
+  .voucher-tag{
+    font-size:10px;font-weight:600;color:var(--cyan);background:rgba(79,224,232,0.12);
+    padding:4px 10px;border-radius:999px;letter-spacing:0.5px;text-transform:uppercase;
+  }
+  .voucher-status{padding:2px 20px 16px;text-align:center;}
+  .voucher-check{
+    width:40px;height:40px;border-radius:50%;background:rgba(139,92,246,0.15);
+    display:flex;align-items:center;justify-content:center;margin:4px auto 10px;
+    color:var(--violet);font-size:18px;font-weight:700;
+  }
+  .voucher-status .sub{font-size:12px;color:var(--mid);margin-bottom:4px;}
+  .voucher-code{
+    font-family:var(--font-main);font-weight:700;font-size:21px;color:var(--hi);letter-spacing:1px;
+  }
+  .voucher-perf{position:relative;height:1px;margin:0;border-top:1.5px dashed var(--line);}
+  .voucher-perf .notch{
+    position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:var(--panel);
+  }
+  .voucher-perf .notch.l{left:-12px;} .voucher-perf .notch.r{right:-12px;}
+  .voucher-details{padding:16px 20px 0;}
+  .voucher-details table{width:100%;font-size:12px;border-collapse:collapse;font-family:var(--font-main);}
+  .voucher-details td{padding:5px 0;}
+  .voucher-details td:first-child{color:var(--dim);}
+  .voucher-details td:last-child{text-align:right;color:var(--hi);font-weight:600;}
+  .voucher-foot{
+    margin:16px 20px 0;border-top:1px solid var(--line);
+    padding:16px 20px 18px;display:flex;align-items:center;gap:14px;
+  }
+  .voucher-qr{width:64px;height:64px;background:var(--hi);border-radius:8px;flex-shrink:0;}
+  .voucher-foot .note{font-size:10px;color:var(--dim);line-height:1.5;}
+  .voucher-save{
+    display:block;width:100%;margin-top:12px;padding:10px;text-align:center;
+    font-size:12px;font-weight:700;color:var(--violet);background:transparent;
+    border:1px solid var(--line);border-radius:10px;cursor:pointer;font-family:var(--font-main);
+  }
+  .voucher-save:hover{border-color:var(--violet);}
+
   footer{
     display:flex;justify-content:space-between;padding:26px 48px;
     border-top:1px solid var(--line);color:var(--dim);font-size:13px;
@@ -640,6 +688,42 @@
           <div class="text"><div class="t-title" data-i18n="diamond.step.done.title">Diamonds delivered</div><div class="t-sub" data-i18n="diamond.step.done.sub">Sent straight to your account</div></div>
         </div>
       </div>
+
+      <div class="voucher-wrap" id="voucher-wrap">
+        <div class="voucher">
+          <div class="voucher-top">
+            <div class="voucher-brand">
+              <img src="assets/zenith-logo.png" alt="Zenith Esports">
+              <div>
+                <div class="name">Zenith Esports</div>
+                <div class="url">zenithwbf.com</div>
+              </div>
+            </div>
+            <span class="voucher-tag" data-i18n="diamond.voucher.tag">Voucher</span>
+          </div>
+          <div class="voucher-status">
+            <div class="voucher-check">✓</div>
+            <div class="sub" data-i18n="diamond.voucher.confirmed">Payment confirmed</div>
+            <div class="voucher-code" id="voucher-code">—</div>
+          </div>
+          <div class="voucher-perf"><div class="notch l"></div><div class="notch r"></div></div>
+          <div class="voucher-details">
+            <table>
+              <tr><td data-i18n="diamond.voucher.package">Package</td><td id="voucher-package">—</td></tr>
+              <tr><td data-i18n="diamond.voucher.amount">Amount</td><td id="voucher-amount">—</td></tr>
+              <tr><td data-i18n="diamond.voucher.gameid">Game ID</td><td id="voucher-gameid">—</td></tr>
+              <tr><td data-i18n="diamond.voucher.date">Date</td><td id="voucher-date">—</td></tr>
+              <tr><td data-i18n="diamond.voucher.method">Payment method</td><td id="voucher-method">—</td></tr>
+            </table>
+          </div>
+          <div class="voucher-foot">
+            <div class="voucher-qr" id="voucher-qr"></div>
+            <div class="note" data-i18n="diamond.voucher.note">Scan to visit Zenith Esports. Keep this voucher until your diamonds are delivered.</div>
+          </div>
+        </div>
+        <button class="voucher-save" id="voucher-save" data-i18n="diamond.voucher.save">Save voucher as image</button>
+      </div>
+
       <div class="new-order" id="new-order" style="display:none;" data-i18n="diamond.neworder">Start a new order</div>
     </div>
   </div>
@@ -703,6 +787,8 @@
 </div>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="js/app-shared.js"></script>
 <script>
 function t(key, fallback){
@@ -1064,6 +1150,7 @@ async function pollOrder(code){
       document.getElementById('step-done').classList.add('done');
       document.querySelector('#step-done .t-title').textContent = t('diamond.confirmed.title');
       document.querySelector('#step-done .t-sub').textContent = t('diamond.confirmed.sub');
+      showVoucher(order);
     } else if (order.status === 'rejected') {
       clearInterval(pollTimer);
       document.getElementById('step-review').classList.remove('active');
@@ -1074,6 +1161,45 @@ async function pollOrder(code){
   } catch (err) {
   }
 }
+
+let voucherQrDrawn = false;
+
+function showVoucher(order){
+  document.getElementById('voucher-code').textContent = order.code;
+  document.getElementById('voucher-package').textContent = order.packageLabel;
+  document.getElementById('voucher-amount').textContent = (order.amount || 0).toLocaleString() + ' Ks';
+  document.getElementById('voucher-gameid').textContent =
+    order.gameId + (order.serverId ? ' (' + order.serverId + ')' : '');
+  document.getElementById('voucher-date').textContent =
+    new Date(order.createdAt || Date.now()).toLocaleString(undefined, {
+      day:'numeric', month:'short', year:'numeric', hour:'numeric', minute:'2-digit',
+    });
+  document.getElementById('voucher-method').textContent = order.paymentMethod;
+
+  if (!voucherQrDrawn && window.QRCode) {
+    voucherQrDrawn = true;
+    new QRCode(document.getElementById('voucher-qr'), {
+      text: 'https://zenithwbf.com',
+      width: 64,
+      height: 64,
+      colorDark: '#1B1030',
+      colorLight: '#F4EEFF',
+    });
+  }
+
+  document.getElementById('voucher-wrap').classList.add('show');
+}
+
+document.getElementById('voucher-save').addEventListener('click', () => {
+  const node = document.querySelector('.voucher');
+  if (!node || !window.html2canvas) return;
+  html2canvas(node, { backgroundColor: null, scale: 2 }).then((canvas) => {
+    const link = document.createElement('a');
+    link.download = 'zenith-voucher-' + (document.getElementById('voucher-code').textContent || 'order') + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+});
 
 document.getElementById('submit-btn').addEventListener('click', submitOrder);
 
