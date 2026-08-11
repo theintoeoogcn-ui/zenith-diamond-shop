@@ -28,6 +28,14 @@ if (!BOT_ENABLED) {
 // Polling mode: no public webhook URL needed, works from any machine.
 const bot = BOT_ENABLED ? new TelegramBot(TOKEN, { polling: true }) : null;
 
+// A Telegram username/first name can contain Markdown-special characters
+// (an underscore is a completely normal username character, for instance) —
+// escape them before dropping a name into a Markdown-parsed message, or the
+// edit can come out mis-formatted or fail outright.
+function escapeMarkdown(s) {
+  return String(s || '').replace(/([_*`[])/g, '\\$1');
+}
+
 function formatOrderText(order) {
   return (
     `🆕 *New diamond order*\n` +
@@ -123,16 +131,24 @@ if (BOT_ENABLED) {
     // Whoever's chat this button lives in — admin DM or the group — acts as
     // the "first responder"; everyone else's copy of the message just gets
     // updated to match below. No per-user permission check on purpose: any
-    // member of the group is allowed to confirm/reject, same as the admin.
+    // member of the group is allowed to confirm/reject, same as the admin —
+    // but we do record *who* tapped it, so the edited message (and the
+    // saved order) show who actually made the call.
+    const actor = query.from || {};
+    const actorName = actor.username
+      ? '@' + actor.username
+      : [actor.first_name, actor.last_name].filter(Boolean).join(' ') || 'someone';
+    const actorNameSafe = escapeMarkdown(actorName);
+
     let updated, ackText, resultSuffix;
     if (action === 'confirm') {
-      updated = updateOrder(code, { status: 'confirmed' });
+      updated = updateOrder(code, { status: 'confirmed', confirmedBy: actorName, confirmedById: actor.id || null });
       ackText = 'Marked as confirmed';
-      resultSuffix = `\n\n✅ *Confirmed* — deliver ${order.packageLabel} to game ID ${order.gameId} (server ${order.serverId}).`;
+      resultSuffix = `\n\n✅ *Confirmed by ${actorNameSafe}* — deliver ${order.packageLabel} to game ID ${order.gameId} (server ${order.serverId}).`;
     } else if (action === 'reject') {
-      updated = updateOrder(code, { status: 'rejected' });
+      updated = updateOrder(code, { status: 'rejected', rejectedBy: actorName, rejectedById: actor.id || null });
       ackText = 'Marked as rejected';
-      resultSuffix = `\n\n❌ *Rejected* — no payment found for this code.`;
+      resultSuffix = `\n\n❌ *Rejected by ${actorNameSafe}* — no payment found for this code.`;
     } else {
       return;
     }

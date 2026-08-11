@@ -85,6 +85,12 @@ function createOrder({ gameId, serverId, ignName, packageLabel, amount, paymentM
     // optional group — see GROUP_CHAT_ID in bot.js), so a Confirm/Reject tap
     // in any one of them can update all of them to stay in sync.
     telegramMessages: [],
+    // Who actually tapped Confirm/Reject (set by bot.js) — useful once more
+    // than one person can act on an order, e.g. from a shared staff group.
+    confirmedBy: null,
+    confirmedById: null,
+    rejectedBy: null,
+    rejectedById: null,
   };
   orders.push(order);
   writeAll(orders);
