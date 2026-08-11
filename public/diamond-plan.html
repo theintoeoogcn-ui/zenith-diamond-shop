@@ -479,9 +479,14 @@
     padding:0 22px 20px;text-decoration:underline;cursor:pointer;
   }
 
-  /* ---------- voucher (shown once the order is confirmed) ---------- */
-  .voucher-wrap{display:none;padding:0 22px 22px;}
-  .voucher-wrap.show{display:block;}
+  /* ---------- voucher (pops up over the current screen once confirmed) ---------- */
+  .voucher-modal{position:relative;width:100%;max-width:380px;animation:modalPop .2s ease;}
+  .voucher-close{
+    position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:50%;
+    background:var(--panel-raised);border:1px solid var(--line);color:var(--hi);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;z-index:2;
+  }
+  .voucher-close:hover{border-color:var(--violet);color:var(--violet);}
   .voucher{
     background:var(--void);border:1px solid var(--line);border-radius:16px;overflow:hidden;
   }
@@ -506,7 +511,7 @@
   }
   .voucher-perf{position:relative;height:1px;margin:0;border-top:1.5px dashed var(--line);}
   .voucher-perf .notch{
-    position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:var(--panel);
+    position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:var(--void);
   }
   .voucher-perf .notch.l{left:-12px;} .voucher-perf .notch.r{right:-12px;}
   .voucher-details{padding:16px 20px 0;}
@@ -689,41 +694,6 @@
         </div>
       </div>
 
-      <div class="voucher-wrap" id="voucher-wrap">
-        <div class="voucher">
-          <div class="voucher-top">
-            <div class="voucher-brand">
-              <img src="assets/zenith-logo.png" alt="Zenith Esports">
-              <div>
-                <div class="name">Zenith Esports</div>
-                <div class="url">zenithwbf.com</div>
-              </div>
-            </div>
-            <span class="voucher-tag" data-i18n="diamond.voucher.tag">Voucher</span>
-          </div>
-          <div class="voucher-status">
-            <div class="voucher-check">✓</div>
-            <div class="sub" data-i18n="diamond.voucher.confirmed">Payment confirmed</div>
-            <div class="voucher-code" id="voucher-code">—</div>
-          </div>
-          <div class="voucher-perf"><div class="notch l"></div><div class="notch r"></div></div>
-          <div class="voucher-details">
-            <table>
-              <tr><td data-i18n="diamond.voucher.package">Package</td><td id="voucher-package">—</td></tr>
-              <tr><td data-i18n="diamond.voucher.amount">Amount</td><td id="voucher-amount">—</td></tr>
-              <tr><td data-i18n="diamond.voucher.gameid">Game ID</td><td id="voucher-gameid">—</td></tr>
-              <tr><td data-i18n="diamond.voucher.date">Date</td><td id="voucher-date">—</td></tr>
-              <tr><td data-i18n="diamond.voucher.method">Payment method</td><td id="voucher-method">—</td></tr>
-            </table>
-          </div>
-          <div class="voucher-foot">
-            <div class="voucher-qr" id="voucher-qr"></div>
-            <div class="note" data-i18n="diamond.voucher.note">Scan to visit Zenith Esports. Keep this voucher until your diamonds are delivered.</div>
-          </div>
-        </div>
-        <button class="voucher-save" id="voucher-save" data-i18n="diamond.voucher.save">Save voucher as image</button>
-      </div>
-
       <div class="new-order" id="new-order" style="display:none;" data-i18n="diamond.neworder">Start a new order</div>
     </div>
   </div>
@@ -783,6 +753,45 @@
       <button class="cancel" id="pass-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
       <button class="save" id="pass-modal-save" data-i18n="tournament.form.save">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- ---------- payment voucher (pops up over whatever screen you're on) ---------- -->
+<div class="modal-overlay" id="voucher-overlay">
+  <div class="voucher-modal">
+    <button class="voucher-close" id="voucher-close" aria-label="Close">✕</button>
+    <div class="voucher">
+      <div class="voucher-top">
+        <div class="voucher-brand">
+          <img src="assets/zenith-logo.png" alt="Zenith Esports">
+          <div>
+            <div class="name">Zenith Esports</div>
+            <div class="url">zenithwbf.com</div>
+          </div>
+        </div>
+        <span class="voucher-tag" data-i18n="diamond.voucher.tag">Voucher</span>
+      </div>
+      <div class="voucher-status">
+        <div class="voucher-check">✓</div>
+        <div class="sub" data-i18n="diamond.voucher.confirmed">Payment confirmed</div>
+        <div class="voucher-code" id="voucher-code">—</div>
+      </div>
+      <div class="voucher-perf"><div class="notch l"></div><div class="notch r"></div></div>
+      <div class="voucher-details">
+        <table>
+          <tr><td data-i18n="diamond.voucher.package">Package</td><td id="voucher-package">—</td></tr>
+          <tr><td data-i18n="diamond.voucher.amount">Amount</td><td id="voucher-amount">—</td></tr>
+          <tr><td data-i18n="diamond.voucher.gameid">Game ID</td><td id="voucher-gameid">—</td></tr>
+          <tr><td data-i18n="diamond.voucher.date">Date</td><td id="voucher-date">—</td></tr>
+          <tr><td data-i18n="diamond.voucher.method">Payment method</td><td id="voucher-method">—</td></tr>
+        </table>
+      </div>
+      <div class="voucher-foot">
+        <div class="voucher-qr" id="voucher-qr"></div>
+        <div class="note" data-i18n="diamond.voucher.note">Scan to visit Zenith Esports. Keep this voucher until your diamonds are delivered.</div>
+      </div>
+    </div>
+    <button class="voucher-save" id="voucher-save" data-i18n="diamond.voucher.save">Save voucher as image</button>
   </div>
 </div>
 
@@ -1187,8 +1196,21 @@ function showVoucher(order){
     });
   }
 
-  document.getElementById('voucher-wrap').classList.add('show');
+  document.getElementById('voucher-overlay').classList.add('show');
 }
+
+const voucherOverlay = document.getElementById('voucher-overlay');
+document.getElementById('voucher-close').addEventListener('click', () => {
+  voucherOverlay.classList.remove('show');
+});
+voucherOverlay.addEventListener('click', (e) => {
+  if (e.target === voucherOverlay) voucherOverlay.classList.remove('show');
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && voucherOverlay.classList.contains('show')) {
+    voucherOverlay.classList.remove('show');
+  }
+});
 
 document.getElementById('voucher-save').addEventListener('click', () => {
   const node = document.querySelector('.voucher');
