@@ -39,12 +39,19 @@ app.use((req, res, next) => {
   const candidate = path.join(PUBLIC_DIR, req.path + '.html');
   fs.access(candidate, fs.constants.F_OK, (err) => {
     if (err) return next();
+    res.setHeader('Cache-Control', 'no-cache');
     res.sendFile(candidate);
   });
 });
 
-// Serve the storefront (public/diamond-plan.html and friends)
-app.use(express.static(PUBLIC_DIR));
+// Serve the storefront (public/diamond-plan.html and friends).
+// no-cache (not no-store) so browsers still keep a local copy for speed, but
+// must revalidate with the server on every load instead of trusting a stale
+// copy — this is what was making phones/browsers show an old layout (missing
+// icons, old bracket columns, etc.) for a few minutes/hours after a deploy.
+app.use(express.static(PUBLIC_DIR, {
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache'),
+}));
 
 // This import starts the Telegram bot (polling) — done after dotenv loads.
 const orderRoutes = require('./routes/orders');
