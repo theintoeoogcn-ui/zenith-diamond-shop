@@ -189,25 +189,25 @@
   }
   @keyframes heroBtnRimSpin{to{--rim:360deg;}}
   @media (prefers-reduced-motion:reduce){ .hero-btn::before{animation:none;} }
-  /* Phones: everything from the top ad banner down to the stat boxes is
-     scaled down together — font sizes, margins, card heights — specifically
-     so the whole hero fits inside one phone screen with no scrolling. This
-     is deliberately tighter than a typical "responsive" pass would be; it's
-     chasing zero scroll, not just avoiding an oversized desktop layout. */
+  /* Phones: scaled down from the desktop sizes, but deliberately NOT
+     squeezed to force the whole hero into one screen — that earlier
+     zero-scroll pass made everything cramped and small. These keep the
+     desktop layout's proportions and breathing room; the page is simply
+     allowed to scroll, which is the normal, expected phone behaviour. */
   @media (max-width:640px){
-    .hero-text{padding:12px 16px 10px;}
-    .mobile-ad-card .ad-headline{font-size:12.5px;}
-    .mobile-ad-card .ad-subtext{font-size:10px;}
-    .mobile-ad-card .ad-cta{font-size:9.5px;padding:5px 10px;margin-top:2px;}
-    .mobile-ad-card .ad-badge{font-size:8.5px;padding:2px 7px;}
-    .eyebrow{font-size:9.5px;letter-spacing:1px;margin:0 0 5px;}
-    h1{font-size:20px;line-height:1.22;margin:0 0 6px;letter-spacing:0.1px;}
-    .hero-text p{font-size:12.5px;line-height:1.4;max-width:none;margin:0 0 10px;}
+    .hero-text{padding:20px 20px 26px;}
+    .mobile-ad-card .ad-headline{font-size:14px;}
+    .mobile-ad-card .ad-subtext{font-size:11px;}
+    .mobile-ad-card .ad-cta{font-size:10.5px;padding:6px 12px;margin-top:3px;}
+    .mobile-ad-card .ad-badge{font-size:9px;padding:3px 8px;}
+    .eyebrow{font-size:11px;letter-spacing:1.4px;margin:0 0 13px;}
+    h1{font-size:27px;line-height:1.28;margin:0 0 13px;letter-spacing:0.2px;}
+    .hero-text p{font-size:14.5px;line-height:1.55;max-width:none;margin:0 0 22px;}
     /* Stretch to a 2-up grid instead of left-aligned pills, so both
        buttons' outer edges line up with the Diamond stat boxes' and the ad
        card's edges below them — same max-width, same gap. */
-    .hero-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;max-width:560px;}
-    .hero-btn{padding:9px 10px;font-size:11px;letter-spacing:0.5px;gap:6px;justify-content:center;}
+    .hero-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-bottom:20px;max-width:560px;}
+    .hero-btn{padding:15px 12px;font-size:13px;letter-spacing:0.8px;justify-content:center;}
   }
   .hero-btn:hover{transform:translateY(-2px);}
   .hero-btn.primary{
@@ -219,44 +219,30 @@
     background:var(--panel);border:1px solid var(--line);color:var(--hi);
   }
   .hero-btn.secondary:hover{border-color:var(--cyan);box-shadow:0 0 18px rgba(79,224,232,0.2);}
-  .btn-icon{font-size:15px;line-height:1;}
-  @media (max-width:640px){ .btn-icon{font-size:13px;} }
 
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:560px;}
   @media (max-width:640px){ .stats{grid-template-columns:repeat(2,1fr);} }
-  /* Icon plus a small animated accent bar above the number — the icon
-     carries the at-a-glance meaning, the accent bar is the quiet/thin
-     (short, low-opacity, slow) flourish that ties it to the rim-light
-     animation used elsewhere on the page. */
+  /* Plain card — no accent bar. The number itself is the focal point; an
+     extra colored flourish on top read as visual noise next to the trust
+     cards below, which have no such bar. */
   .stat{
     position:relative;isolation:isolate;overflow:hidden;
-    display:flex;flex-direction:column;gap:4px;
+    display:flex;flex-direction:column;gap:5px;
     background:var(--panel-raised);border:1px solid rgba(180,164,220,0.22);border-radius:12px;
-    padding:16px 14px 14px;
+    padding:18px 16px 16px;
     box-shadow:0 1px 0 rgba(255,255,255,0.04) inset, 0 6px 16px rgba(0,0,0,0.22);
     transition:border-color .2s, transform .15s;
   }
-  .stat::before{
-    content:"";position:absolute;top:0;left:14px;width:22px;height:2.5px;border-radius:2px;
-    background:linear-gradient(90deg,var(--cyan),var(--violet),var(--signal),var(--cyan));
-    background-size:300% 100%;
-    animation:statAccentFlow 5s linear infinite;
-  }
-  @keyframes statAccentFlow{to{background-position:300% 0;}}
-  @media (prefers-reduced-motion:reduce){ .stat::before{animation:none;} }
   .stat:hover{border-color:var(--violet-dim);transform:translateY(-1px);}
-  .stat .icon{font-size:18px;}
-  .stat .num{font-family:var(--font-main);font-weight:800;font-size:20px;letter-spacing:0.2px;color:var(--hi);}
-  .stat .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.6px;font-weight:600;}
-  /* Part of the no-scroll phone layout — shrinks alongside the hero text
-     and buttons above. Positioned after the base .stat rules (equal
-     specificity) so it wins at this width without !important. */
+  .stat .num{font-family:var(--font-main);font-weight:800;font-size:22px;letter-spacing:0.2px;color:var(--hi);}
+  .stat .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;}
+  /* Phones keep the same generous card proportions as above — only the
+     grid gap tightens slightly to suit the narrower screen. */
   @media (max-width:640px){
-    .stats{gap:8px;}
-    .stat{padding:11px 10px 9px;gap:3px;}
-    .stat .icon{font-size:15px;}
-    .stat .num{font-size:16px;}
-    .stat .lbl{font-size:9px;letter-spacing:0.4px;}
+    .stats{gap:10px;}
+    .stat{padding:17px 15px 15px;gap:5px;}
+    .stat .num{font-size:21px;}
+    .stat .lbl{font-size:10.5px;letter-spacing:0.7px;}
   }
   .stat-edit{
     display:none;position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:6px;
@@ -291,12 +277,12 @@
   .hl-title{font-size:13px;font-weight:700;color:var(--hi);}
   .hl-desc{font-size:11.5px;color:var(--dim);line-height:1.4;}
   @media (max-width:640px){
-    .highlights{gap:6px;margin-top:22px;}
-    .highlight{padding:8px 12px;gap:10px;}
-    .hl-icon{width:28px;height:28px;border-radius:8px;}
-    .hl-icon svg{width:14px;height:14px;}
-    .hl-title{font-size:12px;}
-    .hl-desc{font-size:10px;}
+    .highlights{gap:10px;margin-top:24px;}
+    .highlight{padding:13px 14px;gap:13px;}
+    .hl-icon{width:36px;height:36px;border-radius:10px;}
+    .hl-icon svg{width:17px;height:17px;}
+    .hl-title{font-size:13px;}
+    .hl-desc{font-size:11.5px;}
   }
 
   /* ---------- admin toggle pill in header ---------- */
@@ -435,8 +421,8 @@
      specificity as the rule above, positioned after it, so this wins at
      this width without needing !important. */
   @media (max-width:640px){
-    .mobile-ad-card{margin:0 0 10px;}
-    .mobile-ad-card .ad-card.lg .ad-card-overlay{min-height:94px;padding:9px 12px;gap:2px;}
+    .mobile-ad-card{margin:0 0 18px;}
+    .mobile-ad-card .ad-card.lg .ad-card-overlay{min-height:132px;padding:12px 14px;gap:3px;}
   }
 
   /* ---------- mobile: once-per-visit interstitial ---------- */
