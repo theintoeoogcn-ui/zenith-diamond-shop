@@ -26,7 +26,16 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  /* Sticky-footer layout: header and footer keep their natural height,
+     .hero (flex:1 below) stretches to fill whatever space is left between
+     them. On tall content this is a no-op; on the now much more compact
+     phone hero it's what stops the page from being shorter than the
+     screen and leaving a dead gap of background color between the footer
+     and the bottom of the viewport — the hero's own content stays
+     vertically centered inside whatever space it's given instead. */
   body{
+    display:flex;flex-direction:column;
+    min-height:100vh;min-height:100dvh;
     background:
       radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
       radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
@@ -85,13 +94,15 @@
   }
 
   /* ---------- hero ---------- */
+  header{flex-shrink:0;}
+  footer{flex-shrink:0;}
   .hero{
     position:relative;
-    min-height:calc(100vh - 73px);
+    flex:1 0 auto;
     display:flex;align-items:center;
   }
   @media (max-width:980px){
-    .hero{min-height:auto;flex-direction:column;}
+    .hero{flex-direction:column;justify-content:center;}
   }
 
   /* overflow:hidden lives here (not on .hero) so the desktop ad widget can
@@ -211,24 +222,35 @@
 
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:560px;}
   @media (max-width:640px){ .stats{grid-template-columns:repeat(2,1fr);} }
+  /* No icon anymore — a small animated accent bar above the number carries
+     the "this is a stat" visual weight instead, and stays quiet/thin
+     (short, low-opacity, slow) rather than competing with the number. */
   .stat{
-    position:relative;
-    display:flex;flex-direction:column;gap:6px;
+    position:relative;isolation:isolate;overflow:hidden;
+    display:flex;flex-direction:column;gap:4px;
     background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    padding:14px 12px;
+    padding:16px 14px 14px;
+    transition:border-color .2s, transform .15s;
   }
-  .stat .icon{font-size:18px;}
-  .stat .num{font-family:var(--font-main);font-weight:700;font-size:18px;color:var(--hi);}
-  .stat .lbl{font-size:12px;color:var(--dim);}
+  .stat::before{
+    content:"";position:absolute;top:0;left:14px;width:22px;height:2.5px;border-radius:2px;
+    background:linear-gradient(90deg,var(--cyan),var(--violet),var(--signal),var(--cyan));
+    background-size:300% 100%;
+    animation:statAccentFlow 5s linear infinite;
+  }
+  @keyframes statAccentFlow{to{background-position:300% 0;}}
+  @media (prefers-reduced-motion:reduce){ .stat::before{animation:none;} }
+  .stat:hover{border-color:var(--violet-dim);transform:translateY(-1px);}
+  .stat .num{font-family:var(--font-main);font-weight:800;font-size:20px;letter-spacing:0.2px;color:var(--hi);}
+  .stat .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.6px;font-weight:600;}
   /* Part of the no-scroll phone layout — shrinks alongside the hero text
      and buttons above. Positioned after the base .stat rules (equal
      specificity) so it wins at this width without !important. */
   @media (max-width:640px){
     .stats{gap:8px;}
-    .stat{padding:9px 10px;gap:3px;}
-    .stat .icon{font-size:15px;}
-    .stat .num{font-size:15px;}
-    .stat .lbl{font-size:10px;}
+    .stat{padding:11px 10px 9px;gap:3px;}
+    .stat .num{font-size:16px;}
+    .stat .lbl{font-size:9px;letter-spacing:0.4px;}
   }
   .stat-edit{
     display:none;position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:6px;
@@ -371,7 +393,7 @@
      this width without needing !important. */
   @media (max-width:640px){
     .mobile-ad-card{margin:0 0 10px;}
-    .mobile-ad-card .ad-card.lg .ad-card-overlay{min-height:0;padding:9px 12px;gap:2px;}
+    .mobile-ad-card .ad-card.lg .ad-card-overlay{min-height:76px;padding:9px 12px;gap:2px;}
   }
 
   /* ---------- mobile: once-per-visit interstitial ---------- */
@@ -523,10 +545,10 @@
     </div>
 
     <div class="stats reveal-stagger">
-      <div class="stat"><button type="button" class="stat-edit" data-key="tournaments" title="Edit">✏️</button><span class="icon">🏆</span><span class="num" id="stat-tournaments">2+</span><span class="lbl" data-i18n="home.stat.tournament">Tournament</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="icon">💎</span><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="players" title="Edit">✏️</button><span class="icon">👥</span><span class="num" id="stat-players">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="rating" title="Edit">✏️</button><span class="icon">⭐</span><span class="num" id="stat-rating">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="tournaments" title="Edit">✏️</button><span class="num" id="stat-tournaments">2+</span><span class="lbl" data-i18n="home.stat.tournament">Tournament</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="players" title="Edit">✏️</button><span class="num" id="stat-players">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="rating" title="Edit">✏️</button><span class="num" id="stat-rating">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
     </div>
   </div>
 
