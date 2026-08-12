@@ -277,18 +277,24 @@
     transition:border-color .2s;
   }
   .highlight:hover{border-color:var(--violet-dim);}
+  /* Inline SVGs instead of emoji — emoji render in each OS's own full-color
+     glyph set (orange bolt, gold padlock, etc.), which looks inconsistent
+     and off-brand device to device. currentColor lets one theme color drive
+     all three icons everywhere. */
   .hl-icon{
-    flex-shrink:0;width:38px;height:38px;border-radius:10px;font-size:17px;
+    flex-shrink:0;width:38px;height:38px;border-radius:10px;color:var(--violet);
     display:flex;align-items:center;justify-content:center;
     background:var(--panel);border:1px solid rgba(180,164,220,0.22);
   }
+  .hl-icon svg{width:18px;height:18px;}
   .hl-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
   .hl-title{font-size:13px;font-weight:700;color:var(--hi);}
   .hl-desc{font-size:11.5px;color:var(--dim);line-height:1.4;}
   @media (max-width:640px){
     .highlights{gap:6px;margin-top:22px;}
     .highlight{padding:8px 12px;gap:10px;}
-    .hl-icon{width:28px;height:28px;font-size:13px;border-radius:8px;}
+    .hl-icon{width:28px;height:28px;border-radius:8px;}
+    .hl-icon svg{width:14px;height:14px;}
     .hl-title{font-size:12px;}
     .hl-desc{font-size:10px;}
   }
@@ -601,21 +607,21 @@
 
     <div class="highlights reveal-stagger">
       <div class="highlight">
-        <span class="hl-icon" aria-hidden="true">⚡</span>
+        <span class="hl-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg></span>
         <div class="hl-text">
           <span class="hl-title" data-i18n="home.highlight.fast.title">Fast Delivery</span>
           <span class="hl-desc" data-i18n="home.highlight.fast.desc">Most Diamond orders confirmed within minutes</span>
         </div>
       </div>
       <div class="highlight">
-        <span class="hl-icon" aria-hidden="true">🔒</span>
+        <span class="hl-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
         <div class="hl-text">
           <span class="hl-title" data-i18n="home.highlight.secure.title">Secure Payment</span>
           <span class="hl-desc" data-i18n="home.highlight.secure.desc">Every order checked by our team before delivery</span>
         </div>
       </div>
       <div class="highlight">
-        <span class="hl-icon" aria-hidden="true">🎧</span>
+        <span class="hl-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-3a9 9 0 0 1 18 0v3"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3ZM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3Z"/></svg></span>
         <div class="hl-text">
           <span class="hl-title" data-i18n="home.highlight.support.title">24/7 Support</span>
           <span class="hl-desc" data-i18n="home.highlight.support.desc">Real people ready to help on Telegram, anytime</span>
