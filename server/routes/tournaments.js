@@ -25,26 +25,26 @@ router.post('/verify', (req, res) => {
   res.json({ ok: isAdmin(req) });
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   if (!isAdmin(req)) return res.status(401).json({ error: 'Invalid admin passcode.' });
   const { title } = req.body || {};
   if (!title || !String(title).trim()) {
     return res.status(400).json({ error: 'Title is required.' });
   }
-  const item = createTournament(req.body);
+  const item = await createTournament(req.body);
   res.status(201).json(item);
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   if (!isAdmin(req)) return res.status(401).json({ error: 'Invalid admin passcode.' });
-  const item = updateTournament(req.params.id, req.body || {});
+  const item = await updateTournament(req.params.id, req.body || {});
   if (!item) return res.status(404).json({ error: 'Tournament not found.' });
   res.json(item);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   if (!isAdmin(req)) return res.status(401).json({ error: 'Invalid admin passcode.' });
-  const ok = deleteTournament(req.params.id);
+  const ok = await deleteTournament(req.params.id);
   if (!ok) return res.status(404).json({ error: 'Tournament not found.' });
   res.json({ ok: true });
 });

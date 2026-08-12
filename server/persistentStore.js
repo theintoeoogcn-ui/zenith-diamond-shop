@@ -16,12 +16,16 @@ async function hydrate(key, dbFile) {
   }
 }
 
-// Fire-and-forget push of the current full dataset up to Sheets. Called
-// after every local write so Sheets always has the latest copy ready for
-// the next deploy's hydrate().
+// Push the current full dataset up to Sheets. Returns a promise that
+// ALWAYS resolves — never rejects — with { ok, skipped?, error? }, so a
+// Sheets hiccup never crashes the caller. Most callers can ignore the
+// returned promise (fire-and-forget is fine for low-stakes data), but
+// callers that want to warn the admin when a save didn't durably persist
+// (e.g. tournaments, whose data has been lost to this before) should
+// `await` it and check `.ok`.
 function sync(key, data) {
-  if (!sheetsStore.ENABLED) return;
-  sheetsStore.setValue(key, data).catch(() => {});
+  if (!sheetsStore.ENABLED) return Promise.resolve({ ok: true, skipped: true });
+  return sheetsStore.setValue(key, data).catch((e) => ({ ok: false, error: e.message }));
 }
 
 module.exports = { hydrate, sync };

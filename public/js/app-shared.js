@@ -298,6 +298,7 @@
       "tournament.card.delete.confirm": "Delete this tournament?",
       "tournament.error.save": "Could not save. Please try again.",
       "tournament.error.delete": "Could not delete. Please try again.",
+      "tournament.warn.syncFailed": "Saved — but the backup to Google Sheets failed, so this could be lost if the server restarts before it syncs. Try saving again in a minute to be safe.",
 
       "service.eyebrow": "We're here to help",
       "service.title": "Customer Service",
@@ -716,6 +717,7 @@
       "tournament.card.delete.confirm": "ဒီပြိုင်ပွဲကိုဖျက်မလား?",
       "tournament.error.save": "သိမ်းမရပါ — ထပ်စမ်းကြည့်ပါ။",
       "tournament.error.delete": "ဖျက်မရပါ — ထပ်စမ်းကြည့်ပါ။",
+      "tournament.warn.syncFailed": "သိမ်းလိုက်ပါပီ — ဒါပေမဲ့ Google Sheets Backup မအောင်မြင်ပါ၊ Server ပြန်စတင်ရင် ဒီအချက်အလက် ပျောက်နိုင်ပါတယ်။ ခဏနေမှ ထပ်သိမ်းကြည့်ပါ။",
 
       "service.eyebrow": "ကူညီရန် အသင့်ရှိပါသည်",
       "service.title": "ဖောက်သည်ဝန်ဆောင်မှု",
@@ -1134,6 +1136,7 @@
       "tournament.card.delete.confirm": "ลบทัวร์นาเมนต์นี้หรือไม่?",
       "tournament.error.save": "บันทึกไม่สำเร็จ กรุณาลองใหม่",
       "tournament.error.delete": "ลบไม่สำเร็จ กรุณาลองใหม่",
+      "tournament.warn.syncFailed": "บันทึกแล้ว — แต่การสำรองข้อมูลไป Google Sheets ล้มเหลว หากเซิร์ฟเวอร์รีสตาร์ทก่อนที่จะซิงค์สำเร็จ ข้อมูลนี้อาจหายไป ลองบันทึกอีกครั้งในอีกสักครู่",
 
       "service.eyebrow": "เราพร้อมช่วยเหลือ",
       "service.title": "ฝ่ายบริการลูกค้า",

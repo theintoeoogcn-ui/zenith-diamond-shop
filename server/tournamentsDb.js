@@ -25,10 +25,16 @@ function readAll() {
   }
 }
 
-function writeAll(list) {
+// Writes the local file immediately (so reads are never blocked on the
+// network), then awaits the Sheets backup so callers can tell the admin if
+// this save didn't durably persist — a tournament created here but not yet
+// backed up to Sheets is the exact state that used to get silently rolled
+// back on the next server restart.
+async function writeAll(list) {
   ensureFile();
   fs.writeFileSync(DB_FILE, JSON.stringify(list, null, 2), 'utf8');
-  sync(SHEET_KEY, list);
+  const result = await sync(SHEET_KEY, list);
+  return result;
 }
 
 function generateId() {
@@ -42,7 +48,7 @@ function listTournaments() {
   return readAll().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
 }
 
-function createTournament(data) {
+async function createTournament(data) {
   const list = readAll();
   const item = {
     id: generateId(),
@@ -66,11 +72,13 @@ function createTournament(data) {
     createdAt: new Date().toISOString(),
   };
   list.push(item);
-  writeAll(list);
-  return item;
+  const syncResult = await writeAll(list);
+  // Spread copy for the API response only — the persisted item itself never
+  // carries this flag, so it can't leak into a later re-save.
+  return { ...item, _syncOk: syncResult.ok };
 }
 
-function updateTournament(id, patch) {
+async function updateTournament(id, patch) {
   const list = readAll();
   const idx = list.findIndex((t) => t.id === id);
   if (idx === -1) return null;
@@ -93,15 +101,15 @@ function updateTournament(id, patch) {
   // Older records may still carry the retired external link field.
   delete clean.registerLink;
   list[idx] = clean;
-  writeAll(list);
-  return list[idx];
+  const syncResult = await writeAll(list);
+  return { ...list[idx], _syncOk: syncResult.ok };
 }
 
-function deleteTournament(id) {
+async function deleteTournament(id) {
   const list = readAll();
   const next = list.filter((t) => t.id !== id);
   if (next.length === list.length) return false;
-  writeAll(next);
+  await writeAll(next);
   return true;
 }
 

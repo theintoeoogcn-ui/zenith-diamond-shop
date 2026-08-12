@@ -208,6 +208,7 @@
   .cover-clear.show{display:inline-block;}
   .modal-err{color:var(--signal);font-size:12.5px;margin:-6px 0 12px;display:none;}
   .modal-err.show{display:block;}
+  .modal-err.warn{color:#F5A623;}
   .modal-actions{display:flex;gap:10px;margin-top:6px;}
   .modal-actions button{
     flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;
@@ -702,7 +703,7 @@ function openCreate(){
   fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = ''; fRules.value = '';
   fWatchLink.value = ''; fRegistrationOpen.checked = true;
   setCoverPreview(null); fCover.value = '';
-  tModalErr.classList.remove('show');
+  tModalErr.classList.remove('show', 'warn');
   tModal.classList.add('show');
   fTitle.focus();
 }
@@ -719,7 +720,7 @@ window.openEdit = function(id){
   fWatchLink.value = item.watchLink || '';
   fRegistrationOpen.checked = item.registrationOpen !== false;
   setCoverPreview(item.coverImage || null); fCover.value = '';
-  tModalErr.classList.remove('show');
+  tModalErr.classList.remove('show', 'warn');
   tModal.classList.add('show');
   fTitle.focus();
 };
@@ -851,9 +852,21 @@ document.getElementById('t-modal-save').addEventListener('click', async () => {
     } else {
       tournaments.unshift(saved);
     }
-    tModal.classList.remove('show');
     renderGrids();
+    if (saved._syncOk === false) {
+      // The save DID succeed — it's live on the site right now — but the
+      // Google Sheets backup failed, so it won't survive a server restart
+      // until a later save succeeds. Keep the modal open with a visible
+      // warning instead of silently closing, so the admin knows to retry.
+      tModalErr.textContent = t('tournament.warn.syncFailed', "Saved — but the backup to Google Sheets failed, so this could be lost if the server restarts before it syncs. Try saving again in a minute to be safe.");
+      tModalErr.classList.add('show', 'warn');
+      if (!editingId) editingId = saved.id; // so a retry click edits/re-saves this same item instead of creating a duplicate
+    } else {
+      tModalErr.classList.remove('show', 'warn');
+      tModal.classList.remove('show');
+    }
   } catch (e) {
+    tModalErr.classList.remove('warn');
     tModalErr.textContent = t('tournament.error.save','Could not save. Please try again.');
     tModalErr.classList.add('show');
   } finally {
