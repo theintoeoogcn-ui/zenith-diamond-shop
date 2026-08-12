@@ -53,6 +53,10 @@ function createTournament(data) {
     format: data.format ? String(data.format).trim() : '',
     slots: data.slots ? String(data.slots).trim() : '',
     description: data.description ? String(data.description).trim() : '',
+    // Shown in the must-read Rules & Regulations popup before a visitor can
+    // reach the registration form. Empty means the frontend falls back to a
+    // generic default rule set instead of leaving the popup blank.
+    rules: data.rules ? String(data.rules).trim() : '',
     icon: data.icon ? String(data.icon).trim() : '🏆',
     coverImage: data.coverImage ? String(data.coverImage) : '',
     watchLink: data.watchLink ? String(data.watchLink).trim() : '',
@@ -72,7 +76,7 @@ function updateTournament(id, patch) {
   if (idx === -1) return null;
 
   const clean = { ...list[idx] };
-  const fields = ['title', 'status', 'date', 'prize', 'format', 'slots', 'description', 'icon', 'watchLink'];
+  const fields = ['title', 'status', 'date', 'prize', 'format', 'slots', 'description', 'rules', 'icon', 'watchLink'];
   fields.forEach((f) => {
     if (patch[f] !== undefined) {
       clean[f] = f === 'status'

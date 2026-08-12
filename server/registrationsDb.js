@@ -81,6 +81,9 @@ function cleanPlayer(p, slot) {
     slot: slot.key,
     role: ROLE_OPTIONS.includes(p.role) ? p.role : slot.label.replace(/ \d$/, ''),
     name: str(p.name, 60),
+    // In-game ID, so admins can confirm a roster entry against the actual
+    // Mobile Legends account rather than the in-game name alone.
+    gameId: str(p.gameId, 30),
   };
 }
 
@@ -104,6 +107,7 @@ function validate(payload) {
     // Optional slots may simply be left empty; a starter needs a name.
     if (!slot.required) return;
     if (!str(p.name, 60)) errors.push(`${slot.label}: player name is required.`);
+    if (!str(p.gameId, 30)) errors.push(`${slot.label}: player Game ID is required.`);
   });
   return errors;
 }

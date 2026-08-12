@@ -2214,6 +2214,7 @@ function renderRegTeams(){
             <span class="r">${escapeHtml(p.role)}</span>
             <span class="who2">
               <span class="n">${escapeHtml(p.name)}</span>
+              ${p.gameId ? `<span class="c">ID: ${escapeHtml(p.gameId)}</span>` : ''}
             </span>
           </div>`).join('')}
       </div>

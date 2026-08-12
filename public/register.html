@@ -418,6 +418,10 @@ function renderRoster(){
         <label>${t('reg.player','Player name')}${slot.required ? '<span class="req">*</span>' : ''}</label>
         <input type="text" maxlength="60" data-idx="${i}" data-f="name" placeholder="${t('reg.ign','In-game name')}">
       </div>
+      <div class="field">
+        <label>${t('reg.player_id','Game ID')}${slot.required ? '<span class="req">*</span>' : ''}</label>
+        <input type="text" inputmode="numeric" maxlength="30" data-idx="${i}" data-f="gameId" placeholder="${t('reg.ph.player_id','e.g. 123456789')}">
+      </div>
     </div>`;
   }).join('');
 }
@@ -428,7 +432,7 @@ function collectPlayers(){
       const el = document.querySelector(`[data-idx="${i}"][data-f="${f}"]`);
       return el ? el.value.trim() : '';
     };
-    return { role: get('role'), name: get('name') };
+    return { role: get('role'), name: get('name'), gameId: get('gameId') };
   });
 }
 
@@ -510,6 +514,10 @@ function validateForm(){
     if (!players[i].name) {
       markBad(document.querySelector(`[data-idx="${i}"][data-f="name"]`));
       problems.push(`${slot.label} — ${t('reg.player','Player name')} ${t('reg.err.missing','is required.')}`);
+    }
+    if (!players[i].gameId) {
+      markBad(document.querySelector(`[data-idx="${i}"][data-f="gameId"]`));
+      problems.push(`${slot.label} — ${t('reg.player_id','Game ID')} ${t('reg.err.missing','is required.')}`);
     }
   });
 

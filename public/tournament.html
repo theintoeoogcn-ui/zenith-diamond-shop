@@ -136,6 +136,7 @@
   .t-link-btn.facebook{background:rgba(24,119,242,0.12);border-color:rgba(24,119,242,0.35);color:#4E9BFF;}
   .t-link-btn.generic{background:var(--panel-raised);}
   .t-link-btn.register{background:rgba(139,92,246,0.14);border-color:var(--violet-dim);color:var(--violet);}
+  .t-link-btn.rules{background:var(--panel-raised);border-color:var(--line);color:var(--mid);}
   .reg-toggle{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--hi);cursor:pointer;}
   .reg-toggle input{width:16px;height:16px;accent-color:var(--violet);cursor:pointer;}
   .field-hint{font-size:11.5px;color:var(--dim);margin:7px 0 0;line-height:1.5;}
@@ -216,6 +217,19 @@
   .modal-actions .save:disabled{background:var(--panel-raised);color:var(--dim);cursor:not-allowed;}
   .modal-actions .cancel{background:var(--panel-raised);color:var(--mid);border:1px solid var(--line);}
   .modal-actions .cancel:hover{color:var(--hi);}
+
+  /* ---------- rules & regulations modal ---------- */
+  .rules-modal{max-width:520px;display:flex;flex-direction:column;max-height:85vh;padding:24px 24px 20px;}
+  .rules-modal h3{display:flex;align-items:center;gap:9px;margin:0 0 4px;}
+  .rules-modal .rules-scroll-hint{font-size:12px;color:var(--dim);margin:0 0 14px;}
+  .rules-body{
+    background:var(--void);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;overflow-y:auto;flex:1;min-height:120px;max-height:52vh;
+    font-size:13px;line-height:1.85;color:var(--mid);white-space:pre-line;
+  }
+  .rules-body::-webkit-scrollbar{width:8px;}
+  .rules-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+  .rules-modal .modal-actions{margin-top:16px;}
 
   footer{
     display:flex;justify-content:space-between;padding:26px 48px;margin-top:20px;
@@ -366,6 +380,12 @@
     </div>
 
     <div class="field">
+      <label data-i18n="tournament.form.field.rules">Rules &amp; Regulations</label>
+      <textarea id="f-rules" rows="6" placeholder="One rule per line…"></textarea>
+      <p class="field-hint" data-i18n="tournament.form.field.rules_hint">Shown in a must-read popup before a visitor can register. Leave blank to use the default rules below.</p>
+    </div>
+
+    <div class="field">
       <label data-i18n="tournament.form.field.watchlink">Watch link (YouTube / Facebook)</label>
       <input type="url" id="f-watchlink" placeholder="https://youtube.com/... or https://facebook.com/...">
     </div>
@@ -383,6 +403,19 @@
     <div class="modal-actions">
       <button class="cancel" id="t-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
       <button class="save" id="t-modal-save" data-i18n="tournament.form.save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- rules & regulations modal ---------- -->
+<div class="modal-overlay" id="rules-modal">
+  <div class="modal rules-modal">
+    <h3>📜 <span data-i18n="rules.title">Rules &amp; Regulations</span></h3>
+    <p class="rules-scroll-hint" id="rules-scroll-hint" data-i18n="rules.scroll_hint">Scroll down to read the full rules.</p>
+    <div class="rules-body" id="rules-modal-body"></div>
+    <div class="modal-actions">
+      <button class="cancel" id="rules-modal-close" data-i18n="rules.close">Close</button>
+      <button class="save" id="rules-modal-accept" data-i18n="rules.accept" style="display:none;">Accept &amp; Continue</button>
     </div>
   </div>
 </div>
@@ -439,11 +472,17 @@ function renderCard(item){
     return `<a class="t-link-btn ${p.cls}" href="${escapeHtml(item.watchLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${p.icon} ${escapeHtml(p.label)}</a>`;
   })() : '';
   // Registration is handled on the site now: upcoming tournaments that are
-  // still accepting entries get a button through to register.html.
-  const registerHtml = (item.status !== 'past' && item.registrationOpen !== false)
-    ? `<a class="t-link-btn register" href="register.html?id=${encodeURIComponent(item.id)}" onclick="event.stopPropagation()">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
+  // still accepting entries get a button through to register.html — but only
+  // after the visitor has scrolled through and accepted the Rules &
+  // Regulations popup (see openRulesModal below).
+  const canRegister = item.status !== 'past' && item.registrationOpen !== false;
+  const registerHtml = canRegister
+    ? `<a class="t-link-btn register" href="register.html?id=${encodeURIComponent(item.id)}" onclick="event.stopPropagation();event.preventDefault();openRulesModal('${item.id}','register')">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
     : '';
-  const linksHtml = (watchHtml || registerHtml) ? `<div class="t-links">${watchHtml}${registerHtml}</div>` : '';
+  const rulesHtml = canRegister
+    ? `<a class="t-link-btn rules" href="javascript:void(0)" onclick="event.stopPropagation();openRulesModal('${item.id}','view')">📜 ${escapeHtml(t('tournament.card.rules','Rules and Regulations'))}</a>`
+    : '';
+  const linksHtml = (watchHtml || registerHtml || rulesHtml) ? `<div class="t-links">${watchHtml}${registerHtml}${rulesHtml}</div>` : '';
 
   return `
     <div class="t-card" data-id="${item.id}" onclick="window.location.href='tournament-detail.html?id=${item.id}'" style="cursor:pointer;">
@@ -602,6 +641,7 @@ const fIcon = document.getElementById('f-icon');
 const fWatchLink = document.getElementById('f-watchlink');
 const fRegistrationOpen = document.getElementById('f-registration-open');
 const fDesc = document.getElementById('f-desc');
+const fRules = document.getElementById('f-rules');
 const fCover = document.getElementById('f-cover');
 const coverBox = document.getElementById('cover-box');
 const coverThumb = document.getElementById('cover-thumb');
@@ -646,7 +686,7 @@ function openCreate(){
   editingId = null;
   tModalTitle.textContent = t('tournament.form.title.create','Create tournament');
   fTitle.value = ''; fStatus.value = 'upcoming'; fDate.value = ''; fPrize.value = '';
-  fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = '';
+  fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = ''; fRules.value = '';
   fWatchLink.value = ''; fRegistrationOpen.checked = true;
   setCoverPreview(null); fCover.value = '';
   tModalErr.classList.remove('show');
@@ -662,6 +702,7 @@ window.openEdit = function(id){
   fTitle.value = item.title || ''; fStatus.value = item.status === 'past' ? 'past' : 'upcoming';
   fDate.value = item.date || ''; fPrize.value = item.prize || ''; fSlots.value = item.slots || '';
   fFormat.value = item.format || ''; fIcon.value = item.icon || '🏆'; fDesc.value = item.description || '';
+  fRules.value = item.rules || '';
   fWatchLink.value = item.watchLink || '';
   fRegistrationOpen.checked = item.registrationOpen !== false;
   setCoverPreview(item.coverImage || null); fCover.value = '';
@@ -685,6 +726,61 @@ window.deleteItem = async function(id){
   }
 };
 
+/* ---------------- rules & regulations ---------------- */
+const rulesModal = document.getElementById('rules-modal');
+const rulesModalBody = document.getElementById('rules-modal-body');
+const rulesModalAccept = document.getElementById('rules-modal-accept');
+const rulesModalClose = document.getElementById('rules-modal-close');
+const rulesScrollHint = document.getElementById('rules-scroll-hint');
+let rulesModalMode = 'view';
+let rulesModalTournamentId = null;
+
+// A tournament with no admin-entered rules still needs to show *something*,
+// so a generic ruleset covers it rather than leaving the popup empty.
+function rulesTextFor(item){
+  return (item && item.rules && item.rules.trim()) || t('rules.default', '');
+}
+
+function checkRulesScroll(){
+  if (rulesModalMode !== 'register') return;
+  const atBottom = rulesModalBody.scrollTop + rulesModalBody.clientHeight >= rulesModalBody.scrollHeight - 16;
+  rulesModalAccept.disabled = !atBottom;
+}
+rulesModalBody.addEventListener('scroll', checkRulesScroll);
+
+// mode 'register': gates the Register button — Accept & Continue stays
+// disabled until the visitor scrolls to the bottom, then it goes to the
+// registration form. mode 'view': just a read-only Close, no gating — this
+// is what the standalone "Rules and Regulations" button opens.
+window.openRulesModal = function(id, mode){
+  const item = tournaments.find(x => x.id === id) || {};
+  rulesModalTournamentId = id;
+  rulesModalMode = mode;
+  rulesModalBody.textContent = rulesTextFor(item);
+  rulesModalBody.scrollTop = 0;
+
+  if (mode === 'register') {
+    rulesModalAccept.style.display = '';
+    rulesModalAccept.disabled = true;
+    rulesModalClose.textContent = t('rules.cancel', 'Cancel');
+    rulesScrollHint.style.display = '';
+  } else {
+    rulesModalAccept.style.display = 'none';
+    rulesModalClose.textContent = t('rules.close', 'Close');
+    rulesScrollHint.style.display = 'none';
+  }
+  rulesModal.classList.add('show');
+  // The body may already fit without scrolling (short rules text) — in that
+  // case the visitor has effectively "read" it all already, so unlock Accept.
+  requestAnimationFrame(checkRulesScroll);
+};
+
+rulesModalClose.addEventListener('click', () => rulesModal.classList.remove('show'));
+rulesModalAccept.addEventListener('click', () => {
+  if (rulesModalAccept.disabled || !rulesModalTournamentId) return;
+  window.location.href = 'register.html?id=' + encodeURIComponent(rulesModalTournamentId);
+});
+
 document.getElementById('create-btn').addEventListener('click', openCreate);
 document.getElementById('t-modal-cancel').addEventListener('click', () => tModal.classList.remove('show'));
 
@@ -698,6 +794,7 @@ document.getElementById('t-modal-save').addEventListener('click', async () => {
     format: fFormat.value.trim(),
     icon: fIcon.value.trim() || '🏆',
     description: fDesc.value.trim(),
+    rules: fRules.value.trim(),
     coverImage: coverImageData || '',
     watchLink: fWatchLink.value.trim(),
     registrationOpen: fRegistrationOpen.checked,
