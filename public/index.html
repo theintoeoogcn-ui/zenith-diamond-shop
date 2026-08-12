@@ -261,13 +261,13 @@
     .ad-anim-fade,.ad-anim-slide,.ad-anim-zoom,.ad-anim-flip{animation:none;}
   }
 
-  /* ---------- desktop widget: ~1/3-width, height-matched carousel ---------- */
+  /* ---------- desktop widget: ~1/3-width, auto-height carousel ---------- */
   .hero-ad{
     display:none;position:sticky;top:96px;flex:0 0 33%;min-width:300px;max-width:440px;
     margin-left:auto;
     z-index:2;border-radius:18px;overflow:hidden;
   }
-  @media (min-width:981px){ .hero-ad.has-ads{display:flex;flex-direction:column;} }
+  @media (min-width:981px){ .hero-ad.has-ads{display:block;} }
   .ad-glow{
     position:absolute;inset:-25%;z-index:-1;pointer-events:none;border-radius:50%;
     background:conic-gradient(from 0deg, rgba(139,92,246,0.55), rgba(79,224,232,0.4), rgba(255,62,154,0.35), rgba(139,92,246,0.55));
@@ -275,21 +275,22 @@
   }
   @keyframes adGlowSpin{to{transform:rotate(360deg);}}
   @media (prefers-reduced-motion:reduce){ .ad-glow{animation:none;} }
-  /* .hero-ad's height is set to an explicit pixel value by JS (syncAdHeight,
-     matched to hero-text's rendered height) rather than CSS align-items:
-     stretch — Safari doesn't reliably resolve a percentage-height child
-     against a stretched-but-sticky flex item, which was leaving the ad
-     image short with a blank gap below it. An explicit inline px height
-     gives #ad-slot-desktop / .ad-card a definite height to be 100% of. */
-  #ad-slot-desktop{position:relative;flex:1;height:100%;}
-  /* .ad-card-link (the <a>/<div> wrapping the image+overlay) sits between
-     .ad-card and .ad-card-img — it's the actual positioned ancestor the
-     absolutely-positioned image sizes against, but it was never given a
-     height of its own, so it was collapsing to the overlay's ~220px
-     min-height instead of filling the tall carousel box. Both need the
-     explicit height for the image to truly cover the full height. */
-  .hero-ad .ad-card,
-  .hero-ad .ad-card-link{height:100%;}
+  #ad-slot-desktop{position:relative;}
+  /* Earlier this forced the image to a fixed height matched to hero-text
+     via object-fit:cover — but banner-style creatives (usually wide/landscape)
+     were getting badly cropped/stretched by that. Instead, let the image lay
+     out in normal flow at its own natural aspect ratio (auto-sizing the whole
+     card to whatever size the admin uploaded), and float the text overlay on
+     top of it, pinned to the bottom, rather than the overlay driving the
+     card's height like the smaller mobile/interstitial placements still do.
+     syncAdHeight() below only clamps this with a max-height so an unusually
+     tall upload can't make the sidebar taller than the heading column. */
+  .hero-ad .ad-card{height:auto;}
+  .hero-ad .ad-card-link{height:auto;display:block;}
+  .hero-ad .ad-card-img{position:static;width:100%;height:auto;display:block;}
+  .hero-ad .ad-card.lg .ad-card-overlay{
+    position:absolute;left:0;right:0;bottom:0;top:auto;min-height:0;
+  }
 
   .ad-nav{
     position:absolute;top:50%;transform:translateY(-50%);z-index:3;
@@ -854,8 +855,11 @@ function syncAdHeight(){
   const text = document.querySelector('.hero-text');
   const widget = document.getElementById('hero-ad');
   if (!text || !widget) return;
-  if (window.innerWidth < 981) { widget.style.height = ''; return; }
-  widget.style.height = text.offsetHeight + 'px';
+  // A cap, not a forced height — the card now auto-sizes to whatever the
+  // uploaded image's own proportions are. This just stops an unusually
+  // tall creative from making the sidebar taller than the heading column.
+  if (window.innerWidth < 981) { widget.style.maxHeight = ''; return; }
+  widget.style.maxHeight = text.offsetHeight + 'px';
 }
 (function initAdHeightSync(){
   const text = document.querySelector('.hero-text');
