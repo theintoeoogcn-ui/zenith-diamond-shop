@@ -734,6 +734,7 @@ const rulesModalClose = document.getElementById('rules-modal-close');
 const rulesScrollHint = document.getElementById('rules-scroll-hint');
 let rulesModalMode = 'view';
 let rulesModalTournamentId = null;
+let rulesPollTimer = null;
 
 // A tournament with no admin-entered rules still needs to show *something*,
 // so a generic ruleset covers it rather than leaving the popup empty.
@@ -741,12 +742,17 @@ function rulesTextFor(item){
   return (item && item.rules && item.rules.trim()) || t('rules.default', '');
 }
 
+// A generous buffer (not a pixel-perfect "exactly at the bottom" check) —
+// fractional scroll heights at some zoom levels / browsers otherwise leave
+// the button stuck disabled even after the visitor has genuinely scrolled
+// all the way down.
 function checkRulesScroll(){
   if (rulesModalMode !== 'register') return;
-  const atBottom = rulesModalBody.scrollTop + rulesModalBody.clientHeight >= rulesModalBody.scrollHeight - 16;
-  rulesModalAccept.disabled = !atBottom;
+  const gap = rulesModalBody.scrollHeight - (rulesModalBody.scrollTop + rulesModalBody.clientHeight);
+  if (gap <= 32) rulesModalAccept.disabled = false;
 }
 rulesModalBody.addEventListener('scroll', checkRulesScroll);
+window.addEventListener('resize', checkRulesScroll);
 
 // mode 'register': gates the Register button — Accept & Continue stays
 // disabled until the visitor scrolls to the bottom, then it goes to the
@@ -759,25 +765,34 @@ window.openRulesModal = function(id, mode){
   rulesModalBody.textContent = rulesTextFor(item);
   rulesModalBody.scrollTop = 0;
 
+  clearInterval(rulesPollTimer);
   if (mode === 'register') {
     rulesModalAccept.style.display = '';
     rulesModalAccept.disabled = true;
     rulesModalClose.textContent = t('rules.cancel', 'Cancel');
     rulesScrollHint.style.display = '';
+    // Belt-and-braces: short rules text that never needs a scrollbar at all
+    // won't ever fire a 'scroll' event, so poll for a moment after opening
+    // instead of relying only on that event (and the very first layout
+    // frame, which can occasionally measure 0 before the modal has painted).
+    rulesPollTimer = setInterval(checkRulesScroll, 200);
+    setTimeout(() => clearInterval(rulesPollTimer), 4000);
   } else {
     rulesModalAccept.style.display = 'none';
     rulesModalClose.textContent = t('rules.close', 'Close');
     rulesScrollHint.style.display = 'none';
   }
   rulesModal.classList.add('show');
-  // The body may already fit without scrolling (short rules text) — in that
-  // case the visitor has effectively "read" it all already, so unlock Accept.
   requestAnimationFrame(checkRulesScroll);
 };
 
-rulesModalClose.addEventListener('click', () => rulesModal.classList.remove('show'));
+rulesModalClose.addEventListener('click', () => {
+  rulesModal.classList.remove('show');
+  clearInterval(rulesPollTimer);
+});
 rulesModalAccept.addEventListener('click', () => {
   if (rulesModalAccept.disabled || !rulesModalTournamentId) return;
+  clearInterval(rulesPollTimer);
   window.location.href = 'register.html?id=' + encodeURIComponent(rulesModalTournamentId);
 });
 
