@@ -576,7 +576,7 @@
   <div class="modal">
     <h3 id="ad-form-title" data-i18n="ads.form.title_add">Add ad</h3>
     <div class="field">
-      <label data-i18n="ads.form.media">Image / GIF (max 1.5MB)</label>
+      <label data-i18n="ads.form.media">Image / GIF (max 3MB)</label>
       <div class="ad-media-upload">
         <img class="ad-media-preview" id="ad-media-preview" src="" alt="" style="display:none;">
         <button type="button" class="upload-btn" id="ad-media-upload-btn" data-i18n="ads.form.upload">Choose file</button>
@@ -1086,7 +1086,7 @@ document.getElementById('ad-media-input').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
   if (!file.type.startsWith('image/')) { alert(t('ads.form.error_filetype','Please choose an image or GIF file.')); return; }
-  if (file.size > 1.5 * 1024 * 1024) { alert(t('ads.form.error_filesize','That file is too large — 1.5MB max.')); return; }
+  if (file.size > 3 * 1024 * 1024) { alert(t('ads.form.error_filesize','That file is too large — 3MB max.')); return; }
   const reader = new FileReader();
   reader.onload = () => {
     adMediaData = reader.result;

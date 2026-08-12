@@ -21,7 +21,7 @@ const TRANSITIONS = ['fade', 'slide', 'zoom', 'flip', 'random'];
 // Which surface an ad is eligible to appear on.
 const PLACEMENTS = ['desktop', 'mobile', 'both'];
 const MAX_ADS = 12;
-const MAX_MEDIA_BYTES = 1.5 * 1024 * 1024; // ~1.5MB decoded
+const MAX_MEDIA_BYTES = 3 * 1024 * 1024; // ~3MB decoded
 
 function ensureFile() {
   if (!fs.existsSync(path.dirname(DB_FILE))) fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
