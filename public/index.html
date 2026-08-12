@@ -166,8 +166,11 @@
     .eyebrow{font-size:11px;letter-spacing:1.5px;margin:0 0 12px;}
     h1{font-size:29px;line-height:1.28;margin:0 0 12px;letter-spacing:0.2px;}
     .hero-text p{font-size:14.5px;line-height:1.55;max-width:none;margin:0 0 22px;}
-    .hero-btns{gap:10px;margin-bottom:28px;}
-    .hero-btn{padding:12px 18px;font-size:12px;letter-spacing:0.7px;gap:8px;}
+    /* Stretch to a 2-up grid instead of left-aligned pills, so both
+       buttons' outer edges line up with the Diamond stat boxes' and the ad
+       card's edges below them — same max-width, same gap. */
+    .hero-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px;max-width:560px;}
+    .hero-btn{padding:12px 14px;font-size:12px;letter-spacing:0.7px;gap:8px;justify-content:center;}
   }
   .hero-btn:hover{transform:translateY(-2px);}
   .hero-btn.primary{
@@ -621,6 +624,7 @@
           <option value="both" data-i18n="ads.form.placement.both">Desktop &amp; Mobile</option>
           <option value="desktop" data-i18n="ads.form.placement.desktop">Desktop only</option>
           <option value="mobile" data-i18n="ads.form.placement.mobile">Mobile only</option>
+          <option value="popup" data-i18n="ads.form.placement.popup">Pop Up only</option>
         </select>
       </div>
     </div>
@@ -828,8 +832,17 @@ let desktopTimer = null, mobileTimer = null;
 const AD_BOTTOM_CLOSED_KEY = 'zenith-ad-bottom-closed';
 const AD_INTERSTITIAL_SEEN_KEY = 'zenith-ad-interstitial-seen'; // sessionStorage: once per visit
 
+// 'popup' is a separate lane from 'mobile': an ad only shows in the
+// once-per-visit popup if it's tagged 'popup' specifically, so admins can
+// pick a dedicated "welcome" creative there without it also crowding the
+// in-flow card / sticky-bottom banner rotation. 'both' still only ever
+// means desktop + mobile — it never implicitly includes popup.
 function adsFor(placement){
-  return allAds.filter(a => a.active && (a.placement === 'both' || a.placement === placement));
+  return allAds.filter(a => {
+    if (!a.active) return false;
+    if (a.placement === placement) return true;
+    return placement !== 'popup' && a.placement === 'both';
+  });
 }
 function pickTransition(ad){
   if (!ad) return 'fade';
@@ -995,7 +1008,10 @@ document.getElementById('ad-sticky-bottom-close').addEventListener('click', () =
 /* ---- mobile: once-per-visit interstitial ---- */
 function maybeShowInterstitial(){
   if (sessionStorage.getItem(AD_INTERSTITIAL_SEEN_KEY) === '1') return;
-  const ad = adsFor('mobile')[0];
+  // Prefer an ad tagged specifically "Pop Up only"; fall back to whatever
+  // mobile ad would otherwise show so existing setups without a dedicated
+  // popup creative don't just lose the popup entirely.
+  const ad = adsFor('popup')[0] || adsFor('mobile')[0];
   if (!ad) return;
   setTimeout(() => {
     sessionStorage.setItem(AD_INTERSTITIAL_SEEN_KEY, '1');

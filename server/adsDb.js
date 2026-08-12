@@ -18,8 +18,12 @@ const DB_FILE = path.join(DATA_DIR, 'ads.json');
 const SHEET_KEY = 'ads';
 
 const TRANSITIONS = ['fade', 'slide', 'zoom', 'flip', 'random'];
-// Which surface an ad is eligible to appear on.
-const PLACEMENTS = ['desktop', 'mobile', 'both'];
+// Which surface an ad is eligible to appear on. 'popup' is its own lane —
+// unlike 'mobile' (in-flow card + sticky-bottom banner), an ad only shows
+// in the once-per-visit interstitial popup if it's tagged 'popup'
+// specifically; 'both' still means desktop + mobile only, never popup. See
+// adsFor() in index.html for how these are actually matched at render time.
+const PLACEMENTS = ['desktop', 'mobile', 'both', 'popup'];
 const MAX_ADS = 12;
 const MAX_MEDIA_BYTES = 3 * 1024 * 1024; // ~3MB decoded — still the cap for image/GIF creatives
 // Video ads (short muted autoplay loops, replacing GIFs for smoother
