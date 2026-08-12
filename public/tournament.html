@@ -225,12 +225,53 @@
   .rules-modal .rules-scroll-hint{font-size:12px;color:var(--dim);margin:0 0 14px;}
   .rules-body{
     background:var(--void);border:1px solid var(--line);border-radius:12px;
-    padding:16px 18px;overflow-y:auto;flex:1;min-height:120px;max-height:52vh;
+    padding:20px 20px;overflow-y:auto;flex:1;min-height:120px;max-height:52vh;
     font-size:13px;line-height:1.85;color:var(--mid);white-space:pre-line;
+    display:flex;align-items:center;
   }
   .rules-body::-webkit-scrollbar{width:8px;}
   .rules-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+  .rules-slide{width:100%;opacity:0;transform:translateX(10px);transition:opacity .28s ease, transform .28s ease;}
+  .rules-slide.in{opacity:1;transform:translateX(0);}
+  .rules-pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px;}
+  .rules-nav{
+    width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--panel-raised);
+    color:var(--mid);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;transition:border-color .12s, color .12s;
+  }
+  .rules-nav:hover{border-color:var(--violet-dim);color:var(--hi);}
+  .rules-nav:disabled{opacity:.35;cursor:default;}
+  .rules-dots{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;}
+  .rules-dot{
+    width:8px;height:8px;border-radius:50%;border:none;background:var(--line);cursor:pointer;padding:0;
+    transition:background .15s, transform .15s;
+  }
+  .rules-dot.active{background:var(--violet);transform:scale(1.3);}
+  .rules-dot.seen:not(.active){background:var(--violet-dim);}
+  .rules-page-label{text-align:center;font-size:11.5px;color:var(--dim);margin:8px 0 0;font-weight:600;}
   .rules-modal .modal-actions{margin-top:16px;}
+
+  /* ---------- admin "Add Rule" list builder ---------- */
+  .rules-admin-list{list-style:none;padding:0;margin:0 0 10px;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
+  .rules-admin-list li{
+    display:flex;align-items:flex-start;gap:8px;background:var(--void);border:1px solid var(--line);
+    border-radius:9px;padding:8px 10px;font-size:12.5px;color:var(--hi);line-height:1.5;
+  }
+  .rules-admin-list li .n{color:var(--violet);font-weight:700;flex-shrink:0;}
+  .rules-admin-list li .txt{flex:1;white-space:pre-wrap;word-break:break-word;}
+  .rules-admin-list li button{
+    flex-shrink:0;width:20px;height:20px;border-radius:6px;border:none;background:transparent;
+    color:var(--dim);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;
+  }
+  .rules-admin-list li button:hover{color:var(--signal);}
+  .rules-admin-empty{font-size:12px;color:var(--dim);padding:8px 2px;}
+  .rules-admin-add{display:flex;gap:8px;}
+  .rules-admin-add input{flex:1;}
+  .rules-admin-add-btn{
+    flex-shrink:0;padding:0 14px;border-radius:9px;border:1px solid var(--violet-dim);background:rgba(139,92,246,0.14);
+    color:var(--violet);font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap;
+  }
+  .rules-admin-add-btn:hover{background:rgba(139,92,246,0.24);}
 
   footer{
     display:flex;justify-content:space-between;padding:26px 48px;margin-top:20px;
@@ -382,8 +423,12 @@
 
     <div class="field">
       <label data-i18n="tournament.form.field.rules">Rules &amp; Regulations</label>
-      <textarea id="f-rules" rows="6" placeholder="One rule per line…"></textarea>
-      <p class="field-hint" data-i18n="tournament.form.field.rules_hint">Shown in a must-read popup before a visitor can register. Leave blank to use the default rules below.</p>
+      <ol class="rules-admin-list" id="rules-admin-list"></ol>
+      <div class="rules-admin-add">
+        <input type="text" id="rules-admin-input" maxlength="300" data-i18n-placeholder="tournament.form.field.rules.add_ph" placeholder="Type a rule…">
+        <button type="button" class="rules-admin-add-btn" id="rules-admin-add-btn" data-i18n="tournament.form.field.rules.add_btn">+ Add Rule</button>
+      </div>
+      <p class="field-hint" data-i18n="tournament.form.field.rules_hint">Each rule becomes its own slide in the must-read popup before a visitor can register. Leave the list empty to use the default rules below.</p>
     </div>
 
     <div class="field">
@@ -412,8 +457,14 @@
 <div class="modal-overlay" id="rules-modal">
   <div class="modal rules-modal">
     <h3>📜 <span data-i18n="rules.title">Rules &amp; Regulations</span></h3>
-    <p class="rules-scroll-hint" id="rules-scroll-hint" data-i18n="rules.scroll_hint">Scroll down to read the full rules.</p>
-    <div class="rules-body" id="rules-modal-body"></div>
+    <p class="rules-scroll-hint" id="rules-scroll-hint" data-i18n="rules.scroll_hint">View every page to unlock Accept.</p>
+    <div class="rules-body" id="rules-modal-body"><div class="rules-slide" id="rules-slide-text"></div></div>
+    <div class="rules-pager" id="rules-pager">
+      <button type="button" class="rules-nav" id="rules-prev" aria-label="Previous rule">‹</button>
+      <div class="rules-dots" id="rules-dots"></div>
+      <button type="button" class="rules-nav" id="rules-next" aria-label="Next rule">›</button>
+    </div>
+    <p class="rules-page-label" id="rules-page-label"></p>
     <div class="modal-actions">
       <button class="cancel" id="rules-modal-close" data-i18n="rules.close">Close</button>
       <button class="save" id="rules-modal-accept" data-i18n="rules.accept" style="display:none;">Accept &amp; Continue</button>
@@ -642,7 +693,6 @@ const fIcon = document.getElementById('f-icon');
 const fWatchLink = document.getElementById('f-watchlink');
 const fRegistrationOpen = document.getElementById('f-registration-open');
 const fDesc = document.getElementById('f-desc');
-const fRules = document.getElementById('f-rules');
 const fCover = document.getElementById('f-cover');
 const coverBox = document.getElementById('cover-box');
 const coverThumb = document.getElementById('cover-thumb');
@@ -696,11 +746,57 @@ document.querySelectorAll('.icon-picks button').forEach(btn => {
   btn.addEventListener('click', () => { fIcon.value = btn.dataset.icon; });
 });
 
+/* ---------------- rules & regulations: admin "Add Rule" list builder ----
+   Each rule the admin adds becomes one entry here; on save they're joined
+   with newlines into the same `rules` string the server has always stored
+   (no backend change needed), and the Rules & Regulations popup later
+   splits that string back into one slide per rule. */
+const rulesAdminListEl = document.getElementById('rules-admin-list');
+const rulesAdminInput = document.getElementById('rules-admin-input');
+const rulesAdminAddBtn = document.getElementById('rules-admin-add-btn');
+let adminRules = [];
+
+function renderAdminRules(){
+  if (!adminRules.length) {
+    rulesAdminListEl.innerHTML = `<li class="rules-admin-empty" style="border:none;background:none;padding:2px 2px;" data-i18n="tournament.form.field.rules.empty">${escapeHtml(t('tournament.form.field.rules.empty','No rules added yet — the default rule set below will be used instead.'))}</li>`;
+    return;
+  }
+  rulesAdminListEl.innerHTML = adminRules.map((rule, i) => `
+    <li>
+      <span class="n">${i + 1}.</span>
+      <span class="txt">${escapeHtml(rule)}</span>
+      <button type="button" data-i="${i}" aria-label="Remove rule" title="Remove">✕</button>
+    </li>
+  `).join('');
+}
+
+function addAdminRule(){
+  const val = rulesAdminInput.value.trim();
+  if (!val) return;
+  adminRules.push(val);
+  rulesAdminInput.value = '';
+  renderAdminRules();
+  rulesAdminInput.focus();
+}
+
+rulesAdminAddBtn.addEventListener('click', addAdminRule);
+rulesAdminInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); addAdminRule(); }
+});
+rulesAdminListEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-i]');
+  if (!btn) return;
+  adminRules.splice(Number(btn.dataset.i), 1);
+  renderAdminRules();
+});
+renderAdminRules();
+
 function openCreate(){
   editingId = null;
   tModalTitle.textContent = t('tournament.form.title.create','Create tournament');
   fTitle.value = ''; fStatus.value = 'upcoming'; fDate.value = ''; fPrize.value = '';
-  fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = ''; fRules.value = '';
+  fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = '';
+  adminRules = []; renderAdminRules(); rulesAdminInput.value = '';
   fWatchLink.value = ''; fRegistrationOpen.checked = true;
   setCoverPreview(null); fCover.value = '';
   tModalErr.classList.remove('show', 'warn');
@@ -716,7 +812,8 @@ window.openEdit = function(id){
   fTitle.value = item.title || ''; fStatus.value = item.status === 'past' ? 'past' : 'upcoming';
   fDate.value = item.date || ''; fPrize.value = item.prize || ''; fSlots.value = item.slots || '';
   fFormat.value = item.format || ''; fIcon.value = item.icon || '🏆'; fDesc.value = item.description || '';
-  fRules.value = item.rules || '';
+  adminRules = (item.rules || '').split('\n').map(s => s.trim()).filter(Boolean);
+  renderAdminRules(); rulesAdminInput.value = '';
   fWatchLink.value = item.watchLink || '';
   fRegistrationOpen.checked = item.registrationOpen !== false;
   setCoverPreview(item.coverImage || null); fCover.value = '';
@@ -740,15 +837,35 @@ window.deleteItem = async function(id){
   }
 };
 
-/* ---------------- rules & regulations ---------------- */
+/* ---------------- rules & regulations: auto-sliding pages ----------------
+   Each rule (one per line, from the admin's "Add Rule" list) is shown as
+   its own slide — "Page 1 / Page 2 / Page 3…" — that auto-advances, with
+   dots and prev/next arrows for manual browsing. In 'register' mode,
+   Accept & Continue stays disabled until every page has been shown for at
+   least a moment (MIN_VIEW_MS) at least once, in any order — so a visitor
+   can't accept without actually having each rule on screen, but isn't
+   forced through them in strict sequence either. */
 const rulesModal = document.getElementById('rules-modal');
 const rulesModalBody = document.getElementById('rules-modal-body');
+const rulesSlideEl = document.getElementById('rules-slide-text');
+const rulesPagerEl = document.getElementById('rules-pager');
+const rulesDotsEl = document.getElementById('rules-dots');
+const rulesPrevBtn = document.getElementById('rules-prev');
+const rulesNextBtn = document.getElementById('rules-next');
+const rulesPageLabelEl = document.getElementById('rules-page-label');
 const rulesModalAccept = document.getElementById('rules-modal-accept');
 const rulesModalClose = document.getElementById('rules-modal-close');
 const rulesScrollHint = document.getElementById('rules-scroll-hint');
 let rulesModalMode = 'view';
 let rulesModalTournamentId = null;
-let rulesPollTimer = null;
+let rulesPages = [];
+let rulesPageIdx = 0;
+let rulesSeenPages = new Set();
+let rulesAutoTimer = null;
+let rulesDwellTimer = null;
+let rulesAutoplayPaused = false;
+const RULES_AUTO_MS = 4200;   // how long each page stays up before auto-advancing
+const RULES_MIN_VIEW_MS = 1100; // how long a page must be on screen before it counts as "read"
 
 // A tournament with no admin-entered rules still needs to show *something*,
 // so a generic ruleset covers it rather than leaving the popup empty.
@@ -756,57 +873,112 @@ function rulesTextFor(item){
   return (item && item.rules && item.rules.trim()) || t('rules.default', '');
 }
 
-// A generous buffer (not a pixel-perfect "exactly at the bottom" check) —
-// fractional scroll heights at some zoom levels / browsers otherwise leave
-// the button stuck disabled even after the visitor has genuinely scrolled
-// all the way down.
-function checkRulesScroll(){
-  if (rulesModalMode !== 'register') return;
-  const gap = rulesModalBody.scrollHeight - (rulesModalBody.scrollTop + rulesModalBody.clientHeight);
-  if (gap <= 32) rulesModalAccept.disabled = false;
+function rulesSplitPages(item){
+  const lines = rulesTextFor(item).split('\n').map(s => s.trim()).filter(Boolean);
+  return lines.length ? lines : [rulesTextFor(item)];
 }
-rulesModalBody.addEventListener('scroll', checkRulesScroll);
-window.addEventListener('resize', checkRulesScroll);
+
+function renderRulesDots(){
+  rulesPagerEl.style.display = rulesPages.length > 1 ? '' : 'none';
+  rulesDotsEl.innerHTML = rulesPages.map((_, i) => {
+    const cls = ['rules-dot'];
+    if (i === rulesPageIdx) cls.push('active');
+    else if (rulesSeenPages.has(i)) cls.push('seen');
+    return `<button type="button" class="${cls.join(' ')}" data-i="${i}" aria-label="Page ${i + 1}"></button>`;
+  }).join('');
+  rulesPrevBtn.disabled = rulesPages.length <= 1;
+  rulesNextBtn.disabled = rulesPages.length <= 1;
+}
+
+function updateRulesPageLabel(){
+  rulesPageLabelEl.textContent = rulesPages.length > 1
+    ? t('rules.page_of', 'Page {n} of {total}').replace('{n}', rulesPageIdx + 1).replace('{total}', rulesPages.length)
+    : '';
+}
+
+function checkRulesComplete(){
+  if (rulesModalMode !== 'register') return;
+  if (rulesSeenPages.size >= rulesPages.length) rulesModalAccept.disabled = false;
+}
+
+function goToRulesPage(i){
+  if (!rulesPages.length) return;
+  rulesPageIdx = ((i % rulesPages.length) + rulesPages.length) % rulesPages.length;
+  rulesSlideEl.classList.remove('in');
+  // restart the fade-in transition on every page change
+  void rulesSlideEl.offsetWidth;
+  rulesSlideEl.textContent = rulesPages[rulesPageIdx];
+  rulesSlideEl.classList.add('in');
+  renderRulesDots();
+  updateRulesPageLabel();
+
+  clearTimeout(rulesDwellTimer);
+  const seenAt = rulesPageIdx;
+  rulesDwellTimer = setTimeout(() => {
+    rulesSeenPages.add(seenAt);
+    renderRulesDots();
+    checkRulesComplete();
+  }, RULES_MIN_VIEW_MS);
+}
+
+function startRulesAutoplay(){
+  clearInterval(rulesAutoTimer);
+  if (rulesAutoplayPaused || rulesPages.length <= 1) return;
+  rulesAutoTimer = setInterval(() => goToRulesPage(rulesPageIdx + 1), RULES_AUTO_MS);
+}
+
+function stopRulesTimers(){
+  clearInterval(rulesAutoTimer);
+  clearTimeout(rulesDwellTimer);
+}
+
+rulesPrevBtn.addEventListener('click', () => { rulesAutoplayPaused = true; stopRulesTimers(); goToRulesPage(rulesPageIdx - 1); });
+rulesNextBtn.addEventListener('click', () => { rulesAutoplayPaused = true; stopRulesTimers(); goToRulesPage(rulesPageIdx + 1); });
+rulesDotsEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-i]');
+  if (!btn) return;
+  rulesAutoplayPaused = true;
+  stopRulesTimers();
+  goToRulesPage(Number(btn.dataset.i));
+});
 
 // mode 'register': gates the Register button — Accept & Continue stays
-// disabled until the visitor scrolls to the bottom, then it goes to the
-// registration form. mode 'view': just a read-only Close, no gating — this
-// is what the standalone "Rules and Regulations" button opens.
+// disabled until the visitor has viewed every rule page, then it goes to
+// the registration form. mode 'view': just a read-only Close, no gating —
+// this is what the standalone "Rules and Regulations" button opens.
 window.openRulesModal = function(id, mode){
   const item = tournaments.find(x => x.id === id) || {};
   rulesModalTournamentId = id;
   rulesModalMode = mode;
-  rulesModalBody.textContent = rulesTextFor(item);
-  rulesModalBody.scrollTop = 0;
+  rulesPages = rulesSplitPages(item);
+  rulesPageIdx = 0;
+  rulesSeenPages = new Set();
+  rulesAutoplayPaused = false;
+  stopRulesTimers();
 
-  clearInterval(rulesPollTimer);
   if (mode === 'register') {
     rulesModalAccept.style.display = '';
     rulesModalAccept.disabled = true;
     rulesModalClose.textContent = t('rules.cancel', 'Cancel');
-    rulesScrollHint.style.display = '';
-    // Belt-and-braces: short rules text that never needs a scrollbar at all
-    // won't ever fire a 'scroll' event, so poll for a moment after opening
-    // instead of relying only on that event (and the very first layout
-    // frame, which can occasionally measure 0 before the modal has painted).
-    rulesPollTimer = setInterval(checkRulesScroll, 200);
-    setTimeout(() => clearInterval(rulesPollTimer), 4000);
+    rulesScrollHint.style.display = rulesPages.length > 1 ? '' : 'none';
   } else {
     rulesModalAccept.style.display = 'none';
     rulesModalClose.textContent = t('rules.close', 'Close');
     rulesScrollHint.style.display = 'none';
   }
+
+  goToRulesPage(0);
+  startRulesAutoplay();
   rulesModal.classList.add('show');
-  requestAnimationFrame(checkRulesScroll);
 };
 
 rulesModalClose.addEventListener('click', () => {
   rulesModal.classList.remove('show');
-  clearInterval(rulesPollTimer);
+  stopRulesTimers();
 });
 rulesModalAccept.addEventListener('click', () => {
   if (rulesModalAccept.disabled || !rulesModalTournamentId) return;
-  clearInterval(rulesPollTimer);
+  stopRulesTimers();
   window.location.href = 'register.html?id=' + encodeURIComponent(rulesModalTournamentId);
 });
 
@@ -823,7 +995,7 @@ document.getElementById('t-modal-save').addEventListener('click', async () => {
     format: fFormat.value.trim(),
     icon: fIcon.value.trim() || '🏆',
     description: fDesc.value.trim(),
-    rules: fRules.value.trim(),
+    rules: adminRules.join('\n'),
     coverImage: coverImageData || '',
     watchLink: fWatchLink.value.trim(),
     registrationOpen: fRegistrationOpen.checked,
