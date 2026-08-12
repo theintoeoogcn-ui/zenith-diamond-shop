@@ -219,12 +219,15 @@
     background:var(--panel);border:1px solid var(--line);color:var(--hi);
   }
   .hero-btn.secondary:hover{border-color:var(--cyan);box-shadow:0 0 18px rgba(79,224,232,0.2);}
+  .btn-icon{font-size:15px;line-height:1;}
+  @media (max-width:640px){ .btn-icon{font-size:13px;} }
 
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:560px;}
   @media (max-width:640px){ .stats{grid-template-columns:repeat(2,1fr);} }
-  /* No icon anymore — a small animated accent bar above the number carries
-     the "this is a stat" visual weight instead, and stays quiet/thin
-     (short, low-opacity, slow) rather than competing with the number. */
+  /* Icon plus a small animated accent bar above the number — the icon
+     carries the at-a-glance meaning, the accent bar is the quiet/thin
+     (short, low-opacity, slow) flourish that ties it to the rim-light
+     animation used elsewhere on the page. */
   .stat{
     position:relative;isolation:isolate;overflow:hidden;
     display:flex;flex-direction:column;gap:4px;
@@ -241,6 +244,7 @@
   @keyframes statAccentFlow{to{background-position:300% 0;}}
   @media (prefers-reduced-motion:reduce){ .stat::before{animation:none;} }
   .stat:hover{border-color:var(--violet-dim);transform:translateY(-1px);}
+  .stat .icon{font-size:18px;}
   .stat .num{font-family:var(--font-main);font-weight:800;font-size:20px;letter-spacing:0.2px;color:var(--hi);}
   .stat .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.6px;font-weight:600;}
   /* Part of the no-scroll phone layout — shrinks alongside the hero text
@@ -249,6 +253,7 @@
   @media (max-width:640px){
     .stats{gap:8px;}
     .stat{padding:11px 10px 9px;gap:3px;}
+    .stat .icon{font-size:15px;}
     .stat .num{font-size:16px;}
     .stat .lbl{font-size:9px;letter-spacing:0.4px;}
   }
@@ -540,15 +545,15 @@
     <p class="reveal" data-i18n="home.desc">Join competitive gaming events and get the fastest, most affordable Diamond services tailored for you.</p>
 
     <div class="hero-btns reveal">
-      <a class="hero-btn primary" href="/tournament" data-i18n="home.btn.tournament">Tournament</a>
-      <a class="hero-btn primary" href="/diamond-plan" data-i18n="home.btn.diamond">Buy Diamond</a>
+      <a class="hero-btn primary" href="/tournament"><span class="btn-icon" aria-hidden="true">🏆</span><span data-i18n="home.btn.tournament">Tournament</span></a>
+      <a class="hero-btn secondary" href="/diamond-plan"><span class="btn-icon" aria-hidden="true">💎</span><span data-i18n="home.btn.diamond">Buy Diamond</span></a>
     </div>
 
     <div class="stats reveal-stagger">
-      <div class="stat"><button type="button" class="stat-edit" data-key="tournaments" title="Edit">✏️</button><span class="num" id="stat-tournaments">2+</span><span class="lbl" data-i18n="home.stat.tournament">Tournament</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="players" title="Edit">✏️</button><span class="num" id="stat-players">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="rating" title="Edit">✏️</button><span class="num" id="stat-rating">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="tournaments" title="Edit">✏️</button><span class="icon" aria-hidden="true">🏆</span><span class="num" id="stat-tournaments">2+</span><span class="lbl" data-i18n="home.stat.tournament">Tournament</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="icon" aria-hidden="true">💎</span><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="players" title="Edit">✏️</button><span class="icon" aria-hidden="true">👥</span><span class="num" id="stat-players">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="rating" title="Edit">✏️</button><span class="icon" aria-hidden="true">⭐</span><span class="num" id="stat-rating">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
     </div>
   </div>
 
@@ -906,6 +911,7 @@ function adCardHtml(ad, size){
     <div class="ad-card ${size}">
       ${openTag}
         ${adMediaTagHtml(ad.media, 'ad-card-img')}
+        <span class="ad-sponsored-tag">${escapeHtml(t('ads.sponsored','Sponsored'))}</span>
         <div class="ad-card-overlay">
           ${ad.badge ? `<span class="ad-badge">${escapeHtml(ad.badge)}</span>` : ''}
           ${ad.headline ? `<div class="ad-headline">${escapeHtml(ad.headline)}</div>` : ''}
