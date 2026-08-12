@@ -102,7 +102,7 @@
     display:flex;align-items:center;
   }
   @media (max-width:980px){
-    .hero{flex-direction:column;justify-content:center;}
+    .hero{flex-direction:column;justify-content:flex-start;}
   }
 
   /* overflow:hidden lives here (not on .hero) so the desktop ad widget can
@@ -265,6 +265,32 @@
   .stat-edit.show{display:flex;}
   .stat-edit:hover{background:var(--violet);color:#fff;border-color:transparent;}
 
+  /* Trust-badge strip under the stats — gives the page real, purposeful
+     content to fill the space below the fold on phones instead of leaving
+     empty background, and doubles as reassurance copy on any screen size. */
+  .highlights{display:flex;flex-direction:column;gap:10px;max-width:560px;margin:22px 0 0;}
+  .highlight{
+    display:flex;align-items:center;gap:13px;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:13px 14px;transition:border-color .2s;
+  }
+  .highlight:hover{border-color:var(--violet-dim);}
+  .hl-icon{
+    flex-shrink:0;width:38px;height:38px;border-radius:10px;font-size:17px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel-raised);border:1px solid var(--line);
+  }
+  .hl-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .hl-title{font-size:13px;font-weight:700;color:var(--hi);}
+  .hl-desc{font-size:11.5px;color:var(--dim);line-height:1.4;}
+  @media (max-width:640px){
+    .highlights{gap:8px;margin-top:16px;}
+    .highlight{padding:11px 12px;gap:11px;}
+    .hl-icon{width:34px;height:34px;font-size:15px;border-radius:9px;}
+    .hl-title{font-size:12.5px;}
+    .hl-desc{font-size:11px;}
+  }
+
   /* ---------- admin toggle pill in header ---------- */
   .admin-toggle{
     display:none;align-items:center;gap:6px;
@@ -305,10 +331,14 @@
     margin-top:4px;display:inline-flex;align-items:center;gap:5px;background:var(--violet);color:#fff;
     font-size:11px;font-weight:800;letter-spacing:0.3px;padding:7px 13px;border-radius:9px;
   }
+  /* Flush against the card's top-right corner (no floating gap) — the
+     card's own overflow:hidden clips it into a clean ribbon that follows
+     the corner radius instead of sitting as a separate pill. */
   .ad-sponsored-tag{
-    position:absolute;top:8px;right:8px;z-index:2;font-size:8px;font-weight:700;letter-spacing:0.5px;
-    text-transform:uppercase;color:rgba(255,255,255,0.75);background:rgba(0,0,0,0.4);
-    padding:2px 6px;border-radius:5px;pointer-events:none;
+    position:absolute;top:0;right:0;z-index:2;font-size:8.5px;font-weight:800;letter-spacing:0.6px;
+    text-transform:uppercase;color:rgba(255,255,255,0.85);background:rgba(6,4,14,0.55);
+    backdrop-filter:blur(3px);
+    padding:5px 11px 4px;border-radius:0 0 0 10px;pointer-events:none;
   }
   .ad-stack{display:flex;flex-direction:column;gap:10px;}
 
@@ -485,9 +515,20 @@
   footer{
     display:flex;justify-content:space-between;padding:26px 48px;
     border-top:1px solid var(--line);color:var(--dim);font-size:13px;
-    position:relative;z-index:2;
+    position:relative;z-index:2;background:rgba(var(--void-rgb),0.4);
   }
-  @media (max-width:640px){ footer{flex-direction:column;gap:8px;padding:22px 20px;} }
+  /* Thin gradient cap on the border, matching the accent bar used on the
+     stat boxes — turns the footer's top edge into a deliberate flourish
+     instead of a plain hairline, so it reads as a designed close to the
+     page rather than "content just stopped". */
+  footer::before{
+    content:"";position:absolute;top:-1px;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--violet-dim) 20%,var(--cyan) 50%,var(--violet-dim) 80%,transparent);
+    opacity:0.6;
+  }
+  @media (max-width:640px){
+    footer{flex-direction:column;gap:6px;padding:20px 20px 24px;text-align:center;align-items:center;}
+  }
 </style>
 </head>
 <body>
@@ -554,6 +595,30 @@
       <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="icon" aria-hidden="true">💎</span><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
       <div class="stat"><button type="button" class="stat-edit" data-key="players" title="Edit">✏️</button><span class="icon" aria-hidden="true">👥</span><span class="num" id="stat-players">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
       <div class="stat"><button type="button" class="stat-edit" data-key="rating" title="Edit">✏️</button><span class="icon" aria-hidden="true">⭐</span><span class="num" id="stat-rating">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
+    </div>
+
+    <div class="highlights reveal-stagger">
+      <div class="highlight">
+        <span class="hl-icon" aria-hidden="true">⚡</span>
+        <div class="hl-text">
+          <span class="hl-title" data-i18n="home.highlight.fast.title">Fast Delivery</span>
+          <span class="hl-desc" data-i18n="home.highlight.fast.desc">Most Diamond orders confirmed within minutes</span>
+        </div>
+      </div>
+      <div class="highlight">
+        <span class="hl-icon" aria-hidden="true">🔒</span>
+        <div class="hl-text">
+          <span class="hl-title" data-i18n="home.highlight.secure.title">Secure Payment</span>
+          <span class="hl-desc" data-i18n="home.highlight.secure.desc">Every order checked by our team before delivery</span>
+        </div>
+      </div>
+      <div class="highlight">
+        <span class="hl-icon" aria-hidden="true">🎧</span>
+        <div class="hl-text">
+          <span class="hl-title" data-i18n="home.highlight.support.title">24/7 Support</span>
+          <span class="hl-desc" data-i18n="home.highlight.support.desc">Real people ready to help on Telegram, anytime</span>
+        </div>
+      </div>
     </div>
   </div>
 
