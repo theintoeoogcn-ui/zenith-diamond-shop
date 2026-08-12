@@ -116,8 +116,19 @@
       linear-gradient(180deg, rgba(243,239,252,0.15) 0%, rgba(243,239,252,0.25) 60%, rgba(243,239,252,0.72) 100%);
   }
 
+  /* Inner row that actually lays out hero-text beside the ad widget.
+     Splitting this out from .hero (which stays a simple centering flex
+     container, min-height:100vh) lets align-items:stretch apply only to
+     this row — so the ad widget's height locks to hero-text's own content
+     height (eyebrow to stats) instead of the full viewport-tall .hero. */
+  .hero-row{
+    position:relative;z-index:2;width:100%;
+    display:flex;align-items:stretch;gap:24px;
+  }
+  @media (max-width:980px){ .hero-row{flex-direction:column;} }
+
   .hero-text{
-    position:relative;z-index:2;flex:1;
+    flex:1;
     max-width:820px;padding:64px 48px;
   }
   @media (max-width:980px){
@@ -246,12 +257,12 @@
     .ad-anim-fade,.ad-anim-slide,.ad-anim-zoom,.ad-anim-flip{animation:none;}
   }
 
-  /* ---------- desktop widget: sidebar + sticky + rotating single/stacked ---------- */
+  /* ---------- desktop widget: full-width-remaining, height-matched carousel ---------- */
   .hero-ad{
-    display:none;position:sticky;top:96px;align-self:flex-start;flex-shrink:0;
-    width:280px;margin-left:24px;z-index:2;
+    display:none;position:sticky;top:96px;flex:1 1 380px;min-width:320px;
+    z-index:2;border-radius:18px;overflow:hidden;
   }
-  @media (min-width:981px){ .hero-ad.has-ads{display:block;} }
+  @media (min-width:981px){ .hero-ad.has-ads{display:flex;flex-direction:column;} }
   .ad-glow{
     position:absolute;inset:-25%;z-index:-1;pointer-events:none;border-radius:50%;
     background:conic-gradient(from 0deg, rgba(139,92,246,0.55), rgba(79,224,232,0.4), rgba(255,62,154,0.35), rgba(139,92,246,0.55));
@@ -259,7 +270,35 @@
   }
   @keyframes adGlowSpin{to{transform:rotate(360deg);}}
   @media (prefers-reduced-motion:reduce){ .ad-glow{animation:none;} }
-  #ad-slot-desktop{position:relative;}
+  /* height:100% cascades down (hero-ad is stretched by .hero-row's
+     align-items:stretch to match hero-text's content height) so the
+     carousel image always fills the full box via object-fit:cover,
+     whatever that height ends up being at a given viewport size. */
+  #ad-slot-desktop{position:relative;flex:1;height:100%;}
+  .hero-ad .ad-card{height:100%;}
+
+  .ad-nav{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(10,7,19,0.5);border:1px solid rgba(255,255,255,0.18);color:#fff;
+    display:none;align-items:center;justify-content:center;font-size:20px;line-height:1;
+    cursor:pointer;backdrop-filter:blur(4px);transition:background .15s,transform .15s;
+  }
+  .hero-ad.multi .ad-nav{display:flex;}
+  .ad-nav:hover{background:rgba(10,7,19,0.8);}
+  .ad-nav:active{transform:translateY(-50%) scale(.92);}
+  .ad-nav.prev{left:12px;}
+  .ad-nav.next{right:12px;}
+  .ad-dots{
+    position:absolute;left:0;right:0;bottom:16px;z-index:3;
+    display:none;justify-content:center;gap:6px;
+  }
+  .hero-ad.multi .ad-dots{display:flex;}
+  .ad-dots button{
+    width:7px;height:7px;padding:0;border:none;border-radius:50%;
+    background:rgba(255,255,255,0.4);cursor:pointer;transition:background .2s,width .2s;
+  }
+  .ad-dots button.active{background:#fff;width:20px;border-radius:4px;}
 
   /* ---------- mobile: in-flow card between hero and stats ---------- */
   .mobile-ad-card{display:none;padding:0 20px;margin:0 0 28px;}
@@ -416,6 +455,7 @@
   </div>
   <div class="hero-scrim"></div>
 
+  <div class="hero-row">
   <div class="hero-text">
     <p class="eyebrow reveal" data-i18n="home.eyebrow">Est. 2026 &nbsp;·&nbsp; Beyond the peak</p>
     <h1 class="reveal" data-i18n="home.h1">The Ultimate Hub for Esports Tournaments &amp; MLBB Top-Ups</h1>
@@ -439,12 +479,17 @@
     </div>
   </div>
 
-  <!-- desktop widget: sidebar position + sticky while scrolling + rotates
-       between a single card and a stacked pair -->
+  <!-- desktop widget: fills the remaining width beside hero-text, stretched
+       to match hero-text's full height (eyebrow top to stats bottom), sticky
+       while scrolling, looping carousel with arrow + dot navigation -->
   <aside class="hero-ad" id="hero-ad" aria-label="Sponsored">
     <div class="ad-glow"></div>
     <div class="ad-slot" id="ad-slot-desktop"></div>
+    <button type="button" class="ad-nav prev" id="ad-nav-prev" aria-label="Previous ad">‹</button>
+    <button type="button" class="ad-nav next" id="ad-nav-next" aria-label="Next ad">›</button>
+    <div class="ad-dots" id="ad-dots"></div>
   </aside>
+  </div>
 
 </div>
 
@@ -743,7 +788,7 @@ function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c 
 const AD_ROTATE_MS = 5000;
 const AD_TRANSITIONS = ['fade','slide','zoom','flip'];
 let allAds = [];
-let desktopCursor = 0, desktopToggle = 0, mobileCursor = 0;
+let desktopIndex = 0, mobileCursor = 0;
 let desktopTimer = null, mobileTimer = null;
 const AD_BOTTOM_CLOSED_KEY = 'zenith-ad-bottom-closed';
 const AD_INTERSTITIAL_SEEN_KEY = 'zenith-ad-interstitial-seen'; // sessionStorage: once per visit
@@ -782,35 +827,58 @@ function adCardHtml(ad, size){
     </div>`;
 }
 
-/* ---- desktop: sidebar / sticky / single↔stacked rotation ---- */
-function nextDesktopFrame(){
-  const ads = adsFor('desktop');
-  if (!ads.length) return [];
-  let size = (desktopToggle % 2 === 0) ? 1 : 2;
-  if (size > ads.length) size = 1;
-  const picked = [];
-  for (let k = 0; k < size; k++) { picked.push(ads[desktopCursor % ads.length]); desktopCursor++; }
-  desktopToggle++;
-  return picked;
-}
-function renderDesktopAdFrame(){
+/* ---- desktop: full-width carousel — one ad per slide, looping, with
+   arrow + dot navigation on top of the existing autoplay rotation ---- */
+function renderDesktopAd(){
   const widget = document.getElementById('hero-ad');
   const slot = document.getElementById('ad-slot-desktop');
-  const frame = nextDesktopFrame();
-  if (!frame.length) { widget.classList.remove('has-ads'); return; }
+  const dots = document.getElementById('ad-dots');
+  const ads = adsFor('desktop');
+  if (!ads.length) { widget.classList.remove('has-ads', 'multi'); return; }
+  if (desktopIndex >= ads.length) desktopIndex = 0;
+  if (desktopIndex < 0) desktopIndex = ads.length - 1;
+
   widget.classList.add('has-ads');
-  const html = frame.length === 1
-    ? adCardHtml(frame[0], 'lg')
-    : `<div class="ad-stack">${frame.map(a => adCardHtml(a, 'sm')).join('')}</div>`;
-  slot.innerHTML = html;
-  playEnterAnim(slot, pickTransition(frame[0]));
+  widget.classList.toggle('multi', ads.length > 1);
+
+  const ad = ads[desktopIndex];
+  slot.innerHTML = adCardHtml(ad, 'lg');
+  playEnterAnim(slot, pickTransition(ad));
+
+  dots.innerHTML = ads.length > 1
+    ? ads.map((_, i) => `<button type="button" class="${i === desktopIndex ? 'active' : ''}" aria-label="Go to ad ${i + 1}" onclick="goToDesktopAd(${i})"></button>`).join('')
+    : '';
+}
+function restartDesktopTimer(){
+  clearInterval(desktopTimer);
+  if (adsFor('desktop').length > 1) desktopTimer = setInterval(() => { desktopIndex++; renderDesktopAd(); }, AD_ROTATE_MS);
 }
 function startDesktopRotation(){
-  clearInterval(desktopTimer);
-  desktopCursor = 0; desktopToggle = 0;
-  renderDesktopAdFrame();
-  if (adsFor('desktop').length > 1) desktopTimer = setInterval(renderDesktopAdFrame, AD_ROTATE_MS);
+  desktopIndex = 0;
+  renderDesktopAd();
+  restartDesktopTimer();
 }
+// Manual navigation restarts the autoplay clock so a click isn't immediately
+// undone by a rotation that was already halfway through its interval.
+window.goToDesktopAd = function(i){
+  desktopIndex = i;
+  renderDesktopAd();
+  restartDesktopTimer();
+};
+document.getElementById('ad-nav-prev').addEventListener('click', () => {
+  const ads = adsFor('desktop');
+  if (!ads.length) return;
+  desktopIndex = (desktopIndex - 1 + ads.length) % ads.length;
+  renderDesktopAd();
+  restartDesktopTimer();
+});
+document.getElementById('ad-nav-next').addEventListener('click', () => {
+  const ads = adsFor('desktop');
+  if (!ads.length) return;
+  desktopIndex = (desktopIndex + 1) % ads.length;
+  renderDesktopAd();
+  restartDesktopTimer();
+});
 
 /* ---- mobile: in-flow card + sticky bottom banner (synced) ---- */
 function nextMobileAd(){
