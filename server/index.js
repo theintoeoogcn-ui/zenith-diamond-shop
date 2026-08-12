@@ -5,7 +5,11 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); // raised for base64 payment screenshots
+// Raised for base64 payloads: payment screenshots, and the "Manage Ads"
+// panel's PUT /api/ads, which re-sends the WHOLE ad list (up to 12 ads,
+// each media file up to 3MB for images or 6MB for video — see adsDb.js) in
+// a single request every time any one ad is added or edited.
+app.use(express.json({ limit: '40mb' }));
 
 // Serve the storefront (public/diamond-plan.html and friends)
 app.use(express.static(path.join(__dirname, '..', 'public')));

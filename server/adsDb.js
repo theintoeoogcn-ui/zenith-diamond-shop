@@ -21,7 +21,15 @@ const TRANSITIONS = ['fade', 'slide', 'zoom', 'flip', 'random'];
 // Which surface an ad is eligible to appear on.
 const PLACEMENTS = ['desktop', 'mobile', 'both'];
 const MAX_ADS = 12;
-const MAX_MEDIA_BYTES = 3 * 1024 * 1024; // ~3MB decoded
+const MAX_MEDIA_BYTES = 3 * 1024 * 1024; // ~3MB decoded — still the cap for image/GIF creatives
+// Video ads (short muted autoplay loops, replacing GIFs for smoother
+// playback) get more headroom than a static image, but this is still a
+// real ceiling, not a suggestion: every ad rides through the Google Sheets
+// backup as a chunked base64 blob (see sheetsStore.js), and now that each
+// data key gets its own sheet tab, a single oversized video only slows down
+// *this* key's save — but it can still slow it down a lot. Keep clips
+// short (3-6s) and compressed (~1-1.5 Mbps) and this cap is plenty.
+const MAX_VIDEO_BYTES = 6 * 1024 * 1024; // ~6MB decoded
 
 function ensureFile() {
   if (!fs.existsSync(path.dirname(DB_FILE))) fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
@@ -48,14 +56,22 @@ function genId() {
   return 'AD-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1000);
 }
 
-// Only a data:image/* URL is ever accepted — never an arbitrary remote URL —
-// so a stored ad can't be used to point <img>/background-image at something
-// that isn't actually an image, and can't smuggle markup through the src.
+// Only a data:image/* or data:video/* URL is ever accepted — never an
+// arbitrary remote URL — so a stored ad can't be used to point an
+// <img>/<video> at something that isn't actually media, and can't smuggle
+// markup through the src. Which one it is (and therefore which size cap
+// applies, and which tag the frontend renders it with) is read straight
+// back off this same data: URL prefix — no separate "mediaType" field to
+// keep in sync.
 function cleanMedia(v) {
   const s = String(v || '');
-  if (!/^data:image\/(png|jpeg|jpg|gif|webp);base64,/.test(s)) return '';
-  if (s.length * 0.75 > MAX_MEDIA_BYTES) return '';
-  return s;
+  if (/^data:image\/(png|jpeg|jpg|gif|webp);base64,/.test(s)) {
+    return s.length * 0.75 > MAX_MEDIA_BYTES ? '' : s;
+  }
+  if (/^data:video\/(mp4|webm);base64,/.test(s)) {
+    return s.length * 0.75 > MAX_VIDEO_BYTES ? '' : s;
+  }
+  return '';
 }
 
 // Only http(s), or a same-site relative path/filename with no scheme at
@@ -106,4 +122,4 @@ function saveAds(list) {
 
 const ready = hydrate(SHEET_KEY, DB_FILE);
 
-module.exports = { getAds, saveAds, ready, TRANSITIONS, PLACEMENTS, MAX_ADS, MAX_MEDIA_BYTES };
+module.exports = { getAds, saveAds, ready, TRANSITIONS, PLACEMENTS, MAX_ADS, MAX_MEDIA_BYTES, MAX_VIDEO_BYTES };

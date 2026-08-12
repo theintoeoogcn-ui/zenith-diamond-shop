@@ -252,18 +252,28 @@
   .rules-modal .modal-actions{margin-top:16px;}
 
   /* ---------- admin "Add Rule" list builder ---------- */
-  .rules-admin-list{list-style:none;padding:0;margin:0 0 10px;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
+  .rules-admin-list{list-style:none;padding:0;margin:0 0 10px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;}
   .rules-admin-list li{
-    display:flex;align-items:flex-start;gap:8px;background:var(--void);border:1px solid var(--line);
+    display:flex;align-items:center;gap:6px;background:var(--void);border:1px solid var(--line);
     border-radius:9px;padding:8px 10px;font-size:12.5px;color:var(--hi);line-height:1.5;
   }
-  .rules-admin-list li .n{color:var(--violet);font-weight:700;flex-shrink:0;}
-  .rules-admin-list li .txt{flex:1;white-space:pre-wrap;word-break:break-word;}
+  .rules-admin-list li.editing{border-color:var(--violet);align-items:center;}
+  .rules-admin-list li .n{color:var(--violet);font-weight:700;flex-shrink:0;align-self:flex-start;margin-top:2px;}
+  .rules-admin-list li .txt{flex:1;white-space:pre-wrap;word-break:break-word;align-self:flex-start;}
+  .rules-admin-list li .rules-admin-edit-input{
+    flex:1;background:var(--void);border:1px solid var(--violet);border-radius:6px;
+    padding:5px 8px;font-size:12.5px;color:var(--hi);font-family:var(--font-main);font-weight:600;outline:none;
+  }
   .rules-admin-list li button{
     flex-shrink:0;width:20px;height:20px;border-radius:6px;border:none;background:transparent;
-    color:var(--dim);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;
+    color:var(--dim);cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
   }
-  .rules-admin-list li button:hover{color:var(--signal);}
+  .rules-admin-list li button:hover{color:var(--violet);}
+  .rules-admin-list li button.danger:hover{color:var(--signal);}
+  .rules-admin-list li button.ok{color:var(--violet);font-size:13px;}
+  .rules-admin-list li button.ok:hover{color:#7C4CED;}
+  .rules-admin-list li button:disabled{opacity:.3;cursor:default;}
+  .rules-admin-list li button:disabled:hover{color:var(--dim);}
   .rules-admin-empty{font-size:12px;color:var(--dim);padding:8px 2px;}
   .rules-admin-add{display:flex;gap:8px;}
   .rules-admin-add input{flex:1;}
@@ -755,19 +765,37 @@ const rulesAdminListEl = document.getElementById('rules-admin-list');
 const rulesAdminInput = document.getElementById('rules-admin-input');
 const rulesAdminAddBtn = document.getElementById('rules-admin-add-btn');
 let adminRules = [];
+let rulesEditingIndex = -1; // index of the rule currently being edited inline, or -1
 
 function renderAdminRules(){
   if (!adminRules.length) {
     rulesAdminListEl.innerHTML = `<li class="rules-admin-empty" style="border:none;background:none;padding:2px 2px;" data-i18n="tournament.form.field.rules.empty">${escapeHtml(t('tournament.form.field.rules.empty','No rules added yet — the default rule set below will be used instead.'))}</li>`;
     return;
   }
-  rulesAdminListEl.innerHTML = adminRules.map((rule, i) => `
-    <li>
-      <span class="n">${i + 1}.</span>
-      <span class="txt">${escapeHtml(rule)}</span>
-      <button type="button" data-i="${i}" aria-label="Remove rule" title="Remove">✕</button>
-    </li>
-  `).join('');
+  rulesAdminListEl.innerHTML = adminRules.map((rule, i) => {
+    if (i === rulesEditingIndex) {
+      return `
+        <li class="editing">
+          <span class="n">${i + 1}.</span>
+          <input type="text" class="rules-admin-edit-input" maxlength="300" value="${escapeHtml(rule)}">
+          <button type="button" class="ok" data-save="${i}" aria-label="${t('tournament.form.field.rules.save','Save')}" title="${t('tournament.form.field.rules.save','Save')}">✓</button>
+          <button type="button" class="danger" data-cancel="${i}" aria-label="${t('tournament.form.field.rules.cancel_edit','Cancel')}" title="${t('tournament.form.field.rules.cancel_edit','Cancel')}">✕</button>
+        </li>`;
+    }
+    return `
+      <li>
+        <span class="n">${i + 1}.</span>
+        <span class="txt">${escapeHtml(rule)}</span>
+        <button type="button" data-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="${t('tournament.form.field.rules.move_up','Move up')}" title="${t('tournament.form.field.rules.move_up','Move up')}">↑</button>
+        <button type="button" data-down="${i}" ${i === adminRules.length - 1 ? 'disabled' : ''} aria-label="${t('tournament.form.field.rules.move_down','Move down')}" title="${t('tournament.form.field.rules.move_down','Move down')}">↓</button>
+        <button type="button" data-edit="${i}" aria-label="${t('tournament.form.field.rules.edit','Edit')}" title="${t('tournament.form.field.rules.edit','Edit')}">✎</button>
+        <button type="button" class="danger" data-remove="${i}" aria-label="${t('tournament.form.field.rules.remove','Remove')}" title="${t('tournament.form.field.rules.remove','Remove')}">✕</button>
+      </li>`;
+  }).join('');
+  if (rulesEditingIndex > -1) {
+    const input = rulesAdminListEl.querySelector('.rules-admin-edit-input');
+    if (input) { input.focus(); input.select(); }
+  }
 }
 
 function addAdminRule(){
@@ -779,15 +807,45 @@ function addAdminRule(){
   rulesAdminInput.focus();
 }
 
+function saveRuleEdit(i, input){
+  const val = (input ? input.value : '').trim();
+  if (val) adminRules[i] = val; else adminRules.splice(i, 1); // saving blank removes the rule
+  rulesEditingIndex = -1;
+  renderAdminRules();
+}
+
 rulesAdminAddBtn.addEventListener('click', addAdminRule);
 rulesAdminInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); addAdminRule(); }
 });
 rulesAdminListEl.addEventListener('click', (e) => {
-  const btn = e.target.closest('button[data-i]');
+  const btn = e.target.closest('button');
   if (!btn) return;
-  adminRules.splice(Number(btn.dataset.i), 1);
-  renderAdminRules();
+  if (btn.dataset.up !== undefined) {
+    const i = Number(btn.dataset.up);
+    if (i > 0) { [adminRules[i - 1], adminRules[i]] = [adminRules[i], adminRules[i - 1]]; renderAdminRules(); }
+  } else if (btn.dataset.down !== undefined) {
+    const i = Number(btn.dataset.down);
+    if (i < adminRules.length - 1) { [adminRules[i + 1], adminRules[i]] = [adminRules[i], adminRules[i + 1]]; renderAdminRules(); }
+  } else if (btn.dataset.edit !== undefined) {
+    rulesEditingIndex = Number(btn.dataset.edit);
+    renderAdminRules();
+  } else if (btn.dataset.save !== undefined) {
+    saveRuleEdit(Number(btn.dataset.save), rulesAdminListEl.querySelector('.rules-admin-edit-input'));
+  } else if (btn.dataset.cancel !== undefined) {
+    rulesEditingIndex = -1;
+    renderAdminRules();
+  } else if (btn.dataset.remove !== undefined) {
+    const i = Number(btn.dataset.remove);
+    adminRules.splice(i, 1);
+    if (rulesEditingIndex === i) rulesEditingIndex = -1;
+    renderAdminRules();
+  }
+});
+rulesAdminListEl.addEventListener('keydown', (e) => {
+  if (!e.target.classList.contains('rules-admin-edit-input')) return;
+  if (e.key === 'Enter') { e.preventDefault(); saveRuleEdit(rulesEditingIndex, e.target); }
+  else if (e.key === 'Escape') { rulesEditingIndex = -1; renderAdminRules(); }
 });
 renderAdminRules();
 
@@ -796,7 +854,7 @@ function openCreate(){
   tModalTitle.textContent = t('tournament.form.title.create','Create tournament');
   fTitle.value = ''; fStatus.value = 'upcoming'; fDate.value = ''; fPrize.value = '';
   fSlots.value = ''; fFormat.value = ''; fIcon.value = '🏆'; fDesc.value = '';
-  adminRules = []; renderAdminRules(); rulesAdminInput.value = '';
+  adminRules = []; rulesEditingIndex = -1; renderAdminRules(); rulesAdminInput.value = '';
   fWatchLink.value = ''; fRegistrationOpen.checked = true;
   setCoverPreview(null); fCover.value = '';
   tModalErr.classList.remove('show', 'warn');
@@ -813,6 +871,7 @@ window.openEdit = function(id){
   fDate.value = item.date || ''; fPrize.value = item.prize || ''; fSlots.value = item.slots || '';
   fFormat.value = item.format || ''; fIcon.value = item.icon || '🏆'; fDesc.value = item.description || '';
   adminRules = (item.rules || '').split('\n').map(s => s.trim()).filter(Boolean);
+  rulesEditingIndex = -1;
   renderAdminRules(); rulesAdminInput.value = '';
   fWatchLink.value = item.watchLink || '';
   fRegistrationOpen.checked = item.registrationOpen !== false;

@@ -316,7 +316,13 @@
   .ad-dots button.active{background:#fff;width:20px;border-radius:4px;}
 
   /* ---------- mobile: in-flow card between hero and stats ---------- */
-  .mobile-ad-card{display:none;padding:0 20px;margin:0 0 28px;}
+  /* No horizontal padding of its own — it sits inside .hero-text, which
+     already has the page's 20px side padding, same as .hero-btns and
+     .stats right above/below it. An extra padding here used to stack on
+     top of that and make the card render ~40px narrower than the Diamond
+     stat boxes; matching .stats' own max-width keeps it the same width as
+     those boxes on larger phones/tablets too. */
+  .mobile-ad-card{display:none;margin:0 0 28px;max-width:560px;}
   @media (max-width:980px){ .mobile-ad-card.has-ads{display:block;} }
   .mobile-ad-card .ad-card.lg .ad-card-overlay{min-height:150px;}
 
@@ -328,7 +334,7 @@
   }
   @media (max-width:980px){ .ad-sticky-bottom.show{display:flex;} }
   .ad-sticky-bottom .ad-slot-bottom{flex:1;display:flex;align-items:center;gap:10px;padding:9px 10px;min-width:0;}
-  .ad-sticky-bottom img{width:40px;height:40px;border-radius:9px;object-fit:cover;flex-shrink:0;}
+  .ad-sticky-bottom img,.ad-sticky-bottom video{width:40px;height:40px;border-radius:9px;object-fit:cover;flex-shrink:0;}
   .ad-sticky-bottom .txt{min-width:0;flex:1;}
   .ad-sticky-bottom .txt .h{font-size:12px;font-weight:800;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .ad-sticky-bottom .txt .s{font-size:10.5px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -362,7 +368,7 @@
     display:flex;align-items:center;gap:10px;background:var(--void);border:1px solid var(--line);
     border-radius:10px;padding:9px;
   }
-  .ads-row img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+  .ads-row img,.ads-row video{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;}
   .ads-row .meta{min-width:0;flex:1;}
   .ads-row .meta .h{font-size:13px;font-weight:700;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .ads-row .meta .s{font-size:10.5px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -388,6 +394,7 @@
     width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--void);
     border:1px solid var(--line);
   }
+  .field-hint{font-size:11.5px;color:var(--dim);margin:7px 0 0;line-height:1.5;}
 
   /* ---------- modal ---------- */
   .modal-overlay{
@@ -576,12 +583,14 @@
   <div class="modal">
     <h3 id="ad-form-title" data-i18n="ads.form.title_add">Add ad</h3>
     <div class="field">
-      <label data-i18n="ads.form.media">Image / GIF (max 3MB)</label>
+      <label data-i18n="ads.form.media">Image / GIF (max 3MB) or MP4 / WebM video (max 6MB)</label>
       <div class="ad-media-upload">
         <img class="ad-media-preview" id="ad-media-preview" src="" alt="" style="display:none;">
+        <video class="ad-media-preview" id="ad-media-preview-video" muted loop autoplay playsinline style="display:none;"></video>
         <button type="button" class="upload-btn" id="ad-media-upload-btn" data-i18n="ads.form.upload">Choose file</button>
-        <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" id="ad-media-input" style="display:none;">
+        <input type="file" accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm" id="ad-media-input" style="display:none;">
       </div>
+      <p class="field-hint" data-i18n="ads.form.media_hint">Video ads autoplay muted and loop — keep clips short (3-6s) and compressed for best results.</p>
     </div>
     <div class="field">
       <label data-i18n="ads.form.headline">Headline</label>
@@ -800,6 +809,17 @@ document.getElementById('stat-modal-save').addEventListener('click', async () =>
    http(s)/relative paths server-side (see adsDb.js), never javascript:. */
 function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+// Ads can be either a static image/GIF or a short muted autoplay video —
+// which one a given `media` data: URL is gets read straight off its own
+// "data:video/..." vs "data:image/..." prefix (see adsDb.js), so there's
+// no separate mediaType field to keep in sync anywhere this is rendered.
+function isVideoMedia(media){ return /^data:video\//.test(String(media || '')); }
+function adMediaTagHtml(media, cls){
+  return isVideoMedia(media)
+    ? `<video class="${cls}" src="${media}" muted loop autoplay playsinline></video>`
+    : `<img class="${cls}" src="${media}" alt="">`;
+}
+
 const AD_ROTATE_MS = 5000;
 const AD_TRANSITIONS = ['fade','slide','zoom','flip'];
 let allAds = [];
@@ -830,7 +850,7 @@ function adCardHtml(ad, size){
   return `
     <div class="ad-card ${size}">
       ${openTag}
-        <img class="ad-card-img" src="${ad.media}" alt="">
+        ${adMediaTagHtml(ad.media, 'ad-card-img')}
         <div class="ad-card-overlay">
           ${ad.badge ? `<span class="ad-badge">${escapeHtml(ad.badge)}</span>` : ''}
           ${ad.headline ? `<div class="ad-headline">${escapeHtml(ad.headline)}</div>` : ''}
@@ -933,7 +953,7 @@ function bottomBannerHtml(ad){
   const closeTag = hasLink ? `</a>` : `</div>`;
   return `
     ${openTag}
-      <img src="${ad.media}" alt="">
+      ${adMediaTagHtml(ad.media, '')}
       <div class="txt">
         <div class="h">${escapeHtml(ad.headline || '')}</div>
         ${ad.subtext ? `<div class="s">${escapeHtml(ad.subtext)}</div>` : ''}
@@ -1015,7 +1035,7 @@ function renderAdsList(){
   empty.style.display = 'none';
   list.innerHTML = allAds.map((ad) => `
     <div class="ads-row ${ad.active ? '' : 'inactive'}">
-      <img src="${ad.media}" alt="">
+      ${adMediaTagHtml(ad.media, '')}
       <div class="meta">
         <div class="h">${escapeHtml(ad.headline || '(no headline)')}</div>
         <div class="s">${escapeHtml(ad.placement)} · ${escapeHtml(ad.transition)} · ${ad.active ? t('ads.manage.active','active') : t('ads.manage.inactive','inactive')}</div>
@@ -1074,25 +1094,57 @@ function openAdForm(ad){
   document.getElementById('ad-f-transition').value = ad ? ad.transition : 'fade';
   document.getElementById('ad-f-placement').value = ad ? ad.placement : 'both';
   document.getElementById('ad-f-active').checked = ad ? !!ad.active : true;
-  const preview = document.getElementById('ad-media-preview');
-  if (adMediaData) { preview.src = adMediaData; preview.style.display = 'block'; } else { preview.style.display = 'none'; }
+  showAdMediaPreview(adMediaData);
   adFormErr.classList.remove('show');
   adFormModal.classList.add('show');
 }
 document.getElementById('ad-form-cancel').addEventListener('click', () => adFormModal.classList.remove('show'));
 
+// Only one of these is ever visible at a time — an <img> for image/GIF
+// creatives, a muted looping <video> for video ones — swapped based on the
+// same data: URL prefix everything else here reads the type from.
+function showAdMediaPreview(media){
+  const imgPreview = document.getElementById('ad-media-preview');
+  const videoPreview = document.getElementById('ad-media-preview-video');
+  if (!media) { imgPreview.style.display = 'none'; videoPreview.style.display = 'none'; videoPreview.removeAttribute('src'); return; }
+  if (isVideoMedia(media)) {
+    imgPreview.style.display = 'none';
+    videoPreview.src = media;
+    videoPreview.style.display = 'block';
+  } else {
+    videoPreview.style.display = 'none';
+    videoPreview.removeAttribute('src');
+    imgPreview.src = media;
+    imgPreview.style.display = 'block';
+  }
+}
+
 document.getElementById('ad-media-upload-btn').addEventListener('click', () => document.getElementById('ad-media-input').click());
 document.getElementById('ad-media-input').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  if (!file.type.startsWith('image/')) { alert(t('ads.form.error_filetype','Please choose an image or GIF file.')); return; }
-  if (file.size > 3 * 1024 * 1024) { alert(t('ads.form.error_filesize','That file is too large — 3MB max.')); return; }
+  const isImage = /^image\/(png|jpeg|jpg|gif|webp)$/.test(file.type);
+  const isVideo = /^video\/(mp4|webm)$/.test(file.type);
+  if (!isImage && !isVideo) {
+    adFormErr.textContent = t('ads.form.media_badtype', 'Please choose an image (PNG/JPEG/GIF/WEBP) or a video (MP4/WEBM).');
+    adFormErr.classList.add('show');
+    e.target.value = '';
+    return;
+  }
+  const cap = isVideo ? 6 * 1024 * 1024 : 3 * 1024 * 1024;
+  if (file.size > cap) {
+    adFormErr.textContent = isVideo
+      ? t('ads.form.media_toobig_video', 'That video is over 6MB. Compress it or shorten the clip — large videos can fail to save reliably.')
+      : t('ads.form.media_toobig_image', 'That file is over 3MB. Please choose a smaller one, or resize/compress it first.');
+    adFormErr.classList.add('show');
+    e.target.value = '';
+    return;
+  }
+  adFormErr.classList.remove('show');
   const reader = new FileReader();
   reader.onload = () => {
     adMediaData = reader.result;
-    const preview = document.getElementById('ad-media-preview');
-    preview.src = adMediaData;
-    preview.style.display = 'block';
+    showAdMediaPreview(adMediaData);
   };
   reader.readAsDataURL(file);
 });
