@@ -11,8 +11,40 @@ app.use(cors());
 // a single request every time any one ad is added or edited.
 app.use(express.json({ limit: '40mb' }));
 
+// Clean URLs: zenithwbf.com/news instead of zenithwbf.com/news.html.
+// Two things happen here, both ahead of express.static:
+//  1. A request that still explicitly ends in ".html" (an old bookmark, a
+//     search-engine result, someone typing it manually) gets a permanent
+//     redirect to the extension-less form, so the address bar — and every
+//     link Google indexes — settles on one clean URL per page instead of
+//     both versions existing side by side.
+//  2. A request for an extension-less path (e.g. "/news") quietly gets
+//     served the matching "news.html" file from disk. express.static only
+//     matches exact filenames, so without this "/news" would 404.
+// "/" itself is untouched — express.static already serves index.html for
+// that by default.
+const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+const fs = require('fs');
+
+app.get(/^\/([\w-]+)\.html$/, (req, res) => {
+  const qs = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+  const name = req.params[0];
+  res.redirect(301, (name === 'index' ? '/' : '/' + name) + qs);
+});
+
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  if (req.path.startsWith('/api/')) return next();
+  if (path.extname(req.path)) return next(); // already has an extension — let express.static handle it (or 404)
+  const candidate = path.join(PUBLIC_DIR, req.path + '.html');
+  fs.access(candidate, fs.constants.F_OK, (err) => {
+    if (err) return next();
+    res.sendFile(candidate);
+  });
+});
+
 // Serve the storefront (public/diamond-plan.html and friends)
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(PUBLIC_DIR));
 
 // This import starts the Telegram bot (polling) — done after dotenv loads.
 const orderRoutes = require('./routes/orders');

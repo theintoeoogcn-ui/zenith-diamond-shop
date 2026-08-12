@@ -71,7 +71,7 @@
     color:var(--hi);font-size:18px;cursor:pointer;padding:6px 10px;line-height:1;
   }
   @media (max-width:900px){
-    header{padding:16px 20px;position:relative;}
+    header{padding:14px 20px;position:relative;}
     nav{
       display:none;position:absolute;top:100%;left:0;right:0;z-index:29;
       flex-direction:column;gap:0;background:var(--panel);border-bottom:1px solid var(--line);
@@ -148,29 +148,55 @@
   }
   .hero-text p{color:var(--mid);font-size:17px;max-width:480px;line-height:1.65;margin:0 0 30px;}
 
+  /* Animatable conic-gradient angle for the buttons' spinning rim light —
+     declaring it with @property is what lets the angle itself be animated;
+     browsers without @property support just show a static gradient. */
+  @property --rim{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
+
   .hero-btns{display:flex;gap:14px;margin-bottom:44px;flex-wrap:wrap;}
   .hero-btn{
-    display:flex;align-items:center;gap:10px;
+    position:relative;isolation:isolate;
+    display:flex;align-items:center;justify-content:center;gap:10px;
     font-family:var(--font-main);font-weight:700;font-size:14px;letter-spacing:1px;
     text-transform:uppercase;padding:14px 26px;border-radius:12px;cursor:pointer;
     transition:transform .15s, box-shadow .15s;
   }
-  /* Phones: the heading was sized for desktop (46px) and wrapped across 3-4
-     lines on a narrow screen, pushing the buttons and everything after the
-     hero far below the fold. Scale the whole hero block down together so it
-     reads as a tightened, intentional layout rather than shrunk desktop
-     type — not chasing zero scroll (stats/ads still follow), just cutting
-     the amount of dead space the oversized heading was eating. */
+  /* Theme-colored light travelling continuously around the button border —
+     violet/cyan/signal, the same palette used for the package-card rim
+     light on the Diamond page. Painted as a ring (mask cuts out the
+     middle) rather than a plain border so it can fade in and out smoothly. */
+  .hero-btn::before{
+    content:"";position:absolute;inset:-2px;border-radius:14px;padding:2px;
+    background:conic-gradient(from var(--rim),
+      transparent 0deg, var(--cyan) 70deg, var(--violet) 160deg, var(--signal) 250deg, transparent 340deg);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite:exclude;
+    animation:heroBtnRimSpin 4.5s linear infinite;
+    opacity:0.85;pointer-events:none;z-index:-1;
+  }
+  @keyframes heroBtnRimSpin{to{--rim:360deg;}}
+  @media (prefers-reduced-motion:reduce){ .hero-btn::before{animation:none;} }
+  /* Phones: everything from the top ad banner down to the stat boxes is
+     scaled down together — font sizes, margins, card heights — specifically
+     so the whole hero fits inside one phone screen with no scrolling. This
+     is deliberately tighter than a typical "responsive" pass would be; it's
+     chasing zero scroll, not just avoiding an oversized desktop layout. */
   @media (max-width:640px){
-    .hero-text{padding:36px 20px 14px;}
-    .eyebrow{font-size:11px;letter-spacing:1.5px;margin:0 0 12px;}
-    h1{font-size:29px;line-height:1.28;margin:0 0 12px;letter-spacing:0.2px;}
-    .hero-text p{font-size:14.5px;line-height:1.55;max-width:none;margin:0 0 22px;}
+    .hero-text{padding:12px 16px 10px;}
+    .mobile-ad-card .ad-headline{font-size:12.5px;}
+    .mobile-ad-card .ad-subtext{font-size:10px;}
+    .mobile-ad-card .ad-cta{font-size:9.5px;padding:5px 10px;margin-top:2px;}
+    .mobile-ad-card .ad-badge{font-size:8.5px;padding:2px 7px;}
+    .eyebrow{font-size:9.5px;letter-spacing:1px;margin:0 0 5px;}
+    h1{font-size:20px;line-height:1.22;margin:0 0 6px;letter-spacing:0.1px;}
+    .hero-text p{font-size:12.5px;line-height:1.4;max-width:none;margin:0 0 10px;}
     /* Stretch to a 2-up grid instead of left-aligned pills, so both
        buttons' outer edges line up with the Diamond stat boxes' and the ad
        card's edges below them — same max-width, same gap. */
-    .hero-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px;max-width:560px;}
-    .hero-btn{padding:12px 14px;font-size:12px;letter-spacing:0.7px;gap:8px;justify-content:center;}
+    .hero-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;max-width:560px;}
+    .hero-btn{padding:9px 10px;font-size:11px;letter-spacing:0.5px;gap:6px;justify-content:center;}
   }
   .hero-btn:hover{transform:translateY(-2px);}
   .hero-btn.primary{
@@ -194,6 +220,16 @@
   .stat .icon{font-size:18px;}
   .stat .num{font-family:var(--font-main);font-weight:700;font-size:18px;color:var(--hi);}
   .stat .lbl{font-size:12px;color:var(--dim);}
+  /* Part of the no-scroll phone layout — shrinks alongside the hero text
+     and buttons above. Positioned after the base .stat rules (equal
+     specificity) so it wins at this width without !important. */
+  @media (max-width:640px){
+    .stats{gap:8px;}
+    .stat{padding:9px 10px;gap:3px;}
+    .stat .icon{font-size:15px;}
+    .stat .num{font-size:15px;}
+    .stat .lbl{font-size:10px;}
+  }
   .stat-edit{
     display:none;position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:6px;
     background:var(--panel-raised);border:1px solid var(--line);color:var(--mid);
@@ -328,28 +364,15 @@
   .mobile-ad-card{display:none;margin:0 0 28px;max-width:560px;}
   @media (max-width:980px){ .mobile-ad-card.has-ads{display:block;} }
   .mobile-ad-card .ad-card.lg .ad-card-overlay{min-height:150px;}
-
-  /* ---------- mobile: sticky bottom banner ---------- */
-  .ad-sticky-bottom{
-    display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:60;
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    box-shadow:0 12px 30px rgba(0,0,0,0.4);overflow:hidden;
+  /* Slimmer top-of-hero banner treatment on phones, tightened as part of
+     fitting the whole hero on one screen with no scroll — see the phone
+     breakpoint further up for the matching text-size cuts. Same selector
+     specificity as the rule above, positioned after it, so this wins at
+     this width without needing !important. */
+  @media (max-width:640px){
+    .mobile-ad-card{margin:0 0 10px;}
+    .mobile-ad-card .ad-card.lg .ad-card-overlay{min-height:0;padding:9px 12px;gap:2px;}
   }
-  @media (max-width:980px){ .ad-sticky-bottom.show{display:flex;} }
-  .ad-sticky-bottom .ad-slot-bottom{flex:1;display:flex;align-items:center;gap:10px;padding:9px 10px;min-width:0;}
-  .ad-sticky-bottom img,.ad-sticky-bottom video{width:40px;height:40px;border-radius:9px;object-fit:cover;flex-shrink:0;}
-  .ad-sticky-bottom .txt{min-width:0;flex:1;}
-  .ad-sticky-bottom .txt .h{font-size:12px;font-weight:800;color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .ad-sticky-bottom .txt .s{font-size:10.5px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .ad-sticky-bottom .cta-mini{
-    flex-shrink:0;background:var(--violet);color:#fff;font-size:10.5px;font-weight:800;
-    padding:6px 11px;border-radius:8px;white-space:nowrap;
-  }
-  .ad-sticky-bottom .close-btn{
-    flex-shrink:0;width:28px;align-self:stretch;background:var(--panel-raised);border:none;border-left:1px solid var(--line);
-    color:var(--dim);cursor:pointer;font-size:12px;
-  }
-  .ad-sticky-bottom .close-btn:hover{color:var(--hi);}
 
   /* ---------- mobile: once-per-visit interstitial ---------- */
   .ad-interstitial-overlay{
@@ -443,13 +466,13 @@
 <body>
 
 <header>
-  <a class="brand" href="index.html" id="brand-link"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</a>
+  <a class="brand" href="/" id="brand-link"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</a>
   <nav>
-    <a href="index.html" class="active" data-i18n="nav.home">Home</a>
-    <a href="tournament.html" data-i18n="nav.tournament">Tournament</a>
-    <a href="diamond-plan.html" data-i18n="nav.diamond">Diamond</a>
-    <a href="news.html" data-i18n="nav.news">News</a>
-    <a href="customer-service.html" data-i18n="nav.service">Customer Service</a>
+    <a href="/" class="active" data-i18n="nav.home">Home</a>
+    <a href="/tournament" data-i18n="nav.tournament">Tournament</a>
+    <a href="/diamond-plan" data-i18n="nav.diamond">Diamond</a>
+    <a href="/news" data-i18n="nav.news">News</a>
+    <a href="/customer-service" data-i18n="nav.service">Customer Service</a>
   </nav>
   <div class="hdr-controls">
     <button type="button" class="admin-toggle" id="admin-toggle">
@@ -482,18 +505,21 @@
 
   <div class="hero-row">
   <div class="hero-text">
+    <!-- mobile placement 1: pinned to the very top of the hero, above the
+         eyebrow, so it's the first thing visible on a phone with no scroll
+         needed — see the "no-scroll mobile hero" note further down for how
+         everything below is kept compact enough to fit alongside it. -->
+    <div class="mobile-ad-card" id="mobile-ad-card">
+      <div class="ad-slot-mobile" id="ad-slot-mobile"></div>
+    </div>
+
     <p class="eyebrow reveal" data-i18n="home.eyebrow">Est. 2026 &nbsp;·&nbsp; Beyond the peak</p>
     <h1 class="reveal" data-i18n="home.h1">The Ultimate Hub for Esports Tournaments &amp; MLBB Top-Ups</h1>
     <p class="reveal" data-i18n="home.desc">Join competitive gaming events and get the fastest, most affordable Diamond services tailored for you.</p>
 
     <div class="hero-btns reveal">
-      <a class="hero-btn primary" href="tournament.html" data-i18n="home.btn.tournament">🏆 Tournament</a>
-      <a class="hero-btn secondary" href="diamond-plan.html" data-i18n="home.btn.diamond">💎 Diamond</a>
-    </div>
-
-    <!-- mobile placement 1: between hero buttons and stats -->
-    <div class="mobile-ad-card" id="mobile-ad-card">
-      <div class="ad-slot-mobile" id="ad-slot-mobile"></div>
+      <a class="hero-btn primary" href="/tournament" data-i18n="home.btn.tournament">Tournament</a>
+      <a class="hero-btn primary" href="/diamond-plan" data-i18n="home.btn.diamond">Buy Diamond</a>
     </div>
 
     <div class="stats reveal-stagger">
@@ -519,11 +545,6 @@
 </div>
 
 <!-- mobile placement 2: sticky bottom banner -->
-<div class="ad-sticky-bottom" id="ad-sticky-bottom">
-  <div class="ad-slot-bottom" id="ad-slot-bottom"></div>
-  <button type="button" class="close-btn" id="ad-sticky-bottom-close" aria-label="Close">✕</button>
-</div>
-
 <!-- mobile placement 3: full-screen interstitial, shown once per visit -->
 <div class="ad-interstitial-overlay" id="ad-interstitial-overlay">
   <div class="ad-interstitial" id="ad-interstitial">
@@ -605,7 +626,7 @@
     </div>
     <div class="field-row">
       <div class="field"><label data-i18n="ads.form.cta_text">Button text (optional)</label><input type="text" id="ad-f-cta-text" maxlength="24" placeholder="Top Up Now"></div>
-      <div class="field"><label data-i18n="ads.form.cta_link">Button link (optional)</label><input type="text" id="ad-f-cta-link" maxlength="300" placeholder="diamond-plan.html"></div>
+      <div class="field"><label data-i18n="ads.form.cta_link">Button link (optional)</label><input type="text" id="ad-f-cta-link" maxlength="300" placeholder="/diamond-plan"></div>
     </div>
     <div class="field-row">
       <div class="field">
@@ -829,7 +850,6 @@ const AD_TRANSITIONS = ['fade','slide','zoom','flip'];
 let allAds = [];
 let desktopIndex = 0, mobileCursor = 0;
 let desktopTimer = null, mobileTimer = null;
-const AD_BOTTOM_CLOSED_KEY = 'zenith-ad-bottom-closed';
 const AD_INTERSTITIAL_SEEN_KEY = 'zenith-ad-interstitial-seen'; // sessionStorage: once per visit
 
 // 'popup' is a separate lane from 'mobile': an ad only shows in the
@@ -871,7 +891,6 @@ function adCardHtml(ad, size){
           ${ad.ctaText ? `<span class="ad-cta">${escapeHtml(ad.ctaText)}</span>` : ''}
         </div>
       ${closeTag}
-      <span class="ad-sponsored-tag" data-i18n="ads.sponsored">Sponsored</span>
     </div>`;
 }
 
@@ -952,7 +971,7 @@ document.getElementById('ad-nav-next').addEventListener('click', () => {
   restartDesktopTimer();
 });
 
-/* ---- mobile: in-flow card + sticky bottom banner (synced) ---- */
+/* ---- mobile: in-flow card ---- */
 function nextMobileAd(){
   const ads = adsFor('mobile');
   if (!ads.length) return null;
@@ -960,25 +979,10 @@ function nextMobileAd(){
   mobileCursor++;
   return ad;
 }
-function bottomBannerHtml(ad){
-  const hasLink = !!ad.ctaLink;
-  const openTag = hasLink ? `<a class="ad-card-link" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;" href="${escapeHtml(ad.ctaLink)}" target="_blank" rel="noopener sponsored">` : `<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">`;
-  const closeTag = hasLink ? `</a>` : `</div>`;
-  return `
-    ${openTag}
-      ${adMediaTagHtml(ad.media, '')}
-      <div class="txt">
-        <div class="h">${escapeHtml(ad.headline || '')}</div>
-        ${ad.subtext ? `<div class="s">${escapeHtml(ad.subtext)}</div>` : ''}
-      </div>
-      ${ad.ctaText ? `<span class="cta-mini">${escapeHtml(ad.ctaText)}</span>` : ''}
-    ${closeTag}`;
-}
 function renderMobileAdFrame(){
   const cardWrap = document.getElementById('mobile-ad-card');
-  const bottomWrap = document.getElementById('ad-sticky-bottom');
   const ads = adsFor('mobile');
-  if (!ads.length) { cardWrap.classList.remove('has-ads'); bottomWrap.classList.remove('show'); return; }
+  if (!ads.length) { cardWrap.classList.remove('has-ads'); return; }
   const ad = nextMobileAd();
   const anim = pickTransition(ad);
 
@@ -986,13 +990,6 @@ function renderMobileAdFrame(){
   const cardSlot = document.getElementById('ad-slot-mobile');
   cardSlot.innerHTML = adCardHtml(ad, 'lg');
   playEnterAnim(cardSlot, anim);
-
-  if (sessionStorage.getItem(AD_BOTTOM_CLOSED_KEY) !== '1') {
-    bottomWrap.classList.add('show');
-    const bottomSlot = document.getElementById('ad-slot-bottom');
-    bottomSlot.innerHTML = bottomBannerHtml(ad);
-    playEnterAnim(bottomSlot, anim);
-  }
 }
 function startMobileRotation(){
   clearInterval(mobileTimer);
@@ -1000,10 +997,6 @@ function startMobileRotation(){
   renderMobileAdFrame();
   if (adsFor('mobile').length > 1) mobileTimer = setInterval(renderMobileAdFrame, AD_ROTATE_MS);
 }
-document.getElementById('ad-sticky-bottom-close').addEventListener('click', () => {
-  sessionStorage.setItem(AD_BOTTOM_CLOSED_KEY, '1');
-  document.getElementById('ad-sticky-bottom').classList.remove('show');
-});
 
 /* ---- mobile: once-per-visit interstitial ---- */
 function maybeShowInterstitial(){

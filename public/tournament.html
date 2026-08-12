@@ -293,13 +293,13 @@
 <body>
 
 <header>
-  <a class="brand" href="index.html" id="brand-link"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</a>
+  <a class="brand" href="/" id="brand-link"><span class="mark"><img src="assets/zenith-logo.png" alt="Zenith Esports"></span>ZENITH ESPORTS</a>
   <nav>
-    <a href="index.html" data-i18n="nav.home">Home</a>
-    <a href="tournament.html" class="active" data-i18n="nav.tournament">Tournament</a>
-    <a href="diamond-plan.html" data-i18n="nav.diamond">Diamond</a>
-    <a href="news.html" data-i18n="nav.news">News</a>
-    <a href="customer-service.html" data-i18n="nav.service">Customer Service</a>
+    <a href="/" data-i18n="nav.home">Home</a>
+    <a href="/tournament" class="active" data-i18n="nav.tournament">Tournament</a>
+    <a href="/diamond-plan" data-i18n="nav.diamond">Diamond</a>
+    <a href="/news" data-i18n="nav.news">News</a>
+    <a href="/customer-service" data-i18n="nav.service">Customer Service</a>
   </nav>
   <div class="hdr-controls">
     <button type="button" class="admin-toggle" id="admin-toggle">
@@ -539,7 +539,7 @@ function renderCard(item){
   // Regulations popup (see openRulesModal below).
   const canRegister = item.status !== 'past' && item.registrationOpen !== false;
   const registerHtml = canRegister
-    ? `<a class="t-link-btn register" href="register.html?id=${encodeURIComponent(item.id)}" onclick="event.stopPropagation();event.preventDefault();openRulesModal('${item.id}','register')">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
+    ? `<a class="t-link-btn register" href="/register?id=${encodeURIComponent(item.id)}" onclick="event.stopPropagation();event.preventDefault();openRulesModal('${item.id}','register')">📝 ${escapeHtml(t('tournament.card.register','Register'))}</a>`
     : '';
   const rulesHtml = canRegister
     ? `<a class="t-link-btn rules" href="javascript:void(0)" onclick="event.stopPropagation();openRulesModal('${item.id}','view')">📜 ${escapeHtml(t('tournament.card.rules','Rules and Regulations'))}</a>`
@@ -547,7 +547,7 @@ function renderCard(item){
   const linksHtml = (watchHtml || registerHtml || rulesHtml) ? `<div class="t-links">${watchHtml}${registerHtml}${rulesHtml}</div>` : '';
 
   return `
-    <div class="t-card" data-id="${item.id}" onclick="window.location.href='tournament-detail.html?id=${item.id}'" style="cursor:pointer;">
+    <div class="t-card" data-id="${item.id}" onclick="window.location.href='/tournament-detail?id=${item.id}'" style="cursor:pointer;">
       ${adminHtml}
       ${coverHtml}
       <div class="t-badge ${item.status === 'past' ? 'past' : ''}">${badgeText}</div>
@@ -1038,7 +1038,7 @@ rulesModalClose.addEventListener('click', () => {
 rulesModalAccept.addEventListener('click', () => {
   if (rulesModalAccept.disabled || !rulesModalTournamentId) return;
   stopRulesTimers();
-  window.location.href = 'register.html?id=' + encodeURIComponent(rulesModalTournamentId);
+  window.location.href = '/register?id=' + encodeURIComponent(rulesModalTournamentId);
 });
 
 document.getElementById('create-btn').addEventListener('click', openCreate);
