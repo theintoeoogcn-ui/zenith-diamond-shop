@@ -668,6 +668,19 @@ coverBox.addEventListener('click', () => fCover.click());
 fCover.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
+  // Cover images are stored as base64 inside the Google Sheets backup
+  // (see server/sheetsStore.js) alongside every other admin-managed list on
+  // the site. An oversized image makes that save slow enough to fail
+  // silently — the tournament looks like it saved, but the next server
+  // restart pulls the last *successful* Sheets backup and the change is
+  // gone. Capping the upload keeps every save small and reliable.
+  if (file.size > 3 * 1024 * 1024) {
+    tModalErr.textContent = t('tournament.form.field.cover.toobig', 'That image is over 3MB. Please choose a smaller one, or resize/compress it first — large covers can fail to save reliably.');
+    tModalErr.classList.add('show');
+    fCover.value = '';
+    return;
+  }
+  tModalErr.classList.remove('show');
   const reader = new FileReader();
   reader.onload = () => setCoverPreview(reader.result);
   reader.readAsDataURL(file);
