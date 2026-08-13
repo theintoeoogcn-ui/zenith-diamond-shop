@@ -290,8 +290,8 @@
 
   /* ---------- social rail ---------- */
   .socials{
-    display:flex;flex-direction:column;align-items:center;gap:16px;
-    margin:38px 0 0;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    margin:24px 0 0;
   }
   /* Centered caption with a rule running out to each side. */
   .socials-label{
@@ -348,13 +348,24 @@
     .social:hover{transform:none;}
     .hero-btn:hover::after{transform:none;}
   }
-  /* Placeholder links have no destination yet — show they're inert rather
-     than letting them look clickable and go nowhere. */
-  .social[href="#"]{opacity:0.55;cursor:default;}
-  .social[href="#"]:hover{transform:none;box-shadow:none;color:var(--mid);border-color:rgba(180,164,220,0.22);}
-  .social[href="#"]:hover::before{opacity:0;}
+  /* No link set for this network yet — visibly inert rather than looking
+     clickable and going nowhere. Driven by data-empty (set in
+     renderSocials) so it tracks the saved value, not the href text. */
+  .social[data-empty]{opacity:0.45;cursor:default;}
+  .social[data-empty]:hover{transform:none;box-shadow:none;color:var(--mid);border-color:rgba(180,164,220,0.22);}
+  .social[data-empty]:hover::before{opacity:0;}
+  /* Admin-only pencil that opens the link editor; hidden for visitors. */
+  .socials-edit{
+    display:none;width:34px;height:34px;align-self:center;border-radius:10px;
+    background:var(--panel-raised);border:1px dashed rgba(180,164,220,0.4);
+    color:var(--mid);cursor:pointer;font-size:12px;
+    align-items:center;justify-content:center;
+  }
+  .socials-edit.show{display:flex;}
+  .socials-edit:hover{border-style:solid;border-color:var(--violet);color:var(--hi);}
+  .modal-hint{font-size:12px;color:var(--dim);margin:-4px 0 14px;line-height:1.5;}
   @media (max-width:640px){
-    .socials{margin-top:28px;gap:14px;}
+    .socials{margin-top:20px;gap:12px;}
     .social{width:44px;height:44px;border-radius:12px;}
     .social svg{width:19px;height:19px;}
   }
@@ -698,25 +709,25 @@
       </div>
     </div>
 
-    <!-- Social rail closing out the hero. Telegram is the live account;
-         the other three are placeholders (href="#") until the real profile
-         URLs are supplied — they carry data-placeholder so they're easy to
-         find, and are non-clickable rather than silently going nowhere. -->
+    <!-- Social rail closing out the hero. The four hrefs are admin-editable
+         (/api/socials) and filled in by renderSocials(); any left blank
+         render as inert placeholders rather than dead links. -->
     <div class="socials">
       <span class="socials-label" data-i18n="home.socials.label">Follow Zenith</span>
       <div class="socials-row">
-        <a class="social tiktok" href="#" data-placeholder="tiktok" aria-label="TikTok">
+        <a class="social tiktok" id="social-tiktok" href="#" aria-label="TikTok">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.4 2.2 1.7 3.6 3.9 3.8v2.6c-1.3.1-2.6-.2-3.9-.9v5.9c0 4.5-4.4 6.9-7.9 4.7-2.3-1.5-2.9-4.6-1.5-6.9 1-1.6 2.8-2.5 4.7-2.3v2.7c-.4-.1-.8-.1-1.2 0-1.1.2-1.8 1.2-1.6 2.3.2 1.1 1.2 1.8 2.3 1.6 1-.2 1.7-1 1.7-2V3h3.5Z"/></svg>
         </a>
-        <a class="social facebook" href="#" data-placeholder="facebook" aria-label="Facebook">
+        <a class="social facebook" id="social-facebook" href="#" aria-label="Facebook">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>
         </a>
-        <a class="social youtube" href="#" data-placeholder="youtube" aria-label="YouTube">
+        <a class="social youtube" id="social-youtube" href="#" aria-label="YouTube">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.2-.4-4.7c-.2-.8-.9-1.5-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4c-.8.2-1.5.9-1.7 1.7C1 8.8 1 12 1 12s0 3.2.4 4.7c.2.8.9 1.5 1.7 1.7 1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4c.8-.2 1.5-.9 1.7-1.7.4-1.5.4-4.7.4-4.7ZM9.8 15.3V8.7l6 3.3-6 3.3Z"/></svg>
         </a>
-        <a class="social telegram" href="https://t.me/Zenithdiamond2026" target="_blank" rel="noopener" aria-label="Telegram">
+        <a class="social telegram" id="social-telegram" href="#" aria-label="Telegram">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.9 19c-.2 1-.8 1.3-1.7.8l-4.6-3.4-2.2 2.1c-.2.2-.5.5-1 .5l.3-4.7 8.6-7.7c.4-.3-.1-.5-.6-.2L6.9 13.1 2.4 11.7c-1-.3-1-1 .2-1.4l18-6.9c.8-.3 1.5.2 1.3 1Z"/></svg>
         </a>
+        <button type="button" class="socials-edit" id="socials-edit" title="Edit links">✏️</button>
       </div>
     </div>
   </div>
@@ -764,6 +775,35 @@
     <div class="modal-actions">
       <button class="cancel" id="stat-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
       <button class="save" id="stat-modal-save" data-i18n="tournament.form.save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- edit social links modal ---------- -->
+<div class="modal-overlay" id="socials-modal">
+  <div class="modal">
+    <h3 data-i18n="home.socials.edit.title">Edit social links</h3>
+    <p class="modal-hint" data-i18n="home.socials.edit.hint">Leave a field empty to hide that icon's link.</p>
+    <div class="field">
+      <label>TikTok</label>
+      <input type="url" id="social-input-tiktok" maxlength="300" placeholder="https://www.tiktok.com/@yourpage">
+    </div>
+    <div class="field">
+      <label>Facebook</label>
+      <input type="url" id="social-input-facebook" maxlength="300" placeholder="https://www.facebook.com/yourpage">
+    </div>
+    <div class="field">
+      <label>YouTube</label>
+      <input type="url" id="social-input-youtube" maxlength="300" placeholder="https://www.youtube.com/@yourchannel">
+    </div>
+    <div class="field">
+      <label>Telegram</label>
+      <input type="url" id="social-input-telegram" maxlength="300" placeholder="https://t.me/yourchannel">
+    </div>
+    <div class="modal-err" id="socials-modal-err">Error</div>
+    <div class="modal-actions">
+      <button class="cancel" id="socials-modal-cancel" data-i18n="tournament.form.cancel">Cancel</button>
+      <button class="save" id="socials-modal-save" data-i18n="tournament.form.save">Save</button>
     </div>
   </div>
 </div>
@@ -868,6 +908,88 @@ async function loadStats(){
 }
 loadStats();
 
+/* ---- "Follow Zenith" social links (admin-editable via /api/socials) ---- */
+const SOCIAL_KEYS = ['tiktok', 'facebook', 'youtube', 'telegram'];
+let socials = { tiktok:'', facebook:'', youtube:'', telegram:'' };
+
+function renderSocials(){
+  SOCIAL_KEYS.forEach(key => {
+    const el = document.getElementById('social-' + key);
+    if (!el) return;
+    const url = (socials[key] || '').trim();
+    if (url) {
+      el.href = url;
+      el.target = '_blank';
+      el.rel = 'noopener';
+      el.removeAttribute('data-empty');
+    } else {
+      // No link set yet — keep the icon visible but inert, rather than
+      // letting it look clickable and go nowhere.
+      el.href = '#';
+      el.removeAttribute('target');
+      el.removeAttribute('rel');
+      el.setAttribute('data-empty', '');
+    }
+  });
+  const editBtn = document.getElementById('socials-edit');
+  if (editBtn) editBtn.classList.toggle('show', isAdmin);
+}
+
+async function loadSocials(){
+  try {
+    const res = await fetch('/api/socials');
+    socials = { ...socials, ...(await res.json()) };
+  } catch (e) { /* leave every icon as an inert placeholder */ }
+  renderSocials();
+}
+loadSocials();
+
+// A blank field is valid (it just hides that icon's link); anything else must
+// be a real http(s) URL. The server re-validates — this is only so the admin
+// gets told immediately instead of silently having a value dropped.
+document.getElementById('socials-edit').addEventListener('click', () => {
+  SOCIAL_KEYS.forEach(k => { document.getElementById('social-input-' + k).value = socials[k] || ''; });
+  document.getElementById('socials-modal-err').classList.remove('show');
+  document.getElementById('socials-modal').classList.add('show');
+});
+document.getElementById('socials-modal-cancel').addEventListener('click', () => {
+  document.getElementById('socials-modal').classList.remove('show');
+});
+document.getElementById('socials-modal-save').addEventListener('click', async () => {
+  const err = document.getElementById('socials-modal-err');
+  const next = {};
+  for (const k of SOCIAL_KEYS) {
+    let v = document.getElementById('social-input-' + k).value.trim();
+    if (v && !/^https?:\/\//i.test(v)) v = 'https://' + v; // tolerate a bare domain
+    if (v && !/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(v)) {
+      err.textContent = t('home.socials.edit.invalid','Please enter a valid link (or leave it empty).');
+      err.classList.add('show');
+      return;
+    }
+    next[k] = v;
+  }
+  const saveBtn = document.getElementById('socials-modal-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = t('tournament.form.saving','Saving…');
+  try {
+    const res = await fetch('/api/socials', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-admin-passcode': getPasscode() },
+      body: JSON.stringify(next),
+    });
+    if (!res.ok) throw new Error('save failed');
+    socials = await res.json();
+    renderSocials();
+    document.getElementById('socials-modal').classList.remove('show');
+  } catch (e) {
+    err.textContent = t('home.admin.error.save','Could not save. Please try again.');
+    err.classList.add('show');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = t('tournament.form.save','Save');
+  }
+});
+
 /* ---- admin unlock (shared pattern with other pages) ---- */
 const adminToggle = document.getElementById('admin-toggle');
 
@@ -919,6 +1041,9 @@ function setAdminUI(){
   adminToggleLabel.setAttribute('data-i18n', isAdmin ? 'tournament.admin.unlocked' : 'tournament.admin.locked');
   const adsBtn = document.getElementById('ads-manage-btn');
   if (adsBtn) adsBtn.classList.toggle('show', isAdmin);
+  // Keeps the social-rail pencil in step with every admin lock/unlock —
+  // this runs on toggle, on stored-passcode restore and on language change.
+  renderSocials();
 }
 
 adminToggle.addEventListener('click', async () => {

@@ -89,6 +89,11 @@ app.use('/api/home-stats', homeStatsRoutes);
 const adsRoutes = require('./routes/ads');
 app.use('/api/ads', adsRoutes);
 
+// "Follow Zenith" social links (TikTok/Facebook/YouTube/Telegram) — public
+// to read, admin-passcode-protected to edit
+const socialsRoutes = require('./routes/socials');
+app.use('/api/socials', socialsRoutes);
+
 // News posts — public to read/like/comment, admin-passcode-protected to create/edit/delete/moderate
 const newsRoutes = require('./routes/news');
 app.use('/api/news', newsRoutes);
@@ -132,11 +137,13 @@ const newsDb = require('./newsDb');
 const registrationsDb = require('./registrationsDb');
 const adsDb = require('./adsDb');
 const iconsDb = require('./iconsDb');
+const socialsDb = require('./socialsDb');
 
 Promise.all([
   ordersDb.ready,
   tournamentsDb.ready, tournamentDetailsDb.ready, diamondPricingDb.ready,
   homeStatsDb.ready, newsDb.ready, registrationsDb.ready, adsDb.ready, iconsDb.ready,
+  socialsDb.ready,
 ])
   .catch((e) => console.error('Error while restoring saved data on boot:', e.message))
   .finally(() => {
