@@ -439,6 +439,7 @@ let isAdmin = false;
 let posts = [];
 let editingId = null;
 let mediaFileData = null; // base64 data URL for the chosen image
+let editingHasImage = false; // post being edited already has a photo stored server-side
 let mediaTab = 'image';
 const openCommentPanels = new Set();
 
@@ -486,16 +487,22 @@ function timeAgo(iso){
 }
 
 function renderMedia(item){
-  if (!item.media) return '';
+  // Image posts no longer carry their data URL in the feed payload, so the
+  // presence of a photo is signalled by hasImage rather than by media.
+  if (!item.media && !item.hasImage) return '';
   if (item.mediaType === 'video') {
     const yt = youtubeEmbedUrl(item.media);
     if (yt) return `<div class="n-media"><iframe src="${yt}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
     if (/facebook\.com|fb\.watch/i.test(item.media)) return `<div class="n-media"><iframe src="${facebookEmbedUrl(item.media)}" loading="lazy" allowfullscreen></iframe></div>`;
     return `<a class="n-media-link" href="${escapeHtml(item.media)}" target="_blank" rel="noopener">▶️ ${escapeHtml(t('news.watch.generic','Watch video'))}</a>`;
   }
+  // Photos come from the dedicated media endpoint rather than inline base64,
+  // so they stream in lazily and in parallel instead of bloating the feed
+  // response (which used to make the page unusable on mobile data).
+  const src = '/api/news/' + encodeURIComponent(item.id) + '/media';
   return `
-    <a class="n-media-photo" href="${item.media}" target="_blank" rel="noopener" title="${escapeHtml(t('news.image.open','Open full image'))}">
-      <img class="n-media-img" src="${item.media}" alt="">
+    <a class="n-media-photo" href="${src}" target="_blank" rel="noopener" title="${escapeHtml(t('news.image.open','Open full image'))}">
+      <img class="n-media-img" src="${src}" alt="" loading="lazy" decoding="async">
       <span class="n-media-zoom">⤢ ${escapeHtml(t('news.image.open','Open full image'))}</span>
     </a>`;
 }
@@ -969,6 +976,7 @@ function openCreate(){
   postModalTitle.textContent = t('news.form.title.create','Create post');
   fTitle.value = ''; fBody.value = ''; fLink.value = ''; fMediaVideo.value = '';
   fMediaFile.value = ''; mediaFileData = null; fSchedule.value = '';
+  editingHasImage = false;
   mediaTab = 'image';
   document.querySelector('[data-media-tab="image"]').click();
   postModalErr.classList.remove('show');
@@ -991,9 +999,13 @@ window.openEdit = function(id){
     document.querySelector('[data-media-tab="video"]').click();
   } else {
     mediaTab = 'image';
-    mediaFileData = item.media || null;
+    // The existing photo isn't in the feed payload any more, so there's
+    // nothing to preload here. editingHasImage records that one is stored
+    // server-side; saving without picking a new file leaves it untouched.
+    mediaFileData = null;
     document.querySelector('[data-media-tab="image"]').click();
   }
+  editingHasImage = item.mediaType === 'image' && !!item.hasImage;
   postModalErr.classList.remove('show');
   postModal.classList.add('show');
   startScheduleCountdown();
@@ -1013,10 +1025,17 @@ document.getElementById('post-modal-save').addEventListener('click', async () =>
   if (mediaTab === 'video') {
     payload.media = fMediaVideo.value.trim();
     payload.mediaType = payload.media ? 'video' : '';
-  } else {
-    payload.media = mediaFileData || '';
-    payload.mediaType = payload.media ? 'image' : '';
+  } else if (mediaFileData) {
+    payload.media = mediaFileData;
+    payload.mediaType = 'image';
+  } else if (!editingHasImage) {
+    // No new file and nothing stored — clear any previous media.
+    payload.media = '';
+    payload.mediaType = '';
   }
+  // Editing a post that already has a photo, with no new file chosen: leave
+  // media out of the payload entirely so the server keeps what it has
+  // (updateNews only touches media when the key is present).
   if (!payload.title) {
     postModalErr.textContent = t('news.error.save','Could not save. Please try again.');
     postModalErr.classList.add('show');

@@ -53,6 +53,23 @@ function normalize(item) {
   return item;
 }
 
+// Uploaded photos are stored as base64 data URLs, which are enormous — a
+// single 5MB upload becomes ~6.8MB of JSON. Inlining those in the feed
+// response meant GET /api/news returned tens of megabytes once a few image
+// posts existed: slow but survivable on desktop wifi, and a guaranteed
+// timeout on mobile data (the client's catch then blanked the whole feed).
+//
+// So the list response carries no base64 at all. Each image is fetched
+// separately from GET /api/news/:id/media, which lets the browser stream
+// them in parallel, lazily, and cache them properly. Video "media" is just
+// a short YouTube/Facebook URL, so that stays inline.
+function stripHeavyMedia(item) {
+  if (typeof item.media === 'string' && item.media.startsWith('data:')) {
+    return { ...item, media: '', hasImage: true };
+  }
+  return { ...item, hasImage: false };
+}
+
 // Public feed: hides posts scheduled for the future. Admin view (passcode
 // verified) sees everything, including not-yet-published scheduled posts,
 // so they can manage them ahead of time.
@@ -62,7 +79,16 @@ function listNews(includeScheduled) {
   if (!includeScheduled) {
     list = list.filter((n) => !n.scheduledAt || n.scheduledAt <= now);
   }
-  return list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  return list
+    .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+    .map(stripHeavyMedia);
+}
+
+// Raw stored value for one post's media, used by the media endpoint. Returns
+// the full data URL (or '' when the post has no stored image).
+function getNewsMedia(id) {
+  const item = readAll().find((n) => n.id === id);
+  return item && typeof item.media === 'string' ? item.media : '';
 }
 
 function createNews(data) {
@@ -181,5 +207,5 @@ function deleteComment(id, commentId) {
 const ready = hydrate(SHEET_KEY, DB_FILE);
 
 module.exports = {
-  listNews, createNews, updateNews, deleteNews, reactNews, addComment, deleteComment, viewNews, ready, REACTION_TYPES,
+  listNews, getNewsMedia, createNews, updateNews, deleteNews, reactNews, addComment, deleteComment, viewNews, ready, REACTION_TYPES,
 };
