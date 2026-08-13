@@ -97,9 +97,45 @@
   .t-section h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--violet);}
   .t-section.past h2 .dot{background:var(--dim);}
 
-  .t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-  @media (max-width:900px){ .t-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:520px){ .t-grid{grid-template-columns:1fr;} }
+  /* Each section is a single horizontally-scrolling row rather than a
+     wrapping grid. On a wide monitor a 3-column grid stretched one card to
+     ~800px, which pushed "Past Tournaments" off screen; fixed-width cards
+     keep both sections visible at once and simply scroll sideways as more
+     tournaments are added. */
+  .t-rail-wrap{position:relative;}
+  .t-rail{
+    display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;scroll-behavior:smooth;
+    padding-bottom:10px;
+    /* room for the hover-lift so the cards aren't clipped mid-animation */
+    padding-top:4px;
+    scrollbar-width:thin;scrollbar-color:var(--violet-dim) transparent;
+  }
+  .t-rail::-webkit-scrollbar{height:8px;}
+  .t-rail::-webkit-scrollbar-track{background:transparent;}
+  .t-rail::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px;}
+  .t-rail:hover::-webkit-scrollbar-thumb{background:var(--violet-dim);}
+  .t-rail > *{scroll-snap-align:start;}
+  /* Fixed width so cards stay a readable size no matter how wide the
+     monitor is, and flex-shrink:0 so they queue up instead of squashing. */
+  .t-rail > .t-card{flex:0 0 300px;}
+  @media (max-width:520px){ .t-rail > .t-card{flex-basis:78vw;} }
+
+  /* Arrow buttons — desktop affordance for the rail. Hidden by default and
+     revealed by JS only when the row actually overflows. */
+  .t-rail-nav{
+    display:none;position:absolute;top:50%;transform:translateY(-50%);z-index:4;
+    width:38px;height:38px;border-radius:50%;cursor:pointer;
+    background:var(--panel-raised);border:1px solid var(--line);color:var(--hi);
+    font-size:20px;line-height:1;align-items:center;justify-content:center;
+    box-shadow:0 6px 18px rgba(0,0,0,0.35);transition:background .15s,border-color .15s;
+  }
+  .t-rail-nav:hover{background:var(--violet);border-color:transparent;}
+  .t-rail-nav.show{display:flex;}
+  .t-rail-nav.prev{left:-14px;}
+  .t-rail-nav.next{right:-14px;}
+  /* Touch devices scroll the rail directly; arrows would only get in the way. */
+  @media (hover:none){ .t-rail-nav{display:none !important;} }
 
   .t-card{
     position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
@@ -150,8 +186,10 @@
   .t-admin-actions button:hover{border-color:var(--violet-dim);color:var(--hi);}
   .t-admin-actions button.del:hover{border-color:var(--signal);color:var(--signal);}
 
+  /* The rail is a flex row, so the empty state stretches to fill it rather
+     than using the old grid-column span. */
   .t-empty{
-    grid-column:1 / -1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    flex:1 1 100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:34px 20px;color:var(--mid);
     border:1px dashed var(--line);border-radius:var(--radius);
   }
@@ -330,12 +368,23 @@
 
 <div class="t-section">
   <h2><span class="dot"></span><span data-i18n="tournament.upcoming.title">Upcoming Tournaments</span></h2>
-  <div class="t-grid reveal-stagger" id="grid-upcoming"></div>
+  <!-- Horizontal rail: cards keep a fixed width and the row scrolls
+       sideways once there are more than fit, so this section stays one
+       row tall and Past Tournaments remains visible on the same screen. -->
+  <div class="t-rail-wrap">
+    <button type="button" class="t-rail-nav prev" data-rail="grid-upcoming" aria-label="Scroll left">‹</button>
+    <div class="t-rail reveal-stagger" id="grid-upcoming"></div>
+    <button type="button" class="t-rail-nav next" data-rail="grid-upcoming" aria-label="Scroll right">›</button>
+  </div>
 </div>
 
 <div class="t-section past">
   <h2><span class="dot"></span><span data-i18n="tournament.past.title">Past Tournaments</span></h2>
-  <div class="t-grid reveal-stagger" id="grid-past"></div>
+  <div class="t-rail-wrap">
+    <button type="button" class="t-rail-nav prev" data-rail="grid-past" aria-label="Scroll left">‹</button>
+    <div class="t-rail reveal-stagger" id="grid-past"></div>
+    <button type="button" class="t-rail-nav next" data-rail="grid-past" aria-label="Scroll right">›</button>
+  </div>
 </div>
 
 <footer>
@@ -589,7 +638,44 @@ function renderGrids(){
     : `<div class="t-empty"><div class="icon">🏆</div><p>${t('tournament.past.empty','No past tournaments listed yet.')}</p></div>`;
 
   document.getElementById('create-btn').classList.toggle('show', isAdmin);
+  refreshRailNavs();
 }
+
+/* ---------------- horizontal rails ----------------
+   Each section scrolls sideways instead of wrapping, so both Upcoming and
+   Past stay on screen together. The arrows are only shown when a rail
+   actually overflows, and each is disabled at its end of the track. */
+function refreshRailNavs(){
+  document.querySelectorAll('.t-rail').forEach((rail) => {
+    const overflowing = rail.scrollWidth > rail.clientWidth + 4;
+    const atStart = rail.scrollLeft <= 2;
+    const atEnd = rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 2;
+    document.querySelectorAll(`.t-rail-nav[data-rail="${rail.id}"]`).forEach((btn) => {
+      btn.classList.toggle('show', overflowing);
+      const isPrev = btn.classList.contains('prev');
+      btn.disabled = isPrev ? atStart : atEnd;
+      btn.style.opacity = btn.disabled ? '0.35' : '1';
+      btn.style.cursor = btn.disabled ? 'default' : 'pointer';
+    });
+  });
+}
+
+document.querySelectorAll('.t-rail-nav').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const rail = document.getElementById(btn.dataset.rail);
+    if (!rail) return;
+    // Advance by whole cards rather than a fixed pixel amount, so the scroll
+    // snap always lands cleanly on a card edge.
+    const card = rail.querySelector('.t-card');
+    const step = card ? card.offsetWidth + 16 : rail.clientWidth * 0.8;
+    rail.scrollBy({ left: btn.classList.contains('prev') ? -step : step, behavior: 'smooth' });
+  });
+});
+
+document.querySelectorAll('.t-rail').forEach((rail) => {
+  rail.addEventListener('scroll', refreshRailNavs, { passive: true });
+});
+window.addEventListener('resize', refreshRailNavs);
 
 async function loadTournaments(){
   try {
