@@ -10,18 +10,18 @@
 <link rel="stylesheet" href="css/theme.css">
 <style>
   :root{
-    --void:#0A0713;
-    --void-rgb:10,7,19;
-    --panel:#150C29;
-    --panel-raised:#1D1237;
-    --line:#2C1F4D;
+    --void:#080B1C;
+    --void-rgb:8,11,28;
+    --panel:#101833;
+    --panel-raised:#18213E;
+    --line:#26305A;
     --violet:#8B5CF6;
     --violet-dim:#4C3592;
     --cyan:#4FE0E8;
     --signal:#FF3E9A;
-    --hi:#F4EEFF;
-    --mid:#B4A4DC;
-    --dim:#6C6089;
+    --hi:#EEF1FF;
+    --mid:#A9B3DA;
+    --dim:#6E779F;
     --radius:14px;
   }
   *{box-sizing:border-box;}
@@ -37,8 +37,8 @@
     display:flex;flex-direction:column;
     min-height:100vh;min-height:100dvh;
     background:
-      radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.28), transparent 60%),
-      radial-gradient(900px 500px at 90% 10%, rgba(79,224,232,0.10), transparent 55%),
+      radial-gradient(1100px 600px at 18% -8%, rgba(99,91,255,0.26), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(56,120,255,0.14), transparent 55%),
       var(--void);
     color:var(--hi);
     font-family:var(--font-main);
@@ -117,8 +117,8 @@
   .hero-scrim{
     position:absolute;inset:0;z-index:1;pointer-events:none;
     background:
-      linear-gradient(100deg, rgba(6,4,14,0.82) 0%, rgba(6,4,14,0.55) 40%, rgba(6,4,14,0.28) 70%, rgba(6,4,14,0.42) 100%),
-      linear-gradient(180deg, rgba(6,4,14,0.05) 0%, rgba(6,4,14,0.15) 60%, rgba(6,4,14,0.55) 100%);
+      linear-gradient(100deg, rgba(5,8,22,0.84) 0%, rgba(5,8,22,0.58) 40%, rgba(5,8,22,0.3) 70%, rgba(5,8,22,0.45) 100%),
+      linear-gradient(180deg, rgba(5,8,22,0.05) 0%, rgba(5,8,22,0.16) 60%, rgba(5,8,22,0.58) 100%);
   }
   [data-theme="light"] .hero-scrim{
     background:
@@ -217,6 +217,14 @@
     .hero-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-bottom:20px;max-width:560px;}
     .hero-btn{padding:15px 12px;font-size:13px;letter-spacing:0.8px;justify-content:center;}
   }
+  /* Trailing arrow added via ::after rather than markup: the i18n engine
+     overwrites each button's textContent on every language switch, which
+     would wipe out any child element placed inside the <a>. */
+  .hero-btn::after{
+    content:"→";font-size:1.05em;line-height:1;margin-left:9px;
+    transition:transform .18s ease;
+  }
+  .hero-btn:hover::after{transform:translateX(4px);}
   .hero-btn:hover{transform:translateY(-2px);}
   .hero-btn.primary{
     background:linear-gradient(135deg,var(--violet),#6D3FE0);
@@ -228,9 +236,9 @@
   }
   .hero-btn.secondary:hover{border-color:var(--cyan);box-shadow:0 0 18px rgba(79,224,232,0.2);}
 
-  /* Full page width now that it's a sibling of .hero-row rather than a
-     child of the narrow text column — four equal cards across. */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;width:100%;margin:0 0 18px;}
+  /* Sits under the buttons inside the hero copy column (not full page
+     width) — the trust strip below is the element that spans edge to edge. */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;margin:0;}
   @media (max-width:640px){ .stats{grid-template-columns:repeat(2,1fr);} }
   /* Plain card — no accent bar. The number itself is the focal point; an
      extra colored flourish on top read as visual noise next to the trust
@@ -305,6 +313,77 @@
     .hl-icon svg{width:17px;height:17px;}
     .hl-title{font-size:13px;}
     .hl-desc{font-size:11.5px;}
+  }
+
+  /* ---------- social rail ---------- */
+  .socials{
+    display:flex;flex-direction:column;align-items:center;gap:16px;
+    margin:38px 0 0;
+  }
+  /* Centered caption with a rule running out to each side. */
+  .socials-label{
+    display:flex;align-items:center;gap:14px;width:100%;
+    font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
+    color:var(--dim);white-space:nowrap;
+  }
+  .socials-label::before,.socials-label::after{
+    content:"";flex:1;height:1px;
+    background:linear-gradient(90deg,transparent,var(--line),transparent);
+  }
+  .socials-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+  .social{
+    position:relative;width:48px;height:48px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel-raised);border:1px solid rgba(180,164,220,0.22);
+    color:var(--mid);
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1), color .22s, border-color .22s, box-shadow .22s;
+  }
+  .social svg{width:21px;height:21px;position:relative;z-index:1;}
+  /* Soft brand-coloured halo that only fades in on hover, so the row stays
+     calm at rest instead of four competing colours all the time. */
+  .social::before{
+    content:"";position:absolute;inset:-1px;border-radius:inherit;
+    background:var(--brand,var(--violet));opacity:0;transition:opacity .22s;
+  }
+  .social:hover{
+    transform:translateY(-5px);color:#fff;border-color:transparent;
+    box-shadow:0 10px 22px -6px var(--brand,var(--violet));
+  }
+  .social:hover::before{opacity:1;}
+  .social.tiktok{--brand:#25F4EE;}
+  .social.facebook{--brand:#1877F2;}
+  .social.youtube{--brand:#FF0033;}
+  .social.telegram{--brand:#29A9EB;}
+  /* TikTok's cyan needs dark glyphs to stay legible. */
+  .social.tiktok:hover{color:#08121C;}
+  /* Gentle staggered idle float — a slow, low-amplitude drift so the row
+     feels alive without pulling attention from the buttons above.
+     Deliberately applied to the inner glyph, NOT to .social itself: a
+     running animation's transform beats a normal declaration, so floating
+     the anchor would permanently override the hover lift below. */
+  @keyframes socialFloat{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-4px);}
+  }
+  .social svg{animation:socialFloat 3.6s ease-in-out infinite;}
+  .social:nth-child(2) svg{animation-delay:.45s;}
+  .social:nth-child(3) svg{animation-delay:.9s;}
+  .social:nth-child(4) svg{animation-delay:1.35s;}
+  .social:hover svg{animation-play-state:paused;}
+  @media (prefers-reduced-motion:reduce){
+    .social svg{animation:none;}
+    .social:hover{transform:none;}
+    .hero-btn:hover::after{transform:none;}
+  }
+  /* Placeholder links have no destination yet — show they're inert rather
+     than letting them look clickable and go nowhere. */
+  .social[href="#"]{opacity:0.55;cursor:default;}
+  .social[href="#"]:hover{transform:none;box-shadow:none;color:var(--mid);border-color:rgba(180,164,220,0.22);}
+  .social[href="#"]:hover::before{opacity:0;}
+  @media (max-width:640px){
+    .socials{margin-top:28px;gap:14px;}
+    .social{width:44px;height:44px;border-radius:12px;}
+    .social svg{width:19px;height:19px;}
   }
 
   /* ---------- admin toggle pill in header ---------- */
@@ -609,6 +688,13 @@
       <a class="hero-btn primary" href="/tournament" data-i18n="home.btn.tournament">Tournament</a>
       <a class="hero-btn primary" href="/diamond-plan" data-i18n="home.btn.diamond">Buy Diamond</a>
     </div>
+
+    <div class="stats reveal-stagger">
+      <div class="stat"><button type="button" class="stat-edit" data-key="tournaments" title="Edit">✏️</button><span class="num" id="stat-tournaments">2+</span><span class="lbl" data-i18n="home.stat.tournament">Tournament</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="players" title="Edit">✏️</button><span class="num" id="stat-players">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
+      <div class="stat"><button type="button" class="stat-edit" data-key="rating" title="Edit">✏️</button><span class="num" id="stat-rating">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
+    </div>
   </div>
 
   <!-- desktop widget: sits beside the hero copy at the top of the hero;
@@ -621,13 +707,6 @@
     <div class="ad-dots" id="ad-dots"></div>
   </aside>
   </div>
-
-    <div class="stats reveal-stagger">
-      <div class="stat"><button type="button" class="stat-edit" data-key="tournaments" title="Edit">✏️</button><span class="num" id="stat-tournaments">2+</span><span class="lbl" data-i18n="home.stat.tournament">Tournament</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="diamondSold" title="Edit">✏️</button><span class="num" id="stat-diamondSold">3,000+</span><span class="lbl" data-i18n="home.stat.diamond">Diamond Sold</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="players" title="Edit">✏️</button><span class="num" id="stat-players">700+</span><span class="lbl" data-i18n="home.stat.players">Players</span></div>
-      <div class="stat"><button type="button" class="stat-edit" data-key="rating" title="Edit">✏️</button><span class="num" id="stat-rating">4.9 / 5</span><span class="lbl" data-i18n="home.stat.rating">Rating</span></div>
-    </div>
 
     <div class="highlights reveal-stagger">
       <div class="highlight">
@@ -650,6 +729,28 @@
           <span class="hl-title" data-i18n="home.highlight.support.title">24/7 Support</span>
           <span class="hl-desc" data-i18n="home.highlight.support.desc">Real people ready to help on Telegram, anytime</span>
         </div>
+      </div>
+    </div>
+
+    <!-- Social rail closing out the hero. Telegram is the live account;
+         the other three are placeholders (href="#") until the real profile
+         URLs are supplied — they carry data-placeholder so they're easy to
+         find, and are non-clickable rather than silently going nowhere. -->
+    <div class="socials">
+      <span class="socials-label" data-i18n="home.socials.label">Follow Zenith</span>
+      <div class="socials-row">
+        <a class="social tiktok" href="#" data-placeholder="tiktok" aria-label="TikTok">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.4 2.2 1.7 3.6 3.9 3.8v2.6c-1.3.1-2.6-.2-3.9-.9v5.9c0 4.5-4.4 6.9-7.9 4.7-2.3-1.5-2.9-4.6-1.5-6.9 1-1.6 2.8-2.5 4.7-2.3v2.7c-.4-.1-.8-.1-1.2 0-1.1.2-1.8 1.2-1.6 2.3.2 1.1 1.2 1.8 2.3 1.6 1-.2 1.7-1 1.7-2V3h3.5Z"/></svg>
+        </a>
+        <a class="social facebook" href="#" data-placeholder="facebook" aria-label="Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>
+        </a>
+        <a class="social youtube" href="#" data-placeholder="youtube" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.2-.4-4.7c-.2-.8-.9-1.5-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4c-.8.2-1.5.9-1.7 1.7C1 8.8 1 12 1 12s0 3.2.4 4.7c.2.8.9 1.5 1.7 1.7 1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4c.8-.2 1.5-.9 1.7-1.7.4-1.5.4-4.7.4-4.7ZM9.8 15.3V8.7l6 3.3-6 3.3Z"/></svg>
+        </a>
+        <a class="social telegram" href="https://t.me/Zenithdiamond2026" target="_blank" rel="noopener" aria-label="Telegram">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.9 19c-.2 1-.8 1.3-1.7.8l-4.6-3.4-2.2 2.1c-.2.2-.5.5-1 .5l.3-4.7 8.6-7.7c.4-.3-.1-.5-.6-.2L6.9 13.1 2.4 11.7c-1-.3-1-1 .2-1.4l18-6.9c.8-.3 1.5.2 1.3 1Z"/></svg>
+        </a>
       </div>
     </div>
   </div>
