@@ -61,23 +61,40 @@
   .admin-toggle:hover{border-color:var(--violet-dim);color:var(--hi);}
   .admin-toggle.on{display:flex;background:linear-gradient(135deg,var(--violet),#6D3FE0);border-color:transparent;color:#fff;}
 
-  /* ---------- hero ---------- */
-  .hero{padding:56px 48px 10px;}
+  /* ---------- hero ----------
+     Kept deliberately short: this page's job is to show the tournament
+     rails, and every pixel spent here pushed "Past Tournaments" below the
+     fold on a laptop screen. */
+  .hero{padding:30px 48px 4px;}
   .eyebrow{
-    font-family:var(--font-main);font-weight:600;font-size:12px;letter-spacing:2px;
-    color:var(--cyan);text-transform:uppercase;margin:0 0 14px;
+    font-family:var(--font-main);font-weight:600;font-size:11.5px;letter-spacing:2px;
+    color:var(--cyan);text-transform:uppercase;margin:0 0 9px;
   }
   h1{
-    font-family:var(--font-main);font-weight:800;font-size:40px;line-height:1.4;
-    margin:0 0 12px;letter-spacing:0.5px;
+    font-family:var(--font-main);font-weight:800;font-size:31px;line-height:1.25;
+    margin:0 0 8px;letter-spacing:0.4px;
     background:linear-gradient(180deg, var(--hi), var(--mid));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  .hero p{color:var(--mid);font-size:16px;max-width:560px;line-height:1.6;margin:0;}
-  @media (max-width:900px){ .hero{padding:40px 20px 6px;} h1{font-size:30px;} }
+  .hero p{color:var(--mid);font-size:14.5px;max-width:560px;line-height:1.55;margin:0;}
+  @media (max-width:900px){ .hero{padding:26px 20px 4px;} h1{font-size:27px;} }
+  /* Laptop-height screens: drop the blurb so both rails clear the fold.
+     Most laptops are 800–950px tall, which is exactly the range where the
+     second rail would otherwise be pushed off. */
+  @media (min-width:901px) and (max-height:950px){
+    .hero{padding:20px 48px 2px;}
+    .hero p{display:none;}
+    h1{font-size:27px;}
+  }
+  /* Very short screens (13" laptops, scaled displays): squeeze further. */
+  @media (min-width:901px) and (max-height:820px){
+    .hero{padding:14px 48px 2px;}
+    h1{font-size:24px;margin:0 0 6px;}
+    .eyebrow{margin:0 0 7px;}
+  }
 
-  .create-bar{padding:18px 48px 0;display:flex;justify-content:flex-end;}
-  @media (max-width:900px){ .create-bar{padding:14px 20px 0;} }
+  .create-bar{padding:8px 48px 0;display:flex;justify-content:flex-end;}
+  @media (max-width:900px){ .create-bar{padding:8px 20px 0;} }
   .create-btn{
     display:none;align-items:center;gap:8px;
     background:var(--violet);color:#fff;border:none;border-radius:10px;
@@ -88,10 +105,10 @@
   .create-btn:hover{transform:translateY(-1px);}
 
   /* ---------- tournament sections ---------- */
-  .t-section{padding:26px 48px 10px;}
-  @media (max-width:900px){ .t-section{padding:20px 20px 6px;} }
+  .t-section{padding:14px 48px 6px;}
+  @media (max-width:900px){ .t-section{padding:14px 20px 6px;} }
   .t-section h2{
-    font-family:var(--font-main);font-weight:700;font-size:18px;margin:0 0 16px;
+    font-family:var(--font-main);font-weight:700;font-size:16px;margin:0 0 10px;
     display:flex;align-items:center;gap:10px;color:var(--hi);
   }
   .t-section h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--violet);}
@@ -139,7 +156,7 @@
 
   .t-card{
     position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-    padding:18px 14px 16px;display:flex;flex-direction:column;gap:8px;
+    padding:14px 13px 13px;display:flex;flex-direction:column;gap:6px;
     transition:border-color .15s, transform .12s, box-shadow .15s;
   }
   .t-card:hover{border-color:var(--violet-dim);transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,0.3);}
@@ -149,17 +166,29 @@
     background:rgba(139,92,246,0.18);color:var(--violet);
   }
   .t-badge.past{background:rgba(108,96,137,0.2);color:var(--dim);}
+  /* Overlaid on the artwork when the card has one, so it costs no height. */
+  .t-card.has-cover .t-badge{
+    position:absolute;top:9px;left:9px;z-index:2;
+    background:rgba(6,9,24,0.72);color:#EEF1FF;backdrop-filter:blur(4px);
+    border:1px solid rgba(180,164,220,0.3);
+  }
+  .t-card.has-cover .t-badge.past{background:rgba(6,9,24,0.72);color:var(--mid);}
   .t-icon{font-size:28px;line-height:1;margin-top:2px;}
   .t-title{font-family:var(--font-main);font-weight:700;font-size:14px;line-height:1.5;color:var(--hi);}
-  .t-meta{display:flex;flex-direction:column;gap:3px;margin-top:2px;}
-  .t-meta div{display:flex;justify-content:space-between;gap:6px;font-size:11px;}
+  .t-meta{display:flex;flex-direction:column;gap:2px;margin-top:1px;}
+  .t-meta div{display:flex;justify-content:space-between;gap:6px;font-size:10.5px;line-height:1.45;}
   .t-meta .k{color:var(--dim);}
   .t-meta .v{color:var(--mid);font-weight:600;text-align:right;}
-  .t-desc{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:4px;}
-  .t-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  /* Clamped so a long description can't stretch one card and leave the
+     whole rail ragged (and taller than the screen allows). */
+  .t-desc{
+    font-size:11.5px;color:var(--dim);line-height:1.45;margin-top:3px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .t-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;}
   .t-link-btn{
-    display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;
-    font-size:11px;font-weight:700;border:1px solid var(--line);color:var(--hi);
+    display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;
+    font-size:10.5px;font-weight:700;border:1px solid var(--line);color:var(--hi);
     transition:transform .12s, border-color .12s;
   }
   .t-link-btn:hover{transform:translateY(-1px);}
@@ -173,11 +202,19 @@
   .reg-toggle{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--hi);cursor:pointer;}
   .reg-toggle input{width:16px;height:16px;accent-color:var(--violet);cursor:pointer;}
   .field-hint{font-size:11.5px;color:var(--dim);margin:7px 0 0;line-height:1.5;}
+  /* Bleeds to the card edges: the negative margins must stay in step with
+     .t-card's padding (14px top / 13px sides) or the image sits inset.
+     A fixed height rather than an aspect ratio — at 300px wide, 16/9 came
+     out 169px tall, which alone was enough to push the second rail off a
+     laptop screen. */
   .t-cover{
-    width:calc(100% + 28px);aspect-ratio:16/9;object-fit:cover;display:block;
-    margin:-18px -14px 6px;border-top-left-radius:var(--radius);border-top-right-radius:var(--radius);
+    width:calc(100% + 26px);height:126px;object-fit:cover;display:block;
+    margin:-14px -13px 5px;border-top-left-radius:var(--radius);border-top-right-radius:var(--radius);
     background:var(--panel-raised);
   }
+  /* Cover height steps down with the same two tiers as the hero above. */
+  @media (min-width:901px) and (max-height:950px){ .t-cover{height:104px;} }
+  @media (min-width:901px) and (max-height:820px){ .t-cover{height:86px;} }
   .t-admin-actions{display:flex;gap:6px;position:absolute;top:12px;right:12px;z-index:2;}
   .t-admin-actions button{
     width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:var(--panel-raised);
@@ -593,9 +630,13 @@ function renderCard(item){
   const linksHtml = (watchHtml || registerHtml || rulesHtml) ? `<div class="t-links">${watchHtml}${registerHtml}${rulesHtml}</div>` : '';
 
   return `
-    <div class="t-card" data-id="${item.id}" onclick="window.location.href='/tournament-detail?id=${item.id}'" style="cursor:pointer;">
+    <div class="t-card${coverHtml ? ' has-cover' : ''}" data-id="${item.id}" onclick="window.location.href='/tournament-detail?id=${item.id}'" style="cursor:pointer;">
       ${adminHtml}
       ${coverHtml}
+      <!-- With a cover the badge floats over the artwork (see .has-cover
+           .t-badge) instead of taking its own row, which buys back enough
+           height for both rails to sit on one screen. Without a cover it
+           falls back to a normal inline chip. -->
       <div class="t-badge ${item.status === 'past' ? 'past' : ''}">${badgeText}</div>
       ${iconHtml}
       <div class="t-title">${escapeHtml(item.title)}</div>

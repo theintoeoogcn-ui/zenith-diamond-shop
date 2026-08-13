@@ -397,6 +397,12 @@
     padding:16px;min-height:100%;
     background:linear-gradient(180deg, rgba(10,7,19,0.05) 0%, rgba(10,7,19,0.55) 55%, rgba(10,7,19,0.86) 100%);
   }
+  /* No headline/CTA text on this creative, so the darkening gradient has
+     nothing to make readable and only washes out the artwork (which
+     usually carries its own lettering). The element itself stays — on the
+     mobile and interstitial placements the image is absolutely positioned,
+     so this overlay's min-height is what gives the card its height. */
+  .ad-card-overlay.bare{background:none;}
   .ad-card.lg .ad-card-overlay{min-height:220px;justify-content:flex-end;}
   .ad-card.sm .ad-card-overlay{min-height:96px;justify-content:flex-end;padding:12px 14px;}
   .ad-badge{
@@ -1189,7 +1195,7 @@ function adCardHtml(ad, size){
       ${openTag}
         ${adMediaTagHtml(ad.media, 'ad-card-img')}
         <span class="ad-sponsored-tag">${escapeHtml(t('ads.sponsored','Sponsored'))}</span>
-        <div class="ad-card-overlay">
+        <div class="ad-card-overlay${(ad.badge || ad.headline || ad.subtext || ad.ctaText) ? '' : ' bare'}">
           ${ad.badge ? `<span class="ad-badge">${escapeHtml(ad.badge)}</span>` : ''}
           ${ad.headline ? `<div class="ad-headline">${escapeHtml(ad.headline)}</div>` : ''}
           ${ad.subtext ? `<div class="ad-subtext">${escapeHtml(ad.subtext)}</div>` : ''}
