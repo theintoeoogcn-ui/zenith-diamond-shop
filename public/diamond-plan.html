@@ -270,7 +270,46 @@
   .card.selected::after{opacity:calc(var(--glow-strength) * 2.2);}
   @keyframes cardPop{0%{transform:scale(.94);}100%{transform:scale(1);}}
   .card .amt{font-family:var(--font-main);font-weight:800;font-size:21px;margin-bottom:10px;}
-  .card .card-icon{width:30px;height:30px;margin-bottom:8px;object-fit:contain;}
+  /* Package artwork + its shimmer. The wrapper is the positioning context
+     and clips the sweep; the sweep itself is masked to the artwork's own
+     alpha, so the light travels across the gem/box rather than across a
+     rectangle around it. */
+  .card .card-icon-wrap{
+    position:relative;display:inline-block;line-height:0;margin-bottom:8px;
+    filter:drop-shadow(0 3px 7px rgba(0,0,0,0.45));
+  }
+  .card .card-icon{
+    width:38px;height:38px;object-fit:contain;display:block;
+    animation:iconBreathe 4.2s ease-in-out infinite;
+  }
+  /* Diagonal highlight that sweeps across the artwork every few seconds. */
+  .card .card-icon-wrap::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg,
+      transparent 38%, rgba(255,255,255,0.85) 50%, transparent 62%);
+    background-size:260% 260%;
+    -webkit-mask:url(assets/diamond-gem.png) center/contain no-repeat;
+            mask:url(assets/diamond-gem.png) center/contain no-repeat;
+    mix-blend-mode:screen;opacity:0.55;
+    animation:iconSheen 4.2s ease-in-out infinite;
+  }
+  /* Double-diamond cards mask the sweep to the treasure box instead. */
+  .card[data-group="double"] .card-icon-wrap::after{
+    -webkit-mask-image:url(assets/diamond-box.png);
+            mask-image:url(assets/diamond-box.png);
+  }
+  @keyframes iconSheen{
+    0%,100%{background-position:130% 130%;}
+    45%,55%{background-position:-30% -30%;}
+  }
+  @keyframes iconBreathe{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.05);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .card .card-icon{animation:none;}
+    .card .card-icon-wrap::after{animation:none;opacity:0;}
+  }
   .card .price{font-size:15px;color:var(--cyan);font-weight:700;}
   .card .badge{
     position:absolute;top:-9px;left:10px;background:var(--signal);color:#fff;
@@ -860,16 +899,17 @@ let isAdmin = false;
 function getPasscode(){ return sessionStorage.getItem(ADMIN_KEY) || ''; }
 
 function renderGrid(el, packs, group){
+  // Single diamond for the standard packs, treasure box for double diamond.
+  // The shimmer is a CSS sweep over the artwork (see .card-icon-wrap) rather
+  // than a video, so it stays crisp at any size and costs nothing to load.
+  const iconSrc = group === 'double' ? 'assets/diamond-box.png' : 'assets/diamond-gem.png';
   const cards = packs.map((p,i)=>`
     <div class="card" data-group="${group}" data-idx="${i}">
       <div class="card-admin-actions${isAdmin ? ' show' : ''}">
         <button class="edit" title="${t('tournament.card.edit','Edit')}" onclick="event.stopPropagation();openPkgEdit('${group}',${i})">✏️</button>
         <button class="del" title="${t('tournament.card.delete','Delete')}" onclick="event.stopPropagation();deletePkg('${group}',${i})">🗑</button>
       </div>
-      <video class="card-icon" autoplay muted loop playsinline>
-        <source src="assets/diamond-icon.webm" type="video/webm">
-        <source src="assets/diamond-icon-fallback.mp4" type="video/mp4">
-      </video>
+      <span class="card-icon-wrap"><img class="card-icon" src="${iconSrc}" alt="" loading="lazy"></span>
       <div class="amt">${p.amt}</div>
       <div class="price">${p.price.toLocaleString()} Ks</div>
     </div>`).join('');

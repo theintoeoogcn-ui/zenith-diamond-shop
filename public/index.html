@@ -199,11 +199,25 @@
   }
   .hero-btn:hover::after{transform:translateX(4px);}
   .hero-btn:hover{transform:translateY(-2px);}
+  /* Two stacked background layers: a moving highlight over the fixed violet
+     fill. Done with background-position rather than a pseudo-element because
+     ::before already carries the spinning rim light and ::after the arrow. */
   .hero-btn.primary{
-    background:linear-gradient(135deg,var(--violet),#6D3FE0);
+    background:
+      linear-gradient(115deg, transparent 42%, rgba(255,255,255,0.38) 50%, transparent 58%),
+      linear-gradient(135deg, var(--violet), #6D3FE0);
+    background-size:260% 100%, 100% 100%;
+    background-repeat:no-repeat;
     color:#fff;box-shadow:0 8px 26px rgba(139,92,246,0.4);
+    animation:btnSheen 4s ease-in-out infinite;
+  }
+  /* Long pause at each end so it reads as an occasional glint, not a strobe. */
+  @keyframes btnSheen{
+    0%,100%{background-position:170% 0, 0 0;}
+    50%,60%{background-position:-70% 0, 0 0;}
   }
   .hero-btn.primary:hover{box-shadow:0 10px 32px rgba(139,92,246,0.55);}
+  @media (prefers-reduced-motion:reduce){ .hero-btn.primary{animation:none;} }
   .hero-btn.secondary{
     background:var(--panel);border:1px solid var(--line);color:var(--hi);
   }
@@ -218,22 +232,20 @@
      cards below, which have no such bar. */
   .stat{
     position:relative;isolation:isolate;overflow:hidden;
-    display:flex;flex-direction:column;gap:5px;
-    background:var(--panel-raised);border:1px solid rgba(180,164,220,0.22);border-radius:12px;
-    padding:18px 16px 16px;
+    display:flex;flex-direction:column;gap:2px;
+    background:var(--panel-raised);border:1px solid rgba(180,164,220,0.22);border-radius:10px;
+    padding:10px 12px 9px;
     box-shadow:0 1px 0 rgba(255,255,255,0.04) inset, 0 6px 16px rgba(0,0,0,0.22);
     transition:border-color .2s, transform .15s;
   }
   .stat:hover{border-color:var(--violet-dim);transform:translateY(-1px);}
-  .stat .num{font-family:var(--font-main);font-weight:800;font-size:22px;letter-spacing:0.2px;color:var(--hi);}
-  .stat .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;}
-  /* Phones keep the same generous card proportions as above — only the
-     grid gap tightens slightly to suit the narrower screen. */
+  .stat .num{font-family:var(--font-main);font-weight:800;font-size:17px;letter-spacing:0.2px;color:var(--hi);}
+  .stat .lbl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:0.7px;font-weight:600;}
   @media (max-width:640px){
-    .stats{gap:10px;}
-    .stat{padding:17px 15px 15px;gap:5px;}
-    .stat .num{font-size:21px;}
-    .stat .lbl{font-size:10.5px;letter-spacing:0.7px;}
+    .stats{gap:8px;}
+    .stat{padding:9px 10px 8px;gap:2px;}
+    .stat .num{font-size:16px;}
+    .stat .lbl{font-size:8.5px;letter-spacing:0.6px;}
   }
   .stat-edit{
     display:none;position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:6px;
