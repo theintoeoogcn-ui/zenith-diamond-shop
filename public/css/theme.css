@@ -30,12 +30,51 @@
   --mid:#5C4C7C;
   --dim:#8C7FA6;
 }
-[data-theme="light"] body{
+/* ============================================================
+   Shared animated background — every page, identically
+   ------------------------------------------------------------
+   Each page used to paint its own static purple radials, and the
+   home page additionally sat on a blurred video that washed the
+   whole hero mauve. Both are gone; pages now set only the flat
+   base colour and this one fixed layer supplies the deep-blue
+   aurora, so every category matches automatically.
+
+   position:fixed keeps it out of flex/grid flow (so it is safe
+   inside the home page's flex body) and stops it scrolling with
+   content, which also means it costs one composited layer rather
+   than repainting on scroll.
+   ============================================================ */
+body::before{
+  content:"";
+  position:fixed;inset:-10%;z-index:-1;pointer-events:none;
   background:
-    radial-gradient(1100px 600px at 18% -8%, rgba(139,92,246,0.14), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(14,154,163,0.08), transparent 55%),
-    var(--void);
+    radial-gradient(38vw 42vh at 18% 16%, rgba(56,110,255,0.30), transparent 62%),
+    radial-gradient(34vw 38vh at 82% 12%, rgba(96,84,255,0.24), transparent 62%),
+    radial-gradient(40vw 44vh at 68% 84%, rgba(24,74,190,0.26), transparent 62%),
+    radial-gradient(30vw 34vh at 12% 78%, rgba(40,150,220,0.16), transparent 62%);
+  filter:blur(28px);
+  animation:auroraDrift 26s ease-in-out infinite alternate;
 }
+/* Slow, low-amplitude drift: the blobs breathe and slide a little
+   rather than obviously looping, so it reads as ambience. */
+@keyframes auroraDrift{
+  0%  {transform:translate3d(0,0,0) scale(1);}
+  50% {transform:translate3d(2.5%,-2%,0) scale(1.08);}
+  100%{transform:translate3d(-2%,2.5%,0) scale(1.03);}
+}
+/* Lighter, cooler wash so the same animation reads correctly on
+   the pale background instead of muddying it. */
+[data-theme="light"] body::before{
+  background:
+    radial-gradient(38vw 42vh at 18% 16%, rgba(56,110,255,0.16), transparent 62%),
+    radial-gradient(34vw 38vh at 82% 12%, rgba(124,76,237,0.12), transparent 62%),
+    radial-gradient(40vw 44vh at 68% 84%, rgba(24,120,200,0.12), transparent 62%),
+    radial-gradient(30vw 34vh at 12% 78%, rgba(14,154,163,0.10), transparent 62%);
+}
+@media (prefers-reduced-motion:reduce){
+  body::before{animation:none;}
+}
+
 [data-theme="light"] .brand .mark,
 [data-theme="light"] .pay-chip .swatch,
 [data-theme="light"] .proof-head .swatch{background:#fff;box-shadow:0 0 0 1px var(--line) inset;}
