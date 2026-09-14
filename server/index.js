@@ -120,7 +120,17 @@ if (!process.env.ADMIN_PASSCODE) {
   console.warn('⚠️  ADMIN_PASSCODE is not set — the "Create Tournament" admin panel is disabled until you set one in server/.env.');
 }
 
-app.get('/health', (req, res) => res.json({ ok: true }));
+// The `persistence` flag tells you, without digging into server logs,
+// whether admin edits (news, tournaments, prices, etc.) will actually
+// survive a redeploy/restart. Render's free-tier disk is ephemeral — see
+// sheetsStore.js — so if this is false in production, EVERY restart resets
+// all data back to defaults, which looks exactly like "my data disappeared".
+// It's false when GOOGLE_SHEET_ID / GOOGLE_SERVICE_ACCOUNT_EMAIL /
+// GOOGLE_PRIVATE_KEY aren't set on the host itself — the local server/.env
+// file is gitignored and never reaches a deployed server, so those must be
+// added directly in the hosting dashboard's environment variables.
+const sheetsStore = require('./sheetsStore');
+app.get('/health', (req, res) => res.json({ ok: true, persistence: sheetsStore.ENABLED }));
 
 const PORT = process.env.PORT || 3000;
 

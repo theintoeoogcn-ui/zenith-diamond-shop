@@ -1484,15 +1484,26 @@ function renderHero(){
 async function loadDetail(){
   try {
     const res = await fetch('/api/tournament-details/' + encodeURIComponent(tournamentId));
+    if (!res.ok) throw new Error('load failed: ' + res.status);
     const data = await res.json();
     teams = data.teams || [];
     matches = data.matches || [];
     standings = data.standings || { A: [], B: [] };
     settings = normalizeSettings(data.settings);
-  } catch (e) { teams = []; matches = []; standings = { A: [], B: [] }; settings = defaultSettings(); }
-  detailLoaded = true;
+    detailLoaded = true;
+  } catch (e) {
+    // A failed/interrupted load must NOT be treated as "this tournament has
+    // no teams or matches yet" — that used to fall through with empty
+    // arrays and detailLoaded=true, and autoDrawQualifier() would then save
+    // that empty state right back to the server, permanently wiping real
+    // teams/matches/settings on nothing more than a transient network blip
+    // (a brief redeploy 502, a dropped connection, etc). Instead: keep
+    // whatever was last loaded successfully, and leave detailLoaded false
+    // so no autosave can run until a real load succeeds.
+    console.error('Failed to load tournament detail, keeping last known data:', e);
+  }
   renderAll();
-  autoDrawQualifier();
+  if (detailLoaded) autoDrawQualifier();
 }
 
 async function saveDetail(){

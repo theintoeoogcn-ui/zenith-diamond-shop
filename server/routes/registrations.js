@@ -105,6 +105,27 @@ router.post('/:tournamentId', (req, res) => {
   res.json({ registration: entry });
 });
 
+// Admin — bulk-import teams whose registration was already confirmed
+// outside the normal diamond-purchase flow (manual/Telegram coordination,
+// or recovering from a data-loss incident). No order code or team logo is
+// required; the admin passcode is what vouches for these entries. Body:
+// { entries: [ {teamName, teamTag, leaderName, region, teamPhone,
+//   teamContactType, teamContact, players: [...] , status? }, ... ] }
+router.post('/:tournamentId/admin-import', (req, res) => {
+  if (!isAdmin(req)) return res.status(401).json({ error: 'Invalid admin passcode.' });
+  const entries = Array.isArray((req.body || {}).entries) ? req.body.entries : [];
+  if (!entries.length) return res.status(400).json({ error: 'No entries provided.' });
+
+  const created = [];
+  const failed = [];
+  entries.forEach((payload, i) => {
+    const result = regDb.adminCreateRegistration(req.params.tournamentId, payload, payload && payload.status);
+    if (result.entry) created.push(result.entry);
+    else failed.push({ index: i, teamName: payload && payload.teamName, errors: result.errors });
+  });
+  res.json({ created, failed });
+});
+
 router.patch('/:tournamentId/:id', (req, res) => {
   if (!isAdmin(req)) return res.status(401).json({ error: 'Invalid admin passcode.' });
   const updated = regDb.updateRegistration(req.params.tournamentId, req.params.id, req.body || {});

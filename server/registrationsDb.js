@@ -162,6 +162,57 @@ function createRegistration(tournamentId, payload) {
   return entry;
 }
 
+/* Admin-only import path for teams whose registration was already confirmed
+   outside the normal diamond-purchase flow (e.g. coordinated manually via
+   Telegram before/while the automated flow was unavailable, or recovered
+   after a data-loss incident). Unlike createRegistration(), this never
+   touches orderDb and never requires a diamond order code or a team logo
+   (the admin can attach a logo later) - the admin passcode itself is what
+   confirms the entry is legitimate. Returns { entry } on success or
+   { errors } (a non-empty array) on failure; never throws. */
+function adminCreateRegistration(tournamentId, payload, status) {
+  payload = payload || {};
+  const errors = [];
+  if (!str(payload.teamName, 60)) errors.push('Team name is required.');
+  if (!REGION_VALUES.includes(payload.region)) errors.push('Region is required.');
+
+  const players = Array.isArray(payload.players) ? payload.players : [];
+  ROSTER_SLOTS.forEach((slot, i) => {
+    const p = players[i] || {};
+    if (!slot.required) return;
+    if (!str(p.name, 60)) errors.push(`${slot.label}: player name is required.`);
+  });
+  if (errors.length) return { errors };
+
+  const map = readAll();
+  const list = map[tournamentId] || [];
+  const entry = {
+    id: genId(),
+    teamCode: nextTeamCode(list),
+    tournamentId,
+    teamLogo: payload.teamLogo ? String(payload.teamLogo) : '',
+    teamName: str(payload.teamName, 60),
+    teamTag: str(payload.teamTag, 10),
+    leaderName: str(payload.leaderName, 60),
+    region: REGION_VALUES.includes(payload.region) ? payload.region : 'MM',
+    teamPhone: str(payload.teamPhone, 30),
+    teamContactType: CONTACT_TYPES.includes(payload.teamContactType) ? payload.teamContactType : 'telegram',
+    teamContact: str(payload.teamContact, 80),
+    // Not a real diamond order - flagged so it's obvious in the admin list
+    // and never collides with (or blocks) a genuine order code.
+    orderCode: str(payload.orderCode, 20).toUpperCase() || ('ADMIN-' + genId()),
+    players: ROSTER_SLOTS.map((slot, i) => cleanPlayer((payload.players || [])[i], slot))
+      .filter((p, i) => ROSTER_SLOTS[i].required || p.name),
+    status: ['pending', 'approved', 'rejected'].includes(status) ? status : 'approved',
+    source: 'admin-import',
+    createdAt: new Date().toISOString(),
+  };
+  list.push(entry);
+  map[tournamentId] = list;
+  writeAll(map);
+  return { entry };
+}
+
 /* Public view of the approved teams. Deliberately drops phone numbers and
    contact handles — only the team, its players and its region are public. */
 function listApproved(tournamentId) {
@@ -224,7 +275,7 @@ function backfillTeamCodes() {
 const ready = hydrate(SHEET_KEY, DB_FILE).then(() => { backfillTeamCodes(); });
 
 module.exports = {
-  listRegistrations, listApproved, createRegistration, updateRegistration, deleteRegistration,
+  listRegistrations, listApproved, createRegistration, adminCreateRegistration, updateRegistration, deleteRegistration,
   validate, isCodeUsed, countTeams, isFull, backfillTeamCodes,
   ROSTER_SLOTS, ROLE_OPTIONS, CONTACT_TYPES, REGIONS, MAX_TEAMS,
   TEAM_CODE_PREFIX, MIN_REGISTER_DIAMONDS, ready,
